@@ -1,0 +1,214 @@
+%% 
+%% ACS project dissertation template. 
+%% 
+%% Currently designed for printing two-sided, but if you prefer to 
+%% print single-sided just remove ",twoside,openright" from the 
+%% \documentclass[] line below. 
+%%
+%%
+%%   SMH, May 2010. 
+
+
+\documentclass[a4paper,12pt]{report}
+
+
+%%
+%% EDIT THE BELOW TO CUSTOMIZE
+%%
+
+\def\authorname{Xiu Hong\ Kooi\xspace}
+\def\authorcollege{Wolfson College\xspace}
+\def\authoremail{xhk20@cam.ac.uk}
+\def\dissertationtitle{Expressing Behaviour of Dependently Typed Imperative Language with Hoare Type Theory}
+\def\wordcount{0}
+
+
+%\usepackage[dvips]{epsfig,graphics} 
+\usepackage{epsfig,graphicx,verbatim,parskip,tabularx,setspace,xspace}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+%% START OF DOCUMENT
+\begin{document}
+
+
+%% FRONTMATTER (TITLE PAGE, DECLARATION, ABSTRACT, ETC) 
+\pagestyle{empty}
+\singlespacing
+\input{titlepage}
+\onehalfspacing
+\input{declaration}
+\singlespacing
+\input{abstract}
+
+\pagenumbering{roman}
+\setcounter{page}{0}
+\pagestyle{plain}
+\tableofcontents
+\listoffigures
+\listoftables
+
+\onehalfspacing
+
+%% START OF MAIN TEXT 
+
+\chapter{Introduction}
+\pagenumbering{arabic} 
+\setcounter{page}{1} 
+\textit{Type systems} have been one of the most extensively researched field in 
+Programming Languages. They act as a way from improving the reliability of a 
+language by enforcing rules, preventing operations being applied on 
+incompatible data. Type systems can be broken down into multiple categories but 
+two of the most well known are \textit{Static} and \textit{Dynamic} typing. Mainstream programming 
+languages such as \textit{Java}, \textit{C} and \textit{C++} uses the former 
+while languages like \textit{Python} and \textit{JavaScript} uses the latter. 
+Over the years, programming languages have included more powerful and flexible 
+type systems, languages like \textit{C\#} and \textit{Go} allow 
+\textit{type inference}, using a feature called \textit{Reflection} 
+Java and Python can even achieve \textit{Duck Typing}.
+
+\par
+However, as much as we have studied about Type Systems, \textit{Dependent Types} 
+remains uncommon in the industry. While the theory of dependent types has been 
+established several decades ago, only a small number of languages has 
+integrate full dependent type support, most of them being functional languages. 
+Dependent types allows the programmer to create types whose definition depends 
+on a value. A type system that provides such refined control over the values it 
+can take unlocks possibility that are previously unavailable such as 
+domain-specific type checking at compile time. Furthermore, it acts as a built 
+in ``error-handling'' code and could potentially 
+reduces the lines of code a programmer needs to write. An in depth 
+definition of dependent types is provided in the next section.
+
+\par
+The expressive nature of dependent types allow one to define complex 
+mathematical assertations and hence lends itself to theorem proving systems. 
+Mutliple functional languages such as \textit{Epigram} and \textit{Agda} has 
+built in support for dependent typing. However they remain niche and more 
+mainstream languages like Java and C++ does not get the luxury. In chapter 2 of 
+this dissertation we will be providing an in depth analysis of the current state 
+of dependent types in programming languages and answer why dependent types are 
+not more prominant in languages, in particular imperative languages.
+
+\par
+Multiple past research has studied and show the feasibility of an dependently typed 
+imperative language. These studies has expressed the semantics of 
+how an imperative languages would interact with dependent types and in some 
+cases created a new language from the ground up. While we find these work novel 
+and provided highly technical explanation to the field, they fail to caputure 
+how this could relate to mainsteam programming languages. Furhtermore, the 
+semantics provided in these studies are very complex with advanced language 
+features, we propose that a more simple and barebone definiton will allow easier 
+access to the literature and motivate more studies into dependenty types. In 
+chapter 3 we will discuss all the work done in the area and point out some of the 
+motivation for this project.
+
+\par
+In chapter 4 we will be defining the syntax, typing rules and semantics 
+of a basic language with dependent types support which will be studied 
+and extended throughout the disseratation. In chapter 5 we will be observing 
+multiple scenarios that dependent types cause uncertainties when used with 
+imperative languages. We will be providing the semantics required for them 
+to behave correctly.
+
+\par
+Finally we will conclude by discussing advanced features that can be integrated 
+into our languages and how it can further complicate the language. We will also 
+discuss some of the other considerations that need to be taken account when 
+thinking about incorporating dependent types into a real language. 
+
+\section{What are dependent types}
+In this section we will be providing the definitions of dependent types.
+
+\subsection{Basic Definition}
+At a very high level dependent types are types that depends on the value of 
+another type. For example, we can define a type that captures only the even 
+integers using the definition 
+\verb+type EvenInt := { i : Int | i % 2 = 0}+. In this case we 
+can say that the type EvenInt \textit{EvenInt} depends on the type \textit{int}.
+Another commonly used example to describe dependent types would be a type like 
+\verb+type FixVec<T, N> := { v : Vec<T> | len(v) = N}+, this type definition defines 
+a vector or array of elements with type $T$ that always contains $N$ elements.
+
+\subsection{Dependent $\Pi$ Types}
+We can capture the definition mathematically using the notion of \textit{dependent 
+product types}, i.e. $\Pi$ type. This is also sometimes referred to as 
+\textit{dependent function type} as in this definition we construct a function 
+$F: A \rightarrow B$. The function $F$ takes an element of type $A$ and 
+gives us an element of type $B$ which depends on $A$. We express it 
+mathematically using the $\Pi$ notation as
+\begin{center}
+ \begin{tabular}{l}
+   $\prod x: A.  F(x)$
+ \end{tabular} 
+\end{center}
+
+In this definition, $F(x)$ is the type family for the type $B$ that depends on $A$.
+However $F$ could be a constant function, so we can also express the definition 
+as $\Pi x:A.B$, in this case $B$ does not depend 
+on the value $x$. Using the \textit{EvenInt} example from earlier, 
+it can be defined as 
+$\Pi x:Int.\text{ }\{ i:Int\text{ }|\text{ }i\text{ }\%\text{ }2\text{ }= 0\}$.
+
+\par
+Interestingly, the dependent product type correspond to the 
+\textit{forall quantifier} as per 
+the \textit{Curry–Howard correspondence}. The idea is that the dependent 
+function $F(x)$ correspond to predicate $P(x)$ and thus the dependent product 
+type has a one-to-one correspondence to $\forall x: A. P(x)$.
+
+\subsection{Dependent $\Sigma$ Types}
+In addition to the dependent product type, we have the notion of \textit{dependent sum 
+types}, written as $\Sigma$ type. This is often referred to as the 
+\textit{dependent pair type} as the resulting type here is an ordered pair. 
+Specifically the resulting pair $\langle a,b \rangle$ is ordered such that the 
+second element depends on the first element. The 
+mathematical definition is similar to that of the product type
+\begin{center}
+ \begin{tabular}{l}
+   $\langle a,b \rangle :\sum x: A.  F(x)$
+ \end{tabular} 
+\end{center}
+In the case $a:A, b: F(x)$, similarly, $F$ could be a constant function and thus 
+the expression is $\Sigma x:A.B$. Consider the following example, 
+
+$\Sigma x: Int.\{y:Int\text{ }|\text{ } y = x * 2\}$, then the type would 
+contain values like $\langle 1,2 \rangle$ and $\langle 4,8 \rangle$ where the 
+second pair is doubled the first.
+
+\par
+Like the dependent product type, the dependent sum type correspond to a 
+universal quantifier, in this case, the \textit{Existential quantification}. As 
+per the Curry–Howard correspondence, $F(x)$ corresponds to predicate $P(x)$ 
+thus $\Sigma x:A.F(x)$ correponds to $\exists x: A. P(x)$.
+
+\subsection{Project Focus}
+While both dependent product types and dependent sum types are important to the 
+literature, the project itself will mainly focus on the former. we believe that 
+the the notion of pair in dependent sum types prove to be redundant in 
+the construction a programming languages and does not provide any additional 
+value. The dependent product type is largely adequate for our goal.
+
+
+
+\chapter{State of Dependent Types} 
+
+\chapter{Related Work}
+
+\chapter{The Basic Language}
+
+\chapter{The Semantics}
+
+\chapter{Further Work}
+
+\chapter{Summary and Conclusions} 
+
+
+\appendix
+\singlespacing
+
+\bibliographystyle{unsrt} 
+%\bibliography{dissertation} 
+
+\end{document}
