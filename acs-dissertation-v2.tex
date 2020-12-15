@@ -19,7 +19,7 @@
 \def\authorname{Xiu Hong\ Kooi\xspace}
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
-\def\dissertationtitle{Expressing Behaviour of Dependently Typed Imperative Language with Hoare Type Theory}
+\def\dissertationtitle{Exploring Behaviour of Dependently Typed Imperative Language}
 \def\wordcount{0}
 
 
@@ -28,6 +28,28 @@
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{listings}
+\usepackage{float}
+
+\usepackage[british]{babel}
+\usepackage[%
+  backend=bibtex      % biber or bibtex
+%,style=authoryear    % Alphabeticalsch
+ ,style=numeric-comp  % numerical-compressed
+ ,sorting=none        % no sorting
+ ,sortcites=true      % some other example options ...
+ ,maxbibnames=99
+ ,block=none
+ ,indexing=false
+ ,citereset=none
+ ,isbn=true
+ ,url=true
+ ,doi=true            % prints doi
+ ,natbib=true         % if you need natbib functions
+]{biblatex}
+\usepackage{biblatex}
+\addbibresource{./dissertation.bib}
+
 
 %% START OF DOCUMENT
 \begin{document}
@@ -179,20 +201,63 @@ second pair is doubled the first.
 
 \par
 Like the dependent product type, the dependent sum type correspond to a 
-universal quantifier, in this case, the \textit{Existential quantification}. As 
+universal quantifier, in this case, the \textit{existential quantifier}. As 
 per the Curry–Howard correspondence, $F(x)$ corresponds to predicate $P(x)$ 
 thus $\Sigma x:A.F(x)$ correponds to $\exists x: A. P(x)$.
 
-\subsection{Project Focus}
+\par
 While both dependent product types and dependent sum types are important to the 
 literature, the project itself will mainly focus on the former. we believe that 
 the the notion of pair in dependent sum types prove to be redundant in 
-the construction a programming languages and does not provide any additional 
+the construction a programming language and does not provide any additional 
 value. The dependent product type is largely adequate for our goal.
 
-
-
 \chapter{State of Dependent Types} 
+In this chapter we will be reviewing the current knowledge of dependent types 
+in different programming languages. It will cover languages with full dependent 
+types support as well as some languages with similar concepts and point out how 
+it differs from dependent types. Lastly we will summarise all these languages 
+and point out some limitations and unknowns. 
+
+\section{Functional Languages}
+
+\subsection{Agda}
+
+\textit{Agda} is a purely functional language originally developed by Ulf Norell in 
+1999 however the first appearance the current version known as Agda 2 is in 
+2007. Agda has all the necessary constructs one would expect in a functional 
+language such as first-class functions, inductive definitions, pattern matching, 
+etc. In addition to being a functional language, Agda also serves an automated theorem prover. 
+Agda is one of the few programming language with native dependent type support. 
+
+\par
+The code listing below is an example of defining a fixed length vector in 
+dependent type. 
+
+\begin{figure}[H]
+  \begin{lstlisting}  
+  data Nat : Set where
+  zero : Nat
+  suc  : Nat -> Nat  
+  
+  data Vec (A : Set) : Nat -> Set where
+  [] : Vec A zero
+  _::_ : {n : Nat} -> A -> Vec A n -> Vec A (suc n)
+  \end{lstlisting}
+  \caption{Dependent Types in Agda}
+\end{figure}
+
+\par
+While Agda provides dependent type support, it remains a niche language. One of 
+the reason being its paradigm. Agda is \textit{purely functional}, meaning that 
+all functions are pure (i.e. not relying on the program state or other mutable 
+data). Functional languages are generally considered harder to learn and grasp 
+compared to other paradigm \cite{fpHarder}. For that reason Agda remain niche in 
+the programming world and is pridominantly used for theorem proving.
+
+
+
+
 
 \chapter{Related Work}
 
@@ -208,7 +273,6 @@ value. The dependent product type is largely adequate for our goal.
 \appendix
 \singlespacing
 
-\bibliographystyle{unsrt} 
-%\bibliography{dissertation} 
+\printbibliography
 
 \end{document}
