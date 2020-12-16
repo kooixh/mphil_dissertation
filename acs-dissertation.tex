@@ -78,21 +78,22 @@
 \chapter{Introduction}
 \pagenumbering{arabic} 
 \setcounter{page}{1} 
-\textit{Type systems} have been one of the most extensively researched field in 
+\textit{Type systems} \cite{typesystem} have been one of the most extensively researched field in 
 Programming Languages. They act as a way from improving the reliability of a 
 language by enforcing rules, preventing operations being applied on 
 incompatible data. Type systems can be broken down into multiple categories but 
-two of the most well known are \textit{Static} and \textit{Dynamic} typing. Mainstream programming 
-languages such as \textit{Java}, \textit{C} and \textit{C++} uses the former 
-while languages like \textit{Python} and \textit{JavaScript} uses the latter. 
+two of the most well known are \textit{Static} \cite{staticTyping} and 
+\textit{Dynamic} \cite{dynamicTyping} typing. Mainstream programming 
+languages such as \textit{Java} \cite{java}, \textit{C} and \textit{C++} \cite{cpp} 
+uses the former while languages like \textit{Python} and \textit{JavaScript} uses the latter. 
 Over the years, programming languages have included more powerful and flexible 
 type systems, languages like \textit{C\#} and \textit{Go} allow 
-\textit{type inference}, using a feature called \textit{Reflection} 
-Java and Python can even achieve \textit{Duck Typing}.
+\textit{type inference} \cite{inferenceType}, using a feature called \textit{Reflection} 
+Java and Python can even achieve \textit{Duck Typing} \cite{javaDuckType}.
 
 \par
-However, as much as we have studied about Type Systems, \textit{Dependent Types} 
-remains uncommon in the industry. While the theory of dependent types has been 
+However, as much as we have studied about type systems, \textit{Dependent Types} 
+\cite{depenTypeAtWork} remains uncommon in the industry. While the theory of dependent types has been 
 established several decades ago, only a small number of languages has 
 integrate full dependent type support, most of them being functional languages. 
 Dependent types allows the programmer to create types whose definition depends 
@@ -106,7 +107,8 @@ definition of dependent types is provided in the next section.
 \par
 The expressive nature of dependent types allow one to define complex 
 mathematical assertations and hence lends itself to theorem proving systems. 
-Mutliple functional languages such as \textit{Epigram} and \textit{Agda} has 
+Mutliple functional languages such as \textit{Epigram} 
+\cite{epigram} and \textit{Agda} \cite{agda} has 
 built in support for dependent typing. However they remain niche and more 
 mainstream languages like Java and C++ does not get the luxury. In chapter 2 of 
 this dissertation we will be providing an in depth analysis of the current state 
@@ -223,7 +225,7 @@ and point out some limitations and unknowns.
 
 \subsection{Agda}
 
-\textit{Agda} is a purely functional language originally developed by Ulf Norell in 
+\textit{Agda} \cite{agda} is a purely functional language originally developed by Ulf Norell in 
 1999 however the first appearance the current version known as Agda 2 is in 
 2007. Agda has all the necessary constructs one would expect in a functional 
 language such as first-class functions, inductive definitions, pattern matching, 
@@ -249,7 +251,7 @@ dependent type.
 
 \par
 While Agda provides dependent type support, it remains a niche language. One of 
-the reason being its paradigm. Agda is \textit{purely functional}, meaning that 
+the reason being its paradigm. Agda is \textit{purely functional} \cite{purelyFP}, meaning that 
 all functions are pure (i.e. not relying on the program state or other mutable 
 data). Functional languages are generally considered harder to learn and grasp 
 compared to other paradigms \cite{fpHarder}. For that reason Agda remain niche in 
