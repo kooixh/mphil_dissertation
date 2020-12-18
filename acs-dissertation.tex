@@ -215,7 +215,7 @@ the the notion of pair in dependent sum types prove to be redundant in
 the construction a programming language and does not provide any additional 
 value. The dependent product type is largely adequate for our goal.
 
-\chapter{State of Dependent Types} 
+\chapter{Background: State of Dependent Types in Programming} 
 In this chapter we will be reviewing the current knowledge of dependent types 
 in different programming languages. It will cover languages with full dependent 
 types support as well as some languages with similar concepts and point out how 
@@ -238,10 +238,14 @@ The code listing below is an example of defining a fixed length vector in
 dependent type. 
 
 \begin{figure}[H]
-  \begin{lstlisting}  
-  data Nat : Set where
+  \begin{lstlisting}[mathescape=true] 
+  data Nat : Set where 
   zero : Nat
   suc  : Nat -> Nat  
+  
+  data EvenNat : Nat -> Set where
+  even-zero  : EvenNat zero
+  even-plus2 : {n : Nat} -> EvenNat n -> EvenNat (suc (suc n))
   
   data Vec (A : Set) : Nat -> Set where
   [] : Vec A zero
@@ -252,19 +256,70 @@ dependent type.
 
 \par
 While Agda provides dependent type support, it remains a niche language. One of 
-the reason being its paradigm. Agda is \textit{purely functional} \cite{purelyFP}, meaning that 
+the reason being its paradigm, Agda is \textit{purely functional} \cite{purelyFP}, meaning that 
 all functions are pure (i.e. not relying on the program state or other mutable 
 data). Functional languages are generally considered harder to learn and grasp 
-compared to other paradigms \cite{fpHarder}. For that reason Agda remain niche in 
-the programming world and is predominantly used for theorem proving.
+compared to other paradigms \cite{fpHarder}. Furthermore, the general lack of 
+awareness and competent users who can program dependent types contribute to Agda 
+being a niche language in the programming world and is 
+predominantly used for theorem proving.
+
+\subsection{Haskell}
+\textit{Haskell} \cite{haskell} is a purely functional programming language first appeared in 1990. In 
+contrast to Agda, Haskell is often considered a more general purpose programming 
+language. Haskell is among the most popular programming languages and argubly 
+the most popular ``pure'' language in the world \cite{pypl}. 
+Haskell has even been adopted by software companies such as Facebook \cite{haskellFB}.
+
+\par
+Haskell is not a language that supports dependent types natively however many 
+extensions has been developed to simulate the experience. 
+Generalised Algebraic Data Types (GADTs) are a generalization of the 
+algebraic data types, it allows the programmer to 
+explicitly write down the types of the constructors \cite{haskellGADT}. 
+\begin{figure}[H]
+  \begin{lstlisting}
+    data Expr = I Int        
+          | Add Expr Expr 
+          | Mul Expr Expr 
+  \end{lstlisting}
+  \caption{A GADT defintion for arithmetic operations in Haskell}
+\end{figure}
+
+Using the power of GADT one could define dependent types as so
+
+\begin{figure}[H]
+  \begin{lstlisting}      
+    data EvenNat Nat where
+      EvenZero  :: Even 0
+      EvenPlusTwo :: n -> EvenNat n -> EvenNat (n + 2)
+      
+    data Vec a Nat where
+      Nil  :: Vec a 0
+      (:>) :: a -> Vec a n -> Vec a (n + 1)
+  \end{lstlisting}
+  \caption{Dependent Types in Haskell}
+\end{figure}
+
+\par
+Although GADTs provide a way of simulating dependent types in Haskell and 
+argubly enough for simple dependent typing enough for many cases. 
+Haskell does not qualify as a fully dependent 
+language due to the lack of certain features such as dependent functions. There 
+have been proposals to add full dependent type support to Haskell however a lot 
+of work remains to be done \cite{dependentHaskell, aRoleForDependentHaskell}. 
+Furthermore, while Haskell is significantly more well known compared to Agda, it 
+still lack the popularity of languages like Java and Python.
 
 \subsection{Idris}
 
-\chapter{Related Work}
 
-\chapter{The Basic Language}
+
+\chapter{The Simple-$\Pi$ Language}
 
 \chapter{The Semantics}
+
+\chapter{Related Work}
 
 \chapter{Further Work}
 
