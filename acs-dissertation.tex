@@ -290,11 +290,11 @@ Using the power of GADT one could define dependent types as so
 
 \begin{figure}[H]
   \begin{lstlisting}      
-    data EvenNat Nat where
+    data EvenNat (n :: Nat) where
       EvenZero  :: Even 0
       EvenPlusTwo :: n -> EvenNat n -> EvenNat (n + 2)
       
-    data Vec a Nat where
+    data Vec a (n :: Nat) where
       Nil  :: Vec a 0
       (:>) :: a -> Vec a n -> Vec a (n + 1)
   \end{lstlisting}
