@@ -407,7 +407,7 @@ struct that represents an integer less than N.
     struct LessThanN {
       int value;
       LessThanN(int x) {
-   	    if (x < N)
+        if (x < N)
             value = x;
         else
            throw ``invalid type'';
@@ -416,6 +416,65 @@ struct that represents an integer less than N.
   \end{lstlisting}
   \caption{Struct dependent on values using C++ Templates}
 \end{figure}
+
+\par
+Using the above definition it is possible to define types such as \\
+\verb+LessThanN<5> ltf = LessThanN<5>(3)+, this will define a type that will has 
+to be less than 5. However, certain questions arise from this definition, 
+
+i) What will happen if the constructor is given an invalid argument? 
+
+ii) What if the template parameter is a variable and its 
+value change? 
+
+iii) What if the value of \textit{value} change during execution?
+
+\subsubsection{The Intended Behaviour}
+First, we observe the intended behaviour of LessThanN using the following test 
+code:
+\begin{figure}[H]
+  \begin{lstlisting}[language=c++]     
+    int main() {
+      LessThanN<5> ltf = LessThanN<5>(3);
+      cout << ltf.value; // Prints out 3
+      return 0;
+    }
+  \end{lstlisting}
+  \caption{Intended Behaviour of LessThanN}
+\end{figure}
+
+\par
+As expected, the code compiles perfectly and outputs 3 when executed.
+
+\subsubsection{Invalid Definition of LessThanN}
+In order to observe the behaviour of i), we simply have to pass in an 
+invalid value into a constructor, i.e. a value greater than N, 
+the test is conducted using the code below. 
+
+\begin{figure}[H]
+  \begin{lstlisting}[language=c++]     
+    int main() {
+      LessThanN<5> ltf = LessThanN<5>(10); // Error here
+      cout << ltf.value; 
+      return 0;
+    }
+  \end{lstlisting}
+  \caption{Intended Behaviour of LessThanN}
+\end{figure}
+
+\par
+Interestingly, the code compiles perfectely despite the invalid definition. 
+However it fails to execute as the exeception thrown in the \textbf{else} clause 
+is left uncaught. This behaviour makes it no better than an simple if statement 
+in the constructor. An addition in C++ 11 was the introduction of 
+\textit{constexpr} and \textit{static_assertation}. These allow for certain 
+compile time checking, however the values checked must fulfil 
+the \textit{constant expression} requiremets \cite{cppConstExpr}.
+
+
+
+
+
 
 
 \chapter{The Simple-$\Pi$ Language}
