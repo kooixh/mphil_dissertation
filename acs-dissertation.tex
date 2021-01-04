@@ -348,7 +348,7 @@ Syntactically Idris is very similar to Agda, dependent types are defined as so:
       Nil  : Vect 0 a
       (::) : (x : a) -> (xs : Vect n a) -> Vect (n + 1) a
   \end{lstlisting}
-  \caption{Dependent Types in Haskell}
+  \caption{Dependent Types in Idris}
 \end{figure}
 
 \par
@@ -383,8 +383,38 @@ dependent typing.
 
 
 \subsection{C++ Templates}
+\textit{C++ Templates} \cite{cppTemplate} are a way of passing the type of a 
+data as a parameter so certain code can be reused. For instance, the same 
+sorting algorithm can be used on multiple data types such as \textit{int} and 
+\textit{double}, using templates the programmer will not need to write the same 
+sorting function multiple times for different data types. 
 
+\par
+Templates are often compared to \textit{Java's Generics} as the C++ equivalent. 
+While this statement is mostly true, C++ templates differ in a big way. 
+Generics only allow the template parameter to be a class, templates on the other 
+hand allow the parameter to be a class, values or pointers. The ability to 
+pass values into a template to create types certainly resembles dependent types.
 
+\par
+The code listing below is an example of templates with values. It defines the 
+struct that represents an integer less than N. 
+
+\begin{figure}[H]
+  \begin{lstlisting}[language=c++]     
+    template <int N>
+    struct LessThanN {
+      int value;
+      LessThanN(int x) {
+   	    if (x < N)
+            value = x;
+        else
+           throw "invalid type";
+      }
+    };
+  \end{lstlisting}
+  \caption{Struct dependent on values using C++ Templates}
+\end{figure}
 
 
 \chapter{The Simple-$\Pi$ Language}
