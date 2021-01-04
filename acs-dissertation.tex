@@ -224,6 +224,19 @@ and point out some limitations and unknowns.
 
 \section{Functional Languages}
 
+In this section we will be examining three functional languages with 
+dependent typing. Functional languages 
+uses the \textit{}unctional programming} \cite{overviewFP} paradigm which is a programming 
+paradigm that constructs program using a series of function applications. In 
+this paradigm, functions return values as oppose to altering the state of the 
+program. 
+
+\par
+
+Many functional languages has the notion of purity, i) A function will always 
+return the same value when given the same arguments. ii) The evaluation of a 
+function has no side effects (changes to the state of the program).
+
 \subsection{Agda}
 
 \textit{Agda} \cite{agda} is a purely functional language originally developed by Ulf Norell in 
@@ -312,6 +325,41 @@ Furthermore, while Haskell is significantly more well known compared to Agda, it
 still lack the popularity of languages like Java and Python.
 
 \subsection{Idris}
+\textit{Idris} \cite{idris} is a dependently typed functional language first 
+appeared in 2007. Idris bears similarity with Agda, both in terms of paradigm 
+and type system. However the differ in one crucial way, Idris is designed to 
+emphasise general purpose programming rather than theorem proving. Earlier one 
+we stated that one of the less desirable property of Agda was its niche because 
+of its emphasis in theorem proving. Idris provides 
+interoperability with systems libraries and C programs, 
+as well as language constructs for domain specific language 
+implementation \cite{gpIdris}. 
+
+\par
+Syntactically Idris is very similar to Agda, dependent types are defined as so: 
+\begin{figure}[H]
+  \begin{lstlisting}      
+    data EvenNat :  Nat -> Type where
+      EvenZero  :: EvenNat 0
+      EvenPlusTwo :: EvenNat n -> EvenNat (n + 2)
+      
+    data Vect : Nat -> Type -> Type where
+      Nil  : Vect 0 a
+      (::) : (x : a) -> (xs : Vect n a) -> Vect (n + 1) a
+  \end{lstlisting}
+  \caption{Dependent Types in Haskell}
+\end{figure}
+
+\par
+While Idris offers interoperability with multiple mainstream programming 
+languages such as C and JavaScript, Idris remain predominantly a research tool. 
+Idris is not production ready \cite{gpIdris} as it is missing certain libraries 
+and more importantly nobody is working on Idris full time. Furthermore Idris is 
+still a functional language, hence suffering from the limitation stated earlier. 
+
+\section{Imperative Languages}
+
+
 
 
 
