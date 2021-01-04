@@ -390,8 +390,9 @@ sorting algorithm can be used on multiple data types such as \textit{int} and
 sorting function multiple times for different data types. 
 
 \par
-Templates are often compared to \textit{Java's Generics} as the C++ equivalent. 
-While this statement is mostly true, C++ templates differ in a big way. 
+Templates are often compared to Java's \textit{Generics} \cite{javaGenerics} 
+as the C++ equivalent. While this statement is mostly true, C++ templates 
+differ in a big way. 
 Generics only allow the template parameter to be a class, templates on the other 
 hand allow the parameter to be a class, values or pointers. The ability to 
 pass values into a template to create types certainly resembles dependent types.
@@ -409,7 +410,7 @@ struct that represents an integer less than N.
    	    if (x < N)
             value = x;
         else
-           throw "invalid type";
+           throw ``invalid type'';
       }
     };
   \end{lstlisting}
