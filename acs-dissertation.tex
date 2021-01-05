@@ -143,7 +143,7 @@ into our languages and how it can further complicate the language. We will also
 discuss some of the other considerations that need to be taken account when 
 thinking about incorporating dependent types into a real language. 
 
-\section{What are dependent types}
+\section{What Are Dependent Types}
 In this section we will be providing the definitions of dependent types.
 
 \subsection{Basic Definition}
@@ -214,6 +214,64 @@ literature, the project itself will mainly focus on the former. we believe that
 the the notion of pair in dependent sum types prove to be redundant in 
 the construction a programming language and does not provide any additional 
 value. The dependent product type is largely adequate for our goal.
+
+\section{Overview of a Dependently Typed Language}
+In this section we will discuss at a very high level the behaviour one would 
+expect from a dependently typed language, its benefits and use cases.
+
+\subsection{Language Behaviour}
+The key behaviour we are interested in is regarding compile time type checking. 
+For instance, using the example above, if a type is defined as an \textit{EvenInt} 
+then if at any point in the code it becomes odd then it should be caught at 
+compile time. 
+
+\par
+Consider the psedocode below: 
+\begin{figure}[H]
+  \begin{lstlisting}[mathescape=true] 
+  function f(int x) {
+    if (x \% 2 == 0) {
+      ...
+    }
+    throw error ``x has to be even''
+  }
+  
+  function dependent_f(EvenInt i) {
+    ...
+  }
+  \end{lstlisting}
+  \caption{Dependenty Typed Language Behaviour}
+\end{figure}
+
+\par
+The function \textit{f} above checks whether the argument $x$ is even, if it 
+isn't then it throws a runtime error. If dependent type is available, then if an 
+invalid argument is passed in it should signal an error at compile time, saving the 
+error handling code as shown in \textit{dependent\_f}. 
+
+\subsection{Benefits of Dependent Types}
+As we seen in the previous subsection, dependent types allows programmer to 
+define much richer and expressive types that can be checked at compile time. The 
+addition of dependent types allow for safer code as it is able to guarentee certain 
+properties. 
+
+\par
+Furthermore, using dependent types eliminates the need for many trivial error 
+handling code. Around 4\% of code in every program is dedicated to error 
+handling \cite{errorHandlingCode}, dependent types will be able to reduce the 
+numbers and allow the programmer more time to write the logical part of the 
+code, indirectly leading to more robust codebases.
+
+\par
+Consider a banking system where users are able to transfer and withdraw 
+money using a function, 
+in order to prevent overdraft one might be able to define a function that takes 
+a type \textit{Amount$<$T$>$}, a double type that is always 
+greater than 0 and less than \textit{T}, where \textit{T} is the current balance in the account. 
+This approach guarantees the amount is always valid without the need of writing 
+error handling code. This example demonstrated using an object-oriented style 
+language by Vasconcelos \cite{objOritentedDependentType}.
+
 
 \chapter{Background: State of Dependent Types in Programming} 
 In this chapter we will be reviewing the current knowledge of dependent types 
@@ -429,6 +487,10 @@ value change?
 
 iii) What if the value of \textit{value} change during execution?
 
+In the subsequent text, the term ``Dependent Value'' will be used to refer to the 
+value $N$ and ``Value'' will refer to the actual value held by a LessThanN type, 
+i.e. the \textit{value} state in the struct. 
+
 \subsubsection{The Intended Behaviour}
 First, we observe the intended behaviour of LessThanN using the following test 
 code:
@@ -440,7 +502,7 @@ code:
       return 0;
     }
   \end{lstlisting}
-  \caption{Intended Behaviour of LessThanN}
+  \caption{Intended Behaviour of LessThanN in C++}
 \end{figure}
 
 \par
@@ -448,7 +510,7 @@ As expected, the code compiles perfectly and outputs 3 when executed.
 
 \subsubsection{Invalid Definition of LessThanN}
 In order to observe the behaviour of i), we simply have to pass in an 
-invalid value into a constructor, i.e. a value greater than N, 
+invalid value into the constructor, i.e. a value greater than N, 
 the test is conducted using the code below. 
 
 \begin{figure}[H]
@@ -459,7 +521,7 @@ the test is conducted using the code below.
       return 0;
     }
   \end{lstlisting}
-  \caption{Intended Behaviour of LessThanN}
+  \caption{Invalid Definition of LessThanN in C++}
 \end{figure}
 
 \par
@@ -467,14 +529,82 @@ Interestingly, the code compiles perfectely despite the invalid definition.
 However it fails to execute as the exeception thrown in the \textbf{else} clause 
 is left uncaught. This behaviour makes it no better than an simple if statement 
 in the constructor. An addition in C++ 11 was the introduction of 
-\textit{constexpr} and \textit{static_assertation}. These allow for certain 
+\textit{constexpr} and \textit{static\_assertation}. These allow for certain 
 compile time checking, however the values checked must fulfil 
-the \textit{constant expression} requiremets \cite{cppConstExpr}.
+the \textit{constant expression} requiremets \cite{cppConstExpr}. 
 
+\par
+Modifying the \textbf{struct} to use the code below we get compile time type 
+checking. 
 
+\begin{figure}[H]
+  \begin{lstlisting}[language=c++]     
+    template <int N, int M>
+    struct LessThanN {
+      int value;
+      LessThanN() {
+        static_assert(M < N, ``type is invalid'');
+        value = M;
+      }
+    };
+  \end{lstlisting}
+  \caption{LessThanN with Compile Time Type Checking in C++}
+  \label{code:compileLTN}
+\end{figure}
 
+\par
+Now, providing an invalid definition yields a compile time error, with the 
+following: 
+\verb+LessThanN<10, 12> ltf = LessThanN<10, 12>;+ 
 
+\textbf{static\_assert failed due to requirement `12 $<$ 10' ``type is invalid''}
 
+\subsubsection{Mutation of Template Variable}
+In our previous example we have been passing integer literal as the template 
+parameter for the dependent value. Often programmers are required to 
+work with varied values through variables, how will this effect the behaviour? 
+
+\par
+Consider the following hypothetical situation using the struct defined in 
+figure \ref{code:compileLTN}: 
+
+\begin{figure}[H]
+  \begin{lstlisting}[language=c++]     
+    int n = 5;
+    LessThanN<n, 3> ltf = LessThanN<n, 3>();
+    n = 2; // Is ltf still well typed??
+  \end{lstlisting}
+  \caption{Mutating the Dependent Variable for LessThanN in C++}
+\end{figure}
+
+\par
+Compiling the above code leads to a compile time error, C++ requires template 
+arguments to be constant expressions. In order to use variables as template 
+arguments, they have to be defined \textbf{const}. In which case the above 
+situation is impossible as the variable $n$ now cannot be changed. 
+
+\subsubsection{Changing The Value of Struct During Execution}
+We've showed that it is not possible to change the dependent value in 
+the program, however what if the value changes? Will a 
+variable be well-typed on one line and ill-typed on the next line? 
+
+\par
+Consider the following code: 
+\begin{figure}[H]
+  \begin{lstlisting}[language=c++]     
+    const int n = 5;
+    LessThanN<n, 3> ltf = LessThanN<n, 3>(); // Well typed
+    ltf.value = 10; // Now ill-typed but not caught
+  \end{lstlisting}
+  \caption{Mutating the value of LessThanN in C++}
+\end{figure}
+
+\par
+In order to achieve our intended behaviour there has to be some form of check 
+that runs throughout the lifetime of the program, currently there is no native 
+support for this form of invariant. However one potential workaround as a 
+programmer would be to make the LessThanN type immutable, by setting \textit{value} 
+to be a \textbf{const}. 
 
 
 \chapter{The Simple-$\Pi$ Language}
