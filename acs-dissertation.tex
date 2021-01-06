@@ -8,8 +8,8 @@
 %%
 %%   SMH, May 2010. 
 
-
 \documentclass[a4paper,12pt]{report}
+%TC:group tabular 1 1
 
 
 %%
@@ -635,8 +635,32 @@ This section describes the syntax of the Simple-$\Pi$ language.
   \caption{Syntax for Simple-$\Pi$ language}
 \end{figure}
 
+\par
+The Simple-$\Pi$ language has support for five different data types. In addition to 
+supporting the basic integers and boolean, it has the notion of a pair 
+($T \times T$), dependent types ($\Pi x: A.P(x)$) and the \textit{void} type to 
+represent null or empty. 
 
-\section{Typing}
+\par
+Notice that in the definition functions are defined as taking a type and 
+returning a type. As the language supports the notion of pairs, a functions that 
+take multiple parameter can easily be written as a funtion that takes a pair a 
+function that takes pairs of pair. For instance, a function $f(x, y, z)$ and be 
+written as $\lambda$ : $(T \times T) \times T \longrightarrow T$. 
+
+\par
+The basic addition and subtraction are available for integer types, conjunction 
+and disjunction are there for boolean types. These are written in an infix 
+manner to form expressions. Other expression in the language are if-statements 
+and while-loop for control flow, assignments statements, variables literal. The 
+\textit{call} statement is use to invoke functions and finally skip signify an 
+empty action.
+
+
+\section{Typing Rules}
+This section defines the typing rules for the Simple-$\Pi$ language. 
+
+
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
@@ -673,7 +697,7 @@ This section describes the syntax of the Simple-$\Pi$ language.
 
 
 
-\chapter{Semantics for Dependent Types}
+\chapter{Semantics for Simple-$\Pi$}
 
 \chapter{Related Work}
 
