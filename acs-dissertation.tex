@@ -29,6 +29,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{listings}
+\usepackage{semantic}
 \usepackage{float}
 
 \usepackage[british]{babel}
@@ -608,8 +609,71 @@ to be a \textbf{const}.
 
 
 \chapter{The Simple-$\Pi$ Language}
+This chapter will introduce the Simple-$\Pi$ language. The language will follow 
+the imperative paradigm, specifically a procedural language. Most importantly, 
+the language is statically typed with support for dependent typing. 
 
-\chapter{The Semantics}
+\section{Language Syntax}
+This section describes the syntax of the Simple-$\Pi$ language. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{l l l}
+      \textit{Types} & $T$ & $:\text{ }int\text{ }|\text{ }bool\text{ }|\text{ }\Pi x: A.P(x)
+      \text{ }|\text{ }T \times T\text{ }|\text{ }void$\\
+      \textit{Functions} & $\lambda$ & $:\text{ }T\longrightarrow T$\\
+      \textit{Operators} & $ops$ & $:$ $+$ $|$ $-$ $|$ $\wedge$ $|$ $\vee$ \\
+      \textit{Expressions} & $e$ & $:$ \textbf{skip} $|$ $x$ $|$ $x\text{ }:= e$ $|$ $e_1 + e_2$ $| \text{ }e_1 - e_2$ $|$ $e_1 \wedge e_2$ $|$ $e_1 \vee e_2$ \\
+      & & \; $|$ \textbf{if} $e_1$ \textbf{then} $e_2$ \textbf{then} $e_3$ $|$ \textbf{while} $e_1$ \textbf{do} $e_2$ $|$ 
+      $\text{\textbf{call}}(\lambda_1, e)$\\
+      \textit{Variables} & $vars$& $:$ $x \in {a,b,c...z}$\\
+      \textit{Values} & $vals$& $:$ $\mathbb{Z}$ $|$ $\mathbb{B}$ $|$ $(e, e')$ $|$ $\{a\text{ }:
+      \text{ }T\text{ }|\text{ } P(a)\}$\text{ }$|$\text{ }$\lambda x.e$\\
+      \textit{Context} & $\sigma$& $:$ $vars \mapsto vals$
+    \end{tabular}
+  \end{center}
+  \caption{Syntax for Simple-$\Pi$ language}
+\end{figure}
+
+
+\section{Typing}
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int}
+        {\Gamma \vdash e_1 + e_2 : int}[(+)] \text{ }
+      \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int} 
+        {\Gamma \vdash e_1 - e_2 : int}[(-)] & \\
+      \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool}
+        {\Gamma \vdash e_1 \wedge e_2 : bool}[($\wedge$)] \text{ }
+      \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool} 
+        {\Gamma \vdash e_1 \vee e_2 : bool}[($\vee$)] & \\
+      \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash e_2: T & \Gamma \vdash e_3: T}
+        {\Gamma \vdash \text{\textbf{if }} e_1 \text{\textbf{ then }} 
+        e_2 \text{\textbf{ else }} e_3: T}[(\textbf{if else})] \text{ }
+      \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: T}
+        {\Gamma \vdash \text{\textbf{while }} e_1 \text{\textbf{ do }} e_2 : T} [(\textbf{while do})]
+      & \\
+      \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
+        {\Gamma \vdash x := e_1 : T} [($:=$)] \text{ }
+      \inference {\lambda_1 = T_1 \longrightarrow T_2 & \Gamma \vdash e_1: T_1}
+        {\Gamma \vdash \text{\textbf{call}}(\lambda_1, e_1) : T_2}[(\textbf{call})]
+      & \\
+      \inference {\Gamma \vdash A : T \\ \Gamma, x : A \vdash P(x) : T} 
+        {\Gamma \vdash \Pi x. P(x) : T}[($\Pi$ F)] \text{ }
+      \inference {\Gamma \vdash A : T \\ \Gamma, x : A \vdash e : P(x)} 
+        {\Gamma \vdash \lambda x : A. e : \Pi x : A. P(x) }[($\Pi$ I)] & \\
+      \inference {\Gamma \vdash e : \Pi x : A. P(x) & \Gamma \vdash e' : A} 
+        {\Gamma \vdash (e, e') : [e'/x]P(x)}[($\Pi$ E)] \text{ }
+    \end{tabular}
+  \end{center}
+\caption{Typing Rules for Simple-$\Pi$}
+\end{figure}
+
+
+
+
+\chapter{Semantics for Dependent Types}
 
 \chapter{Related Work}
 
