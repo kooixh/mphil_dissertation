@@ -605,16 +605,18 @@ In order to achieve our intended behaviour there has to be some form of check
 that runs throughout the lifetime of the program, currently there is no native 
 support for this form of invariant. However one potential workaround as a 
 programmer would be to make the LessThanN type immutable, by setting \textit{value} 
-to be a \textbf{const}. 
-
+to be a \textbf{const} however that significantly limits the usability of the 
+language. 
 
 \chapter{The Simple-$\Pi$ Language}
-This chapter will introduce the Simple-$\Pi$ language. The language will follow 
-the imperative paradigm, specifically a procedural language. Most importantly, 
-the language is statically typed with support for dependent typing. 
+To address the uncertainties introduced in the previous chapter and provide a 
+base for research in dependent types among imperative languages, we look to 
+define a basic language called Simple-$\Pi$. This chapter will introduce 
+the language's syntax and typing rules. The language follows 
+the imperative paradigm, specifically a procedural language.
 
 \section{Language Syntax}
-This section describes the syntax of the Simple-$\Pi$ language. 
+This section will describe the syntax for the Simple-$\Pi$ language. 
 
 \begin{figure}[H]
   \begin{center}
@@ -623,43 +625,111 @@ This section describes the syntax of the Simple-$\Pi$ language.
       \text{ }|\text{ }T \times T\text{ }|\text{ }void$\\
       \textit{Functions} & $\lambda$ & $:\text{ }T\longrightarrow T$\\
       \textit{Operators} & $ops$ & $:$ $+$ $|$ $-$ $|$ $\wedge$ $|$ $\vee$ \\
-      \textit{Expressions} & $e$ & $:$ \textbf{skip} $|$ $x$ $|$ $x\text{ }:= e$ $|$ $e_1 + e_2$ $| \text{ }e_1 - e_2$ $|$ $e_1 \wedge e_2$ $|$ $e_1 \vee e_2$ \\
-      & & \; $|$ \textbf{if} $e_1$ \textbf{then} $e_2$ \textbf{then} $e_3$ $|$ \textbf{while} $e_1$ \textbf{do} $e_2$ $|$ 
-      $\text{\textbf{call}}(\lambda_1, e)$\\
+      \textit{Expressions} & $e$ & $:$ $vals$ $|$ $x$ $|$ $x\text{ }:= e$ $|$ 
+      $e_1 + e_2$ $| \text{ }e_1 - e_2$ $|$ $e_1 \wedge e_2$ $|$ \\ 
+      & & \; $e_1 \vee e_2$ $|$ $e1;e2$ $|$ \textbf{if} $e_1$ \textbf{then} $e_2$ \textbf{then} $e_3$ $|$\\
+      & & \;  \textbf{while} $e_1$ \textbf{do} $e_2$ $|$ 
+      $\text{\textbf{call}}(x, e)$ $|$ \textbf{skip}\\
       \textit{Variables} & $vars$& $:$ $x \in {a,b,c...z}$\\
       \textit{Values} & $vals$& $:$ $\mathbb{Z}$ $|$ $\mathbb{B}$ $|$ $(e, e')$ $|$ $\{a\text{ }:
-      \text{ }T\text{ }|\text{ } P(a)\}$\text{ }$|$\text{ }$\lambda x.e$\\
-      \textit{Context} & $\sigma$& $:$ $vars \mapsto vals$
+      \text{ }T\text{ }|\text{ } P(a)\}$\text{ }$|$ $\lambda x.e$\\
+      \textit{Value Variable Context} & $\Gamma$& $:$ $vars \mapsto vals$
     \end{tabular}
   \end{center}
-  \caption{Syntax for Simple-$\Pi$ language}
+  \caption{Language Syntax for Simple-$\Pi$}
+\end{figure}
+
+\paragraph{Types} The Simple-$\Pi$ language has support the following five data types. 
+\begin{itemize}
+  \item The basic integer type \textit{int}
+  \item The basic boolean type \textit{bool}
+  \item The dependent product type, written as $\Pi x: A.P(x)$, is used to 
+  define a type $B$ that depends on the variable $x$ of type A.
+  \item The product type $(T \times T)$ which denotes an ordered pair $(T, T)$.
+  \item The \textit{void} type to represent empty or null.
+\end{itemize}
+
+\paragraph{Functions}
+Functions are defined in Simple-$\Pi$ as $(T \longrightarrow T)$, taking a type 
+and returning a type. Using the product type, representation of a function 
+taking multiple parameter can be achived using a pair with containing a pair. 
+For instance, a function $f(x,y,z)$ can be formalised as 
+$\lambda$ : $(T \times T) \times T \longrightarrow T$. Note that functions are 
+not first-class in this language.
+
+\paragraph{Operators}
+The language supports the following built in operators.
+\begin{itemize}
+  \item Integer addition using the $+$ operator writte in an infix notation.
+  \item Integer subtraction using the $-$ operator written in an infix notation.
+  \item Logical conjunction using the $\wedge$ operator written in an infix 
+  notation.
+  \item Logical disjunction using the $\wedge$ operator written in an infix 
+  notation.
+\end{itemize}
+
+\paragraph{Expressions} The following expressions make up the language.
+\begin{itemize}
+  \item Variable and values represents the most basic form of an expression.
+  \item The four operators are expressions operator on two other expressions $e_1$ 
+  and $e_2$
+  \item The assignment statement $(:=)$ assigns an expression $e_1$ to a 
+  free variable $x$.
+  \item The \textbf{if then} and \textbf{while do} statements are the standard control flow 
+  operations one would expect.
+  \item The \textbf{call} statement is used to indicate function calls, 
+  \textbf{call}($x, e$) will invoke the function bounded to $x$ using the 
+  parameter $e$.
+  \item The \textbf{skip} statment is use to indicate an empty expression and 
+  does not perform any meaningful action. 
+\end{itemize}
+
+\paragraph{Variables and Values} In Simple-$\Pi$, all variable are reference 
+variables, as one would expect in imperative programming. We use $x$ to denote a 
+variable. Variables can take values as suggested by the types, all the integer 
+literals $\mathbb{Z}$, booleans $\mathbb{B}$, dependent type values 
+$\{x: T\text{ }|\text{ }P(x)\}$ and functions $\lambda x.e$.
+
+\paragraph{Value Variable Context} Variables are mapped to values in the program 
+context $\Gamma$. Each reference variable is allowed to only appear once in 
+the context. We use \textbf{dom}($\Gamma$) to retrive the domain which represent 
+the set of declared variables. $\Gamma(x)$ retrieves the value bound to variable 
+$x$.
+
+\section{Typing Rules}
+This section defines the typing rules for the Simple-$\Pi$ language.
+
+\par
+We begin by defining the typing judgement. The typing judgement used in 
+Simple-$\Pi$ takes the form of the standard notation. 
+\begin{center}
+  $\Gamma \vdash e : T$
+\end{center}
+This judgement represents that expression $e$ under the context $\Gamma$ has the 
+type $T$.
+
+\par
+Using the judgement rule we can easily define the fist two typing rules for base 
+values \textit{int} and \textit{bool}.
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      $\forall n \in \mathbb{Z}$, $\Gamma \vdash n : int$ & 
+      $\forall b \in \mathbb{B}$, $\Gamma \vdash b : bool$ &       
+    \end{tabular}
+  \end{center}
+  \caption{Typing Rules for Base Values}
 \end{figure}
 
 \par
-The Simple-$\Pi$ language has support for five different data types. In addition to 
-supporting the basic integers and boolean, it has the notion of a pair 
-($T \times T$), dependent types ($\Pi x: A.P(x)$) and the \textit{void} type to 
-represent null or empty. 
+Functions are treated similarly, a function $\lambda x.e$ with function type 
+$T \longrightarrow T$ under context $\Gamma$ is written as 
+$\Gamma \vdash \lambda x.e : T \longrightarrow T$.
 
 \par
-Notice that in the definition functions are defined as taking a type and 
-returning a type. As the language supports the notion of pairs, a functions that 
-take multiple parameter can easily be written as a funtion that takes a pair a 
-function that takes pairs of pair. For instance, a function $f(x, y, z)$ and be 
-written as $\lambda$ : $(T \times T) \times T \longrightarrow T$. 
-
-\par
-The basic addition and subtraction are available for integer types, conjunction 
-and disjunction are there for boolean types. These are written in an infix 
-manner to form expressions. Other expression in the language are if-statements 
-and while-loop for control flow, assignments statements, variables literal. The 
-\textit{call} statement is use to invoke functions and finally skip signify an 
-empty action.
-
-
-\section{Typing Rules}
-This section defines the typing rules for the Simple-$\Pi$ language. 
-
+The remaining typing rules for the operators, statements and function 
+calls are presented in figure 3.3 below.
 
 \begin{figure}[H]
   \begin{center}
@@ -674,25 +744,49 @@ This section defines the typing rules for the Simple-$\Pi$ language.
         {\Gamma \vdash e_1 \vee e_2 : bool}[($\vee$)] & \\
       \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash e_2: T & \Gamma \vdash e_3: T}
         {\Gamma \vdash \text{\textbf{if }} e_1 \text{\textbf{ then }} 
-        e_2 \text{\textbf{ else }} e_3: T}[(\textbf{if else})] \text{ }
+        e_2 \text{\textbf{ else }} e_3: T}[(\textbf{if else})]
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: T}
-        {\Gamma \vdash \text{\textbf{while }} e_1 \text{\textbf{ do }} e_2 : T} [(\textbf{while do})]
-      & \\
+        {\Gamma \vdash \text{\textbf{while }} e_1 \text{\textbf{ do }} e_2 : T} [(\textbf{while do})] & \\
       \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
         {\Gamma \vdash x := e_1 : T} [($:=$)] \text{ }
-      \inference {\lambda_1 = T_1 \longrightarrow T_2 & \Gamma \vdash e_1: T_1}
-        {\Gamma \vdash \text{\textbf{call}}(\lambda_1, e_1) : T_2}[(\textbf{call})]
-      & \\
+      \inference {\Gamma(x) = \lambda x.e \\ \Gamma \vdash x : T_1 \longrightarrow T_2  & \Gamma \vdash e_1: T_1}
+        {\Gamma \vdash \text{\textbf{call}}(x, e_1) : T_2}[(\textbf{call})]
+    \end{tabular}
+  \end{center}
+\caption{Basic Typing Rules for Simple-$\Pi$}
+\end{figure}
+
+Most of the typing rule are straightforward and what one would expect from the 
+type checker. For ther function call, notice that the variable $x$ has to be a 
+function in the context. The type of the function is from $T_1 \longrightarrow 
+T_2$, because multiple arguments are represented as pairs for a n-nary function, 
+we avoid having to arbitrary check the argument type $T_1$ to $T_n$.
+
+
+\par
+Finally we define the formation, introduction and elimination rules for 
+the dependent product types as follows.
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
       \inference {\Gamma \vdash A : T \\ \Gamma, x : A \vdash P(x) : T} 
         {\Gamma \vdash \Pi x. P(x) : T}[($\Pi$ F)] \text{ }
       \inference {\Gamma \vdash A : T \\ \Gamma, x : A \vdash e : P(x)} 
         {\Gamma \vdash \lambda x : A. e : \Pi x : A. P(x) }[($\Pi$ I)] & \\
-      \inference {\Gamma \vdash e : \Pi x : A. P(x) & \Gamma \vdash e' : A} 
-        {\Gamma \vdash (e, e') : [e'/x]P(x)}[($\Pi$ E)] \text{ }
+      \inference {\Gamma \vdash f : \Pi x : A. P(x) & \Gamma \vdash x : A} 
+        {\Gamma, x: A \vdash f(x) : P(x)}[($\Pi$ E)] \text{ }
     \end{tabular}
   \end{center}
-\caption{Typing Rules for Simple-$\Pi$}
+  \caption{Typing Rules for the Dependent Product Type}
 \end{figure}
+
+\par
+The dependent product type formation rule ($\Pi$ F) defines the rules in order 
+for a dependent product type to be formed. The introduction rule ($\Pi$ I) 
+defines the rules in order for expressions to take the type of $\Pi$. Finally, 
+the elimination rule ($\Pi$ E) acts as the modus ponens of $\Pi$ I and states 
+how from an expression of $\Pi$ one could gets the expression of others type. 
 
 
 
