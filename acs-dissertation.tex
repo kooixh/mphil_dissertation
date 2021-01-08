@@ -126,17 +126,16 @@ and provided highly technical explanation to the field, they fail to caputure
 how this could relate to mainsteam programming languages. Furhtermore, the 
 semantics provided in these studies are very complex with advanced language 
 features, we propose that a more simple and barebone definiton will allow easier 
-access to the literature and motivate more studies into dependenty types. In 
-chapter 3 we will discuss all the work done in the area and point out some of the 
-motivation for this project.
+access to the literature and motivate more studies into dependenty types. 
 
 \par
-In chapter 4 we will be defining the syntax, typing rules and semantics 
+In chapter 3 we will be defining the syntax, typing rules and semantics 
 of a basic language with dependent types support which will be studied 
-and extended throughout the disseratation. In chapter 5 we will be observing 
+and extended throughout the disseratation. In chapter 4 we will be observing 
 multiple scenarios that dependent types cause uncertainties when used with 
 imperative languages. We will be providing the semantics required for them 
-to behave correctly.
+to behave correctly. In chapter 5 we will discuss our work with regards to the 
+existing work done in the area and how it completments the literature. 
 
 \par
 Finally we will conclude by discussing advanced features that can be integrated 
@@ -608,6 +607,13 @@ programmer would be to make the LessThanN type immutable, by setting \textit{val
 to be a \textbf{const} however that significantly limits the usability of the 
 language. 
 
+\par
+We see glimpses of dependent typing in certain imperative languages, the 
+examples using C++ presented above is one of them. One could argue arrays in 
+Java and C++ resembles the fixed size vector however they are quite similar. In 
+the subsequent chapters of this dissertation we will define a language to 
+address these uncertainties. 
+
 \chapter{The Simple-$\Pi$ Language}
 To address the uncertainties introduced in the previous chapter and provide a 
 base for research in dependent types among imperative languages, we look to 
@@ -693,8 +699,8 @@ $\{x: T\text{ }|\text{ }P(x)\}$ and functions $\lambda x.e$.
 \paragraph{Value Variable Context} Variables are mapped to values in the program 
 context $\Gamma$. Each reference variable is allowed to only appear once in 
 the context. We use \textbf{dom}($\Gamma$) to retrive the domain which represent 
-the set of declared variables. $\Gamma(x)$ retrieves the value bound to variable 
-$x$.
+the set of declared variables. We will use the notation $\Gamma(x)$ 
+to retrieve the value bound to variable $x$.
 
 \section{Typing Rules}
 This section defines the typing rules for the Simple-$\Pi$ language.
@@ -789,9 +795,88 @@ the elimination rule ($\Pi$ E) acts as the modus ponens of $\Pi$ I and states
 how from an expression of $\Pi$ one could gets the expression of others type. 
 
 
-
-
 \chapter{Semantics for Simple-$\Pi$}
+In this chapter we will define the basic semantics for Simple-$\Pi$, we will 
+then build up the semantics gradually to formalise the behavour of certain 
+non-trivial behaviour involving dependent types such as assignments and 
+mutation. In the final section of this chapter we will extend the syntax in 
+order to incorporate vectors into the language.
+
+\section{Operational Semanctics}
+In this section we will define the \textit{operational semantics} 
+\cite{operationalSemantics} of the language.
+
+\par
+We will use the \textit{Structured Operational Semantics} \cite{plotkinSOS} to 
+formalise the basic semantics. Throughout the semantics we will use the following 
+metavariables. 
+\begin{itemize}
+  \item The metavarible $ops$ to range over all operators.
+  \item The metavariable $s$ to range over all states $\Gamma$ 
+  (mapping from variables to values). The operator $\uplus$ when used on 
+state $s$ with $\{x \mapsto e\}$ update the state $s$ such that now $s(x) = 
+e$.
+  \item The metavariable $v$ to range over all values.
+  \item Greek letters ($\alpha$, $\pi$, $\upsilon$) to define local varibles in 
+  the formuli. 
+\end{itemize}
+Figure 4.1 defines the operation semantics to capture the basic behaviour of 
+Simple-$\Pi$.
+
+\begin{figure}[H]
+  \begin{center}
+  \begin{tabular} {c}
+      $\langle v, s \rangle \longrightarrow \langle v, s \rangle$ ($vals$ evaluation) 
+      & \\
+      \inference {n = n_1 + n_2}{\langle n_1 + n_2, s \rangle \longrightarrow \langle n, s\rangle}[(op +)] \text{ }
+      \inference {n = n_1 - n_2}{\langle n_1 - n_2, s \rangle \longrightarrow \langle n, s\rangle}[(op -)]
+      & \\
+      \inference {b = b_1 \wedge b_2}{\langle b_1 \wedge b_2, s \rangle \longrightarrow \langle b, s \rangle}[(op $\wedge$)] \text{ }
+      \inference {b = b_1 \vee b_2}{\langle b_1 \vee b_2, s \rangle \longrightarrow \langle b, s \rangle}[(op $\vee$)]
+      & \\
+      \inference {\langle e_1, s\rangle \longrightarrow \langle e'_1, s\rangle & 
+        \langle e_2, s\rangle \longrightarrow \langle e'_2, s\rangle }
+        {\langle e_1\text{ }ops\text{ }e_2, s  
+        \rangle \longrightarrow \langle e'_1\text{ }ops\text{ }e'_2, s \rangle}[($ops$)]
+      & \\
+      \inference {\langle e_1, s \rangle \longrightarrow \langle e'_1, s' \rangle}
+        {\langle e_1;e_2, s \rangle \longrightarrow \langle e'_1;e_2, s' \rangle}[($e_1;e_2$)]
+      & \\
+      $\langle \text{\textbf{skip}};e2, s \rangle \longrightarrow \langle e2, s \rangle$ (\textbf{skip})
+      & \\
+      $\langle \text{\textbf{if }} true \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
+        e_2, s \rangle \longrightarrow \langle e_1, s\rangle }$ (\textbf{if} true)
+      & \\
+      $\langle \text{\textbf{if }} false \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
+        e_2, s \rangle \longrightarrow \langle e_1, s\rangle }$ (\textbf{if} false)
+      & \\
+      \inference {\langle e, s\rangle \longrightarrow \langle e', s \rangle}
+        {\langle \text{\textbf{if }} e \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
+        e_2, s \rangle \longrightarrow \langle \textbf{if } e \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
+        e_2, s \rangle}[(\textbf{if} $expr$)] 
+      & \\
+      $\langle \text{\textbf{while }} c \text{\textbf{ do }} e, s \rangle \longrightarrow \langle 
+        \text{\textbf{if }} c \text{\textbf{ then }} e;
+        (\text{\textbf{while }} c \text{\textbf{ do }} e) \text{\textbf{ else }} \textbf{skip}, s \rangle}$ (\textbf{while do})
+      & \\
+      $\langle x := v, s \rangle \longrightarrow \langle skip, s \uplus \{x \mapsto v\} \rangle $ (assignment $vals$)
+      & \\
+      \inference {\langle e, s \rangle \longrightarrow \langle e', s' \rangle} 
+      {\langle x := e, s \rangle \longrightarrow \langle x := e', s'\rangle} (assignment $expr$ ) \text{ }
+      & \\
+      \inference {\lambda_1 = \lambda x.e}
+        {\langle \textbf{call}(\lambda_1, x), s \rangle \longrightarrow \langle e, s \rangle}[(\textbf{call})] 
+    \end{tabular}
+  \end{center}
+  \caption{Operational Semantics for Simple-$\Pi$}
+\end{figure}
+
+\section{Dependent Type Definitions}
+
+
+
+
+
 
 \chapter{Related Work}
 
