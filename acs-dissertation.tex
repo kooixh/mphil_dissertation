@@ -845,10 +845,10 @@ Simple-$\Pi$.
       $\langle \text{\textbf{skip}};e2, s \rangle \longrightarrow \langle e2, s \rangle$ (\textbf{skip})
       & \\
       $\langle \text{\textbf{if }} true \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
-        e_2, s \rangle \longrightarrow \langle e_1, s\rangle }$ (\textbf{if} true)
+        e_2, s \rangle \longrightarrow \langle e_1, s\rangle$ (\textbf{if} true)
       & \\
       $\langle \text{\textbf{if }} false \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
-        e_2, s \rangle \longrightarrow \langle e_1, s\rangle }$ (\textbf{if} false)
+        e_2, s \rangle \longrightarrow \langle e_1, s\rangle$ (\textbf{if} false)
       & \\
       \inference {\langle e, s\rangle \longrightarrow \langle e', s \rangle}
         {\langle \text{\textbf{if }} e \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
@@ -857,7 +857,7 @@ Simple-$\Pi$.
       & \\
       $\langle \text{\textbf{while }} c \text{\textbf{ do }} e, s \rangle \longrightarrow \langle 
         \text{\textbf{if }} c \text{\textbf{ then }} e;
-        (\text{\textbf{while }} c \text{\textbf{ do }} e) \text{\textbf{ else }} \textbf{skip}, s \rangle}$ (\textbf{while do})
+        (\text{\textbf{while }} c \text{\textbf{ do }} e) \text{\textbf{ else }} \textbf{skip}, s \rangle$ (\textbf{while do})
       & \\
       $\langle x := v, s \rangle \longrightarrow \langle skip, s \uplus \{x \mapsto v\} \rangle $ (assignment $vals$)
       & \\
