@@ -871,8 +871,23 @@ Simple-$\Pi$.
   \caption{Operational Semantics for Simple-$\Pi$}
 \end{figure}
 
-\section{Dependent Type Definitions}
+\section{Dependent Types Definitions}
 In this section we will define the semantics regarding dependent types. 
+
+
+\subsection{Defining Dependent Types with Variable}
+Consider the uncertainty of using variables to define dependent types. For 
+instance: 
+\begin{center}
+  $y\text{ }:\text{ }int = 10$ \\
+  $BoundedInt<y>$ = $\Pi y. \{i : Int\text{ }i < y\}$
+\end{center}
+\par
+How would this behaviour work in practice? Recall from chapter 2 we proposed the 
+question of what should happen when the value bound to the variable change. In 
+this subsection we will define semantics to formalise the behavour.
+
+
 
 
 
