@@ -808,7 +808,7 @@ In this section we will define the \textit{operational semantics}
 
 \par
 We will use the \textit{Structured Operational Semantics} \cite{plotkinSOS} to 
-formalise the basic semantics. Throughout the dissertation we will use the following 
+formalise the basic semantics. Throughout the text we will use the following 
 metavariables. 
 \begin{itemize}
   \item The metavarible $ops$ to range over all operators.
@@ -817,6 +817,7 @@ metavariables.
 state $s$ with $\{x \mapsto e\}$ update the state $s$ such that now $s(x) = 
 e$.
   \item The metavariable $v$ to range over all values.
+  \item Uppercase letters $A,B,C$ to range over all types.
   \item Greek letters ($\alpha$, $\pi$, $\upsilon$) to define local varibles in 
   the formuli. 
 \end{itemize}
@@ -871,21 +872,112 @@ Simple-$\Pi$.
   \caption{Operational Semantics for Simple-$\Pi$}
 \end{figure}
 
-\section{Dependent Types Definitions}
-In this section we will define the semantics regarding dependent types. 
+\section{Dependent Types Semantics}
+Programming languages often have a wide range of features, often the team behind 
+the language have to put extensive thought into the design decisions. As there 
+are often multiple way to handle a certain feature, rarely are there a definite 
+answer to which is the most optimal.
 
+\par
+The same applies to dependent types, which is a feature itself. This section 
+will cover the different ways of handling dependent types and they interact with 
+other features.
 
 \subsection{Defining Dependent Types with Variable}
 Consider the uncertainty of using variables to define dependent types. For 
 instance: 
-\begin{center}
-  $y\text{ }:\text{ }int = 10$ \\
-  $BoundedInt<y>$ = $\Pi y. \{i : Int\text{ }i < y\}$
-\end{center}
+
+\begin{figure} [H]
+  \begin{center}
+    $y\text{ }:\text{ }int := 10$ \\
+    $BoundedInt<y>$ = $\Pi y. \{i : Int\text{ }i < y\}$ \\ 
+    $y := 5$
+  \end{center}
+  \caption{Mutation to Variable A Dependent Type Depends On}
+\end{figure}
 \par
 How would this behaviour work in practice? Recall from chapter 2 we proposed the 
 question of what should happen when the value bound to the variable change. In 
-this subsection we will define semantics to formalise the behavour.
+this subsection we will define semantics to formalise the behaviour.
+
+\subsubsection{Passing by Value}
+In the first subsection we will define a method of handling the above 
+uncertainty using a pass by value approach. In languages such as C/C++, 
+\textit{pass by value} \cite{pbv} is a way of passing a parameter into a 
+function in a way that any modification to the parameter in the function does 
+not reflect changes outside and vice versa. 
+
+\par
+A similar approach can be taken in our definitions for dependent types. For 
+instance, taking the example in figure 4.2, if the variable $y$ in the dependent 
+type function is different from the variable $y$ in the program state, then any 
+changes to the variable $y$ will not effect the type definition and the program 
+will stay well typed. 
+
+\par
+In order to achieve this, our dependent type function should be have its own 
+local context so it does not overlap with the program's context. We use the 
+notation $\sigma$ as a local context. The context behaves, just as the program's 
+context $\Gamma$ would, mapping variables to values.
+
+\par
+We would also need a similar mapping for types, notice that we defined a name 
+for the type $BoundedInt$ in the example. We use $\tau$ to represent the type 
+variable map. The syntax is extended by adding the following: 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {l l l}
+      \textit{Expression} & $e$ & $:$ ... $|$ $x = T$ \\
+      \textit{Value Variable Context} & $\Gamma, \sigma$& $:$ $vars \mapsto 
+      vals$ \\
+      \textit{Type Variable Context} & $\tau$& $:$ $vars \mapsto T$ \\
+    \end{tabular}
+  \end{center}
+  \caption{Extended Syntax for Simple-$\Pi$}
+\end{figure}
+
+\par
+Notice in the example above we use an equal sign (=) to denote a new type. 
+First we define its rule:
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {x \notin \text{\textbf{dom}}(s)}{\langle x = A, s, t \rangle \longrightarrow 
+        \langle \text{\textbf{skip}}, s, t \uplus \{x \mapsto A\}\rangle}[(= type assign)] \text{ }    
+    \end{tabular}
+  \end{center}
+\end{figure}
+
+In order to formalise the behaviour and correctness we opted to use 
+\textit{Hoare Logic} \cite{hoare}. The \textit{Hoare Triple} is defined as follows: 
+
+\begin{figure}[H]
+  \begin{center}
+    $\{P\}C\{Q\}$
+  \end{center}
+  \caption{Hoare Triple}
+\end{figure}
+
+The Hoare triple simply expresses that given precondition $P$ holds then after executing $C$ 
+and $C$ terminates, the postcondition $Q$ will hold.
+
+\par 
+We use the notation $P[x/a]$ to denote in the function $P$, replace all 
+occurence of variable $x$ with variable $a$. We use the context $\sigma_P$  
+to denote the local context of function $P$. The rules for dependent type 
+definition written using hoare logic is as follows: 
+
+
+\begin{figure}[H]
+  \begin{center}
+    $\{x \notin \Gamma \wedge \alpha = x \wedge P[x/\alpha] \wedge \sigma_P = \Gamma \}
+    x = \Pi x : A. P(x)\{x \in \text{\textbf{dom}}(\tau)\}$
+  \end{center}
+  \caption{Dependedent Type Definition Rule using Hoare Logic}
+\end{figure}
+
 
 
 
