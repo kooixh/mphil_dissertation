@@ -1035,9 +1035,31 @@ example above, then the type checker should flag it at compile time.
 
 \par
 In order to do this we need will need to type check all variables against its 
-type after an assignment. Notice that currently the variable mapping does not 
-provide the type that a variable possess, we only have the value. We would have 
-to modify out syntax to include this necessary information. 
+type after an assignment. We can use the typing judgement to perform the 
+type checking by only allowing assignment if the all variables of a dependent 
+type that depnds on $x$ holds after reassignment of $x$.
+
+\par
+We modify the typing judgement for assignment by adding a new condition:
+
+\begin{figure}[H]
+  \begin{center}
+   \begin {tabular} {c} 
+     \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T \\ \Gamma \vdash \forall \alpha : \Pi x. P(x)\text{ }s.t.\text{ }\alpha : \Pi e_1. P(e_1)} 
+          {\Gamma \vdash x := e_1 : T} [($:=$)] \text{ }
+    \end{tabular}
+  \end{center}
+  \caption{Dynamic Dependedent Type Reassignment Rule}
+\end{figure}
+
+The rule above states that for all $\alpha$ of a type $\pi x.P(x)$ it will be 
+well typed for $\pi e_1.P(e_1)$, the new value of $x$.
+
+\par
+Notice that our current value variable context does not 
+provide the type that a variable possess, we only have the value. 
+In order to formalise the behaviour in Hoare Logic, we have to 
+modify out syntax to include this necessary information. 
 
 \par
 We opted to use the following notation for our context: 
@@ -1049,24 +1071,20 @@ We opted to use the following notation for our context:
   \end{center}
   \caption{Extended Value Variable Context with Type}
 \end{figure}
-
 This means that a varible now maps to a value with type $T$. The notation of 
 $\Gamma(x)$ to retrieve a value used in previous semantics still hold, now we 
 can write $\alpha : \tau = \Gamma(x)$ which gets $\alpha$ the value of $x$ 
 and $\tau$ the type of $x$. This notation allows us to apply the universal 
-quantifier in order to type check all the variables of a certain type.
-\par
-We define the Hoare Logic for the reassignment operation as the following: 
+
 
 \begin{figure}[H]
   \begin{center}
-    \footnotesize$\{\tau = \{\alpha\in\text{\textbf{dom}}(\Gamma)\text{ }|\text{ }\Gamma \vdash \alpha : \Pi a'. P(a')\}\}a := e\{\Gamma(a) = e \wedge 
-    \forall \alpha \in \tau\text{ }s.t.\text{ } \Gamma \vdash \alpha : \Pi a. P(a)\}$ 
+    \footnotesize$\{\tau = \{\alpha : \beta \in\text{\textbf{dom}}(\Gamma)\text{ }|\text{ }\beta = \Pi a'. P(a')\}\}a := e\{\Gamma(a) = e \wedge 
+    \forall \alpha : \beta \in \tau\text{ }s.t.\text{ }\beta = \Pi a. P(a)\}$ 
     \normalsize
   \end{center}
   \caption{Dynamic Dependedent Type Reassignment Rule}
 \end{figure}
-
 
 
 
