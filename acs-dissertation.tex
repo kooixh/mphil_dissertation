@@ -939,7 +939,7 @@ variable map. The syntax is extended by adding the following:
 
 \par
 Notice in the example above we use an equal sign (=) to denote a new type. 
-First we define its rule:
+First we define its rule, $t$ ranges over all Type Variable Context:
 
 \begin{figure}[H]
   \begin{center}
@@ -959,7 +959,6 @@ In order to formalise the behaviour and correctness we opted to use
   \end{center}
   \caption{Hoare Triple}
 \end{figure}
-
 The Hoare triple simply expresses that given precondition $P$ holds then after executing $C$ 
 and $C$ terminates, the postcondition $Q$ will hold.
 
@@ -972,17 +971,21 @@ definition written using hoare logic is as follows:
 
 \begin{figure}[H]
   \begin{center}
-    $\{x \notin \Gamma \wedge \alpha = x \wedge P[x/\alpha] \wedge \sigma_P = \Gamma \}
-    x = \Pi x : A. P(x)\{x \in \text{\textbf{dom}}(\tau)\}$
+    \small$\{x \notin \text{\textbf{dom}}(\Gamma) \wedge \alpha = \Gamma(x) \wedge \sigma_P = \Gamma\}
+    y = \Pi x : A. P(x)\{P =  P[x/\alpha] \wedge y \in \text{\textbf{dom}}(\tau)\}$ 
+    \normalsize
   \end{center}
   \caption{Dependedent Type Definition Rule using Hoare Logic}
 \end{figure}
 
-
-
-
-
-
+\par
+The precoditions states that the $\alpha$ is the value of $x$ in the 
+program context. After execution the type assignment, 
+the function $P$ would have been substituted 
+such that all occurence of variable $x$ is replaced with the value $\alpha$. Note 
+that we are substituting a variable with a value, essentially fixing the value 
+of $x$ in the function. So any changes to $x$ in the program will now no longer 
+have an impact on the type.
 
 
 \chapter{Related Work}
