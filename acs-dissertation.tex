@@ -890,7 +890,7 @@ instance:
 \begin{figure} [H]
   \begin{center}
     $y\text{ }:\text{ }int := 10$ \\
-    $BoundedInt<y>$ = $\Pi y. \{i : Int\text{ }i < y\}$ \\ 
+    $BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$ \\ 
     $y := 5$
   \end{center}
   \caption{Mutation to Variable A Dependent Type Depends On}
@@ -931,7 +931,7 @@ variable map. The syntax is extended by adding the following:
       \textit{Expression} & $e$ & $:$ ... $|$ $x = T$ \\
       \textit{Value Variable Context} & $\Gamma, \sigma$& $:$ $vars \mapsto 
       vals$ \\
-      \textit{Type Variable Context} & $\tau$& $:$ $vars \mapsto T$ \\
+      \textit{Type Variable Context} & $\Upsilon$& $:$ $vars \mapsto T$ \\
     \end{tabular}
   \end{center}
   \caption{Extended Syntax for Simple-$\Pi$}
@@ -963,7 +963,7 @@ The Hoare triple simply expresses that given precondition $P$ holds then after e
 and $C$ terminates, the postcondition $Q$ will hold.
 
 \par 
-We use the notation $P[x/a]$ to denote in the function $P$, replace all 
+We use the notation $P[x/a]$ to denote that in the function $P$, replace all 
 occurence of variable $x$ with variable $a$. We use the context $\sigma_P$  
 to denote the local context of function $P$. The rules for dependent type 
 definition written using hoare logic is as follows: 
@@ -972,7 +972,7 @@ definition written using hoare logic is as follows:
 \begin{figure}[H]
   \begin{center}
     \small$\{x \notin \text{\textbf{dom}}(\Gamma) \wedge \alpha = \Gamma(x) \wedge \sigma_P = \Gamma\}
-    y = \Pi x : A. P(x)\{P =  P[x/\alpha] \wedge y \in \text{\textbf{dom}}(\tau)\}$ 
+    y = \Pi x : A. P(x)\{P =  P[x/\alpha] \wedge y \in \text{\textbf{dom}}(\Upsilon)\}$ 
     \normalsize
   \end{center}
   \caption{Dependedent Type Definition Rule using Hoare Logic}
@@ -983,9 +983,85 @@ The precoditions states that the $\alpha$ is the value of $x$ in the
 program context. After execution the type assignment, 
 the function $P$ would have been substituted 
 such that all occurence of variable $x$ is replaced with the value $\alpha$. Note 
-that we are substituting a variable with a value, essentially fixing the value 
+that we are substituting the variable with a value, essentially fixing the value 
 of $x$ in the function. So any changes to $x$ in the program will now no longer 
 have an impact on the type.
+
+\par
+This semantic allow the language to allow us to define types using variable 
+whose value are available at runtime, i.e. a non constant variable. It provides 
+more flexibility in comparison to C++ templates but it is still has limitations. The 
+programmer might sometimes be looking for dependent types whose definitions 
+changes with the value of the variable. 
+
+\subsubsection{Dynamic Dependent Types}
+In this subsection we will be presenting an approach to handling dependent types 
+in imperative languages called \textit{Dynamic Dependent Types}. It is a type 
+that will allow the definition of dependent types to change during runtime and 
+still guarantees a well-typed program. 
+
+
+\begin{figure} [H]
+  \begin{center}
+    $y\text{ }:\text{ }int := 10$ \\
+    $BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$ \\ 
+    $x\text{ }:\text{ }BoundedIntY := 4$ \\
+    $y := 5$ \\
+  \end{center}
+  \caption{Dynamically Changing Dependent Types}
+\end{figure}
+
+Figure 4.6 extends the previous example, in this scenario, the variable $x$ is 
+of type $BoundedIntY$ and has the value 4 which is well typed. In the next line, 
+the value of $y$ is reassigned the value 5. In this approach, rather than having 
+no effect on the type definition, the type of $BoundedIntY$ changes with the 
+value $y$, being now bounded to $5$. In our example, $x$ is still well typed so 
+everything is valid. 
+
+
+\begin{figure} [H]
+  \begin{center}
+    $y\text{ }:\text{ }int := 10$ \\
+    $BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$ \\ 
+    $x\text{ }:\text{ }BoundedIntY := 6$ \\
+    $y := 5$ // Error \\
+  \end{center}
+  \caption{Ill-Typed Dynamically Changing Dependent Types}
+\end{figure}
+
+\par
+If the reassignment of $y$ causes $x$ to be ill-type as demonstrated in the 
+example above, then the type checker should flag it at compile time. 
+
+\par
+In order to do this we need will need to type check all variables against its 
+type after an assignment. Notice that currently the variable mapping does not 
+provide the type that a variable possess, we only have the value. We would have 
+to modify out syntax to include this necessary information. 
+
+\par
+We opted to use the following notation for our context: 
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {l l l}
+      \textit{Value Variable Context} & $\Gamma, \sigma$& $:$ $vars \mapsto vals : T$ 
+    \end{tabular}
+  \end{center}
+  \caption{Extended Value Variable Context with Type}
+\end{figure}
+
+This means that a varible now maps to a value with type $T$. The notation of 
+$\Gamma(x)$ to retrieve a value used in previous semantics still hold, now we 
+can write $\alpha : \tau = \Gamma(x)$ which gets $\alpha$ the value of $x$ 
+and $\tau$ the type of $x$. This notation allows us to apply the universal 
+quantifier in order to type check all the variables of a certain type. 
+
+
+
+
+
+
+
 
 
 \chapter{Related Work}
