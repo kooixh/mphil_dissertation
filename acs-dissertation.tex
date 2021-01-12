@@ -1054,9 +1054,18 @@ This means that a varible now maps to a value with type $T$. The notation of
 $\Gamma(x)$ to retrieve a value used in previous semantics still hold, now we 
 can write $\alpha : \tau = \Gamma(x)$ which gets $\alpha$ the value of $x$ 
 and $\tau$ the type of $x$. This notation allows us to apply the universal 
-quantifier in order to type check all the variables of a certain type. 
+quantifier in order to type check all the variables of a certain type.
+\par
+We define the Hoare Logic for the reassignment operation as the following: 
 
-
+\begin{figure}[H]
+  \begin{center}
+    \footnotesize$\{\tau = \{\alpha\in\text{\textbf{dom}}(\Gamma)\text{ }|\text{ }\Gamma \vdash \alpha : \Pi a'. P(a')\}\}a := e\{\Gamma(a) = e \wedge 
+    \forall \alpha \in \tau\text{ }s.t.\text{ } \Gamma \vdash \alpha : \Pi a. P(a)\}$ 
+    \normalsize
+  \end{center}
+  \caption{Dynamic Dependedent Type Reassignment Rule}
+\end{figure}
 
 
 
