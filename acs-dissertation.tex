@@ -435,10 +435,28 @@ in a procedural manner or object-oriented manner.
 
 \par
 
-Currently there is no imperative programming language with proper dependent type 
-support, however the are some aspect of different languages that resembles 
-dependent typing. 
+Currently there is no production ready imperative programming language with 
+proper dependent type support. Previous research has look at creating an 
+impertaive language with dependent types but these are not available to the 
+general programmers. Certain mainstream languages also have aspect that 
+resembles dependent types but do not provide the complete feature.
 
+\subsection{Xanadu}
+\textit{Xanadu} \cite{xanadu} is a dependently typed imperative language created by a team at 
+the University of Cincinnati. The language was implemented in OCaml and was 
+said to be available online in the original paper, however the original cited 
+location looks to have been taken offline. It is safe to conclude that 
+the language itself is also no longer in active development 
+
+\par
+There are no examples of the actual language available online except some code 
+snippets shown by the author in the original paper. As such we are unable to 
+provide any analysis on the language itself.
+
+\par
+However, the language is worth a mention here as it shows the feasibility of 
+imperative languages having full dependent typing. The research by the authors 
+are impressive and it serves as inspiration for our project. 
 
 \subsection{C++ Templates}
 \textit{C++ Templates} \cite{cppTemplate} are a way of passing the type of a 
@@ -802,7 +820,7 @@ non-trivial behaviour involving dependent types such as assignments and
 mutation. In the final section of this chapter we will extend the syntax in 
 order to incorporate vectors into the language.
 
-\section{Operational Semanctics}
+\section{Operational Semantics}
 In this section we will define the \textit{operational semantics} 
 \cite{operationalSemantics} of the language.
 
@@ -879,9 +897,73 @@ are often multiple way to handle a certain feature, rarely are there a definite
 answer to which is the most optimal.
 
 \par
-The same applies to dependent types, which is a feature itself. This section 
+This seemingly undecideable problem is known as \textit{feature interaction} 
+\cite{featInteract}, it describes the problem in some situations multiple 
+features would modify the behaviours of each others. The same applies to 
+dependent types, which is a feature itself. For instance, the inclusion of dependent types 
+would modify the behaviour of assignments and vice versa. This section 
 will cover the different ways of handling dependent types and they interact with 
 other features.
+
+\subsection{Hoare Logic}
+In order to formalise the specification of our language we opted to use 
+\textit{Hoare Logic} \cite{hoare}. The \textit{Hoare Triple} is defined as follows: 
+
+\begin{figure}[H]
+  \begin{center}
+    $\{P\}C\{Q\}$
+  \end{center}
+  \caption{Hoare Triple}
+\end{figure}
+The Hoare triple simply expresses that given precondition $P$ holds then after executing $C$ 
+and $C$ terminates, the postcondition $Q$ will hold.
+
+\par
+We chose Hoare Logic as our preferred system because of its simple to understand 
+notation. While Hoare Logic is a powerful tool that can become complex when 
+reasoning about the correctness of a program we are mainly interested in using 
+the Hoare notation as a tool for specifications. We will be using the 
+precondition to specify in which state the programmer is allowed to perform 
+certain commands and what must be the resulting state after execution. While the 
+same formalisation can be achieved using Structures Operational Semantics, the 
+Hoare Triple provides a much more concise notation. 
+
+
+\subsection{Complete Immutability}
+The main issue one encounters when associating dependent types with imperative 
+languages is the presence of mutability and assignments. The obvious way to 
+work around this problem is to remove the ability to make changes to the state 
+of the program. In other words, all defined variables are constant. 
+
+\par
+While this approach does allow for a type system that depends on values, it is 
+only partial dependent typing as the values depended on has to be available at 
+compile time whereas a fully dependently typed language is able to depend on 
+value at runtime.
+
+\par
+The approach proposed in this subsection does not encompass the intended behaviour we 
+sought after however we decided to formalise it for completeness and serves as 
+a building block for our language. 
+
+\par
+Using Hoare Logic, we specify the rule for assignment as follows:
+
+\begin{figure}[H]
+  \begin{center}
+    $\{x \notin \text{\textbf{dom}}(\Gamma)\}x := e\{\Gamma(x) = e\}$
+  \end{center}  
+  \caption{Hoare Logic for Immutable Assignment}
+\end{figure}
+
+In the rule above we simply forbid the any changes to already defined variable 
+in the program state, this avoid any complications regarding dependent types as 
+if they are well typed during definition it will stay well typed. 
+
+\par
+Using this approach does definitely resolves the uncertainty the usability of 
+the language is poor. Imperative programming relies on state changes, forbidding 
+that go against the paradigm. 
 
 \subsection{Defining Dependent Types with Variable}
 Consider the uncertainty of using variables to define dependent types. For 
@@ -939,7 +1021,7 @@ variable map. The syntax is extended by adding the following:
 
 \par
 Notice in the example above we use an equal sign (=) to denote a new type. 
-First we define its rule, $t$ ranges over all Type Variable Context:
+First we specify its rule, $t$ ranges over all Type Variable Context:
 
 \begin{figure}[H]
   \begin{center}
@@ -950,24 +1032,16 @@ First we define its rule, $t$ ranges over all Type Variable Context:
   \end{center}
 \end{figure}
 
-In order to formalise the behaviour and correctness we opted to use 
-\textit{Hoare Logic} \cite{hoare}. The \textit{Hoare Triple} is defined as follows: 
-
-\begin{figure}[H]
-  \begin{center}
-    $\{P\}C\{Q\}$
-  \end{center}
-  \caption{Hoare Triple}
-\end{figure}
-The Hoare triple simply expresses that given precondition $P$ holds then after executing $C$ 
-and $C$ terminates, the postcondition $Q$ will hold.
+\par
+The operational semantic above simply adds a new type definition with name $x$ 
+into the type variable context. Importantly, the variable $x$ cannot have 
+already been defined as a value variable. 
 
 \par 
 We use the notation $P[x/a]$ to denote that in the function $P$, replace all 
 occurence of variable $x$ with variable $a$. We use the context $\sigma_P$  
-to denote the local context of function $P$. The rules for dependent type 
+to denote the local context of function $P$. The specification for dependent type 
 definition written using hoare logic is as follows: 
-
 
 \begin{figure}[H]
   \begin{center}
@@ -1052,17 +1126,20 @@ We modify the typing judgement for assignment by adding a new condition:
   \caption{Dynamic Dependedent Type Reassignment Rule}
 \end{figure}
 
-The rule above states that for all $\alpha$ of a type $\pi x.P(x)$ it will be 
-well typed for $\pi e_1.P(e_1)$, the new value of $x$.
+The rule above states that for all $\alpha$ of a type $\Pi x.P(x)$ it will be 
+well typed for $\Pi e_1.P(e_1)$, the new value of $x$.
 
 \par
 Notice that our current value variable context does not 
 provide the type that a variable possess, we only have the value. 
-In order to formalise the behaviour in Hoare Logic, we have to 
-modify out syntax to include this necessary information. 
+In order to formalise the behaviour in Hoare Logic, we will need to typing 
+information of a variable. Adding this necessary information requires us to 
+make changes to our syntax by adding some minor modifications to the value 
+variable context.
 
 \par
-We opted to use the following notation for our context: 
+We modified the value variable context as shown below:
+ 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {l l l}
@@ -1071,20 +1148,32 @@ We opted to use the following notation for our context:
   \end{center}
   \caption{Extended Value Variable Context with Type}
 \end{figure}
+
 This means that a varible now maps to a value with type $T$. The notation of 
 $\Gamma(x)$ to retrieve a value used in previous semantics still hold, now we 
 can write $\alpha : \tau = \Gamma(x)$ which gets $\alpha$ the value of $x$ 
 and $\tau$ the type of $x$. This notation allows us to apply the universal 
 
-
 \begin{figure}[H]
   \begin{center}
-    \footnotesize$\{\tau = \{\alpha : \beta \in \Gamma\text{ }|\text{ }\beta = \Pi a'. P(a')\}\}a := e\{\Gamma(a) = e \wedge 
+    \footnotesize$\{\tau = \{\alpha : \beta \in \Gamma\text{ }|\text{ }\beta = \Pi a. P(a)\}\}a := e\{\Gamma(a) = e \wedge 
     \forall \alpha : \beta \in \tau\text{ }s.t.\text{ }\beta = \Pi a. P(a)\}$ 
     \normalsize
   \end{center}
   \caption{Dynamic Dependedent Type Reassignment Rule}
 \end{figure}
+
+
+\par
+The Hoare Logic above reiterates this behaviour by stating that all values $\alpha$ with 
+type $\Pi a.P(a)$ in the state will have their typing updated with the new value 
+of $a$.
+
+\subsubsection{Practical Considertaions}
+
+
+
+\section{Introducing Arrays to Simple-$\Pi$}
 
 
 
