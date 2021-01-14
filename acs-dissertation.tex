@@ -92,7 +92,6 @@ Over the years, programming languages have included more powerful and flexible
 type systems, languages like \textit{C\#} \cite{cSharp} and \textit{Go} \cite{goInferenceType} allow 
 \textit{type inference} \cite{inferenceType}, using a feature called \textit{Reflection} 
 Java and Python can even achieve \textit{Duck Typing} \cite{javaDuckType}.
-
 \par
 However, as much as we have studied about type systems, \textit{Dependent Types} 
 \cite{depenTypeAtWork} remains uncommon in the industry. While the theory of dependent types has been 
@@ -773,8 +772,8 @@ calls are presented in figure 3.3 below.
         {\Gamma \vdash \text{\textbf{while }} e_1 \text{\textbf{ do }} e_2 : T} [(\textbf{while do})] & \\
       \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
         {\Gamma \vdash x := e_1 : T} [($:=$)] \text{ }
-      \inference {\Gamma(x) = \lambda x.e \\ \Gamma \vdash x : T_1 \longrightarrow T_2  & \Gamma \vdash e_1: T_1}
-        {\Gamma \vdash \text{\textbf{call}}(x, e_1) : T_2}[(\textbf{call})]
+      \inference {\Gamma \vdash x : T_1 \longrightarrow T_2  & \Gamma \vdash e: T_1}
+        {\Gamma \vdash \text{\textbf{call}}(x, e) : T_2}[(\textbf{call})]
     \end{tabular}
   \end{center}
 \caption{Basic Typing Rules for Simple-$\Pi$}
@@ -787,7 +786,7 @@ T_2$, because multiple arguments are represented as pairs for a n-nary function,
 we avoid having to arbitrary check the argument type $T_1$ to $T_n$.
 
 
-\par
+\subsection{Dependent Types Rules}
 Finally we define the formation, introduction and elimination rules for 
 the dependent product types as follows.
 
@@ -816,8 +815,8 @@ how from an expression of $\Pi$ one could gets the expression of others type.
 \chapter{Semantics for Simple-$\Pi$}
 In this chapter we will define the basic semantics for Simple-$\Pi$, we will 
 then build up the semantics gradually to formalise the behavour of certain 
-non-trivial behaviour involving dependent types such as assignments and 
-mutation. In the final section of this chapter we will extend the syntax in 
+non-trivial behaviour involving dependent types such as reassignments and 
+arrays. In the final section of this chapter we will extend the syntax in 
 order to incorporate vectors into the language.
 
 \section{Operational Semantics}
@@ -844,7 +843,7 @@ Simple-$\Pi$.
 
 \begin{figure}[H]
   \begin{center}
-  \begin{tabular} {c}
+    \begin{tabular} {c}
       $\langle v, s \rangle \longrightarrow \langle v, s \rangle$ ($vals$ evaluation) 
       & \\
       \inference {n = n_1 + n_2}{\langle n_1 + n_2, s \rangle \longrightarrow \langle n, s\rangle}[(op +)] \text{ }
@@ -863,10 +862,10 @@ Simple-$\Pi$.
       & \\
       $\langle \text{\textbf{skip}};e2, s \rangle \longrightarrow \langle e2, s \rangle$ (\textbf{skip})
       & \\
-      $\langle \text{\textbf{if }} true \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
+      $\langle \text{\textbf{if } \textit{true}} \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
         e_2, s \rangle \longrightarrow \langle e_1, s\rangle$ (\textbf{if} true)
       & \\
-      $\langle \text{\textbf{if }} false \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
+      $\langle \text{\textbf{if } \textit{false}} \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
         e_2, s \rangle \longrightarrow \langle e_1, s\rangle$ (\textbf{if} false)
       & \\
       \inference {\langle e, s\rangle \longrightarrow \langle e', s \rangle}
@@ -883,11 +882,31 @@ Simple-$\Pi$.
       \inference {\langle e, s \rangle \longrightarrow \langle e', s' \rangle} 
       {\langle x := e, s \rangle \longrightarrow \langle x := e', s'\rangle} (assignment $expr$ ) \text{ }
       & \\
-      \inference {\lambda_1 = \lambda x.e}
-        {\langle \textbf{call}(\lambda_1, x), s \rangle \longrightarrow \langle e, s \rangle}[(\textbf{call})] 
-    \end{tabular}
+     \end{tabular}
   \end{center}
   \caption{Operational Semantics for Simple-$\Pi$}
+\end{figure}
+
+\par
+Functions in Simple-$\Pi$ are call by values only, we use the notation $e[x/v]$ 
+to express substituion. A substitution $\sigma$ is a mapping from variables to 
+expression such that we replace occurence of the variable with the expression. 
+$e[x/v]$ replaces all variable $x$ in the expression e with $v$. For a multiple 
+parameter function, we replace all the variables $x_1$ to $x_n$ with their 
+respective argument.
+
+\par
+The evaluation rules for functions is shown below.
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      $\langle \textbf{call}(\lambda void.e, v), s \rangle \longrightarrow \langle e, s \rangle$ (\textbf{call} with void)
+      & \\
+      $\langle \textbf{call}(\lambda (x,x_1...x_n).e, (v_1,v_2...v_n)), s \rangle \longrightarrow \langle [x_1/v_1...x_n/v_n]e, s \rangle$ (\textbf{call} with params)
+    \end{tabular}
+  \end{center}
+  \caption{Functions Call Semantics for Simple-$\Pi$}
 \end{figure}
 
 \section{Dependent Types Semantics}
@@ -929,7 +948,67 @@ same formalisation can be achieved using Structures Operational Semantics, the
 Hoare Triple provides a much more concise notation. 
 
 
-\subsection{Complete Immutability}
+\subsection{Defining Dependent Types with Variable}
+Consider the uncertainty of using variables to define dependent types. For 
+instance: 
+
+\begin{figure} [H]
+  \begin{center}
+    $y\text{ }:\text{ }int := 10$ \\
+    $BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$ \\ 
+    $y := 5$
+  \end{center}
+  \caption{Mutation to Variable Depended On}
+\end{figure}
+\par
+How would this behaviour work in practice? Recall from chapter 2 we proposed the 
+question of what should happen when the value bound to the variable change. In 
+this subsection we will define different methods to handle this behaviour and 
+formalise their specification.
+
+
+\par
+First we need to introduce a new expression for type definition, in the example 
+above we used an equal sign (=) to denote a new type. In our example, we mean 
+that a new type named $BoundedIntY$ is created. We need to add this construct 
+into our syntax.In our current syntax, we have a context for variables and 
+values, We would also need a similar mapping for types, We use $\Upsilon$ to 
+represent the type variable map. 
+
+\par
+The syntax is extended by adding the following: 
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {l l l}
+      \textit{Expression} & $e$ & $:$ ... $|$ $x = T$ \\
+      \textit{Value Variable Context} & $\Gamma$& $:$ $vars \mapsto 
+      vals$ \\
+      \textit{Type Variable Context} & $\Upsilon$& $:$ $vars \mapsto T$ \\
+    \end{tabular}
+  \end{center}
+  \caption{Extended Syntax for Simple-$\Pi$}
+\end{figure}
+
+\par
+We then define the operational semantics, let $t$ range over all Type Variable 
+Context: 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {x \notin \text{\textbf{dom}}(s)}{\langle x = A, s, t \rangle \longrightarrow 
+        \langle \text{\textbf{skip}}, s, t \uplus \{x \mapsto A\}\rangle}[(= type assign)] \text{ }    
+    \end{tabular}
+  \end{center}
+\end{figure}
+
+\par
+The operational semantic above simply adds a new type definition with name $x$ 
+into the type variable context. Importantly, the variable $x$ cannot have 
+already been defined as a value variable. 
+
+
+\subsubsection{Complete Immutability}
 The main issue one encounters when associating dependent types with imperative 
 languages is the presence of mutability and assignments. The obvious way to 
 work around this problem is to remove the ability to make changes to the state 
@@ -965,29 +1044,49 @@ Using this approach does definitely resolves the uncertainty the usability of
 the language is poor. Imperative programming relies on state changes, forbidding 
 that go against the paradigm. 
 
-\subsection{Defining Dependent Types with Variable}
-Consider the uncertainty of using variables to define dependent types. For 
-instance: 
+\subsubsection{Immutability For Dependent Variables}
+We observe that only variables associated with dependent typing needs to be 
+immutable to prevent any uncertain behaviours. To improve the flexibility of our 
+language, we could loosen the restrictions by having only the depenent variables 
+be immutable. We introduced a new construct in our syntax to handle immutable 
+variable. 
 
-\begin{figure} [H]
+\begin{figure}[H]
   \begin{center}
-    $y\text{ }:\text{ }int := 10$ \\
-    $BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$ \\ 
-    $y := 5$
+    \begin{tabular} {l l l}
+      \textit{Immutable Variable} & $consts$& $:$ $\{vars\}$ \\
+    \end{tabular}
   \end{center}
-  \caption{Mutation to Variable A Dependent Type Depends On}
+  \caption{Extended Syntax for Simple-$\Pi$}
 \end{figure}
+
+The set $const$ is simply a set of variables that are deemed to be immutable. To 
+keep it simple, we do not offer a way of defining a $consts$, instead we 
+consider that any variables that are being dependend on are automatically 
+immutable. 
+
 \par
-How would this behaviour work in practice? Recall from chapter 2 we proposed the 
-question of what should happen when the value bound to the variable change. In 
-this subsection we will define semantics to formalise the behaviour.
+We capture the specifications using the two Hoare Logic rules below
+
+\begin{figure}[H]
+  \begin{center}
+    
+    \begin{tabular}{c}
+      $\{a \notin \text{\textbf{dom}}(\Gamma)\}a = \Pi x. P(x)\{consts = consts' \cup \{x\} 
+      \wedge \Upsilon(a) = \Pi x. P(x)\}$ & \\  
+      $\{x \notin consts\}x := e\{\Gamma(x) = e\}$
+    \end{tabular}
+  \end{center}
+  \caption{Immutable Variable Rule}
+\end{figure}
 
 \subsubsection{Passing by Value}
-In the first subsection we will define a method of handling the above 
-uncertainty using a pass by value approach. In languages such as C/C++, 
-\textit{pass by value} \cite{pbv} is a way of passing a parameter into a 
-function in a way that any modification to the parameter in the function does 
-not reflect changes outside and vice versa. 
+
+If we further analyse our design, we notice that if our dependent type is 
+constructed using a value then we would not have the problem of variable change. 
+In languages such as C/C++, \textit{pass by value} \cite{pbv} is a way of 
+passing a parameter into a function in a way that any modification to the 
+parameter in the function does not reflect changes outside and vice versa. 
 
 \par
 A similar approach can be taken in our definitions for dependent types. For 
@@ -996,57 +1095,15 @@ type function is different from the variable $y$ in the program state, then any
 changes to the variable $y$ will not effect the type definition and the program 
 will stay well typed. 
 
-\par
-In order to achieve this, our dependent type function should be have its own 
-local context so it does not overlap with the program's context. We use the 
-notation $\sigma$ as a local context. The context behaves, just as the program's 
-context $\Gamma$ would, mapping variables to values.
-
-\par
-We would also need a similar mapping for types, notice that we defined a name 
-for the type $BoundedInt$ in the example. We use $\tau$ to represent the type 
-variable map. The syntax is extended by adding the following: 
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {l l l}
-      \textit{Expression} & $e$ & $:$ ... $|$ $x = T$ \\
-      \textit{Value Variable Context} & $\Gamma, \sigma$& $:$ $vars \mapsto 
-      vals$ \\
-      \textit{Type Variable Context} & $\Upsilon$& $:$ $vars \mapsto T$ \\
-    \end{tabular}
-  \end{center}
-  \caption{Extended Syntax for Simple-$\Pi$}
-\end{figure}
-
-\par
-Notice in the example above we use an equal sign (=) to denote a new type. 
-First we specify its rule, $t$ ranges over all Type Variable Context:
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {c}
-      \inference {x \notin \text{\textbf{dom}}(s)}{\langle x = A, s, t \rangle \longrightarrow 
-        \langle \text{\textbf{skip}}, s, t \uplus \{x \mapsto A\}\rangle}[(= type assign)] \text{ }    
-    \end{tabular}
-  \end{center}
-\end{figure}
-
-\par
-The operational semantic above simply adds a new type definition with name $x$ 
-into the type variable context. Importantly, the variable $x$ cannot have 
-already been defined as a value variable. 
-
 \par 
-We use the notation $P[x/a]$ to denote that in the function $P$, replace all 
-occurence of variable $x$ with variable $a$. We use the context $\sigma_P$  
-to denote the local context of function $P$. The specification for dependent type 
-definition written using hoare logic is as follows: 
+We use the notation $[x/a]P$ to denote that in the function $P$, replace all 
+occurence of variable $x$ with variable $a$. 
+The specification for dependent type definition written using hoare logic is as follows: 
 
 \begin{figure}[H]
   \begin{center}
-    \small$\{x \notin \text{\textbf{dom}}(\Gamma) \wedge \alpha = \Gamma(x) \wedge \sigma_P = \Gamma\}
-    y = \Pi x : A. P(x)\{P =  P[x/\alpha] \wedge y \in \text{\textbf{dom}}(\Upsilon)\}$ 
+    \small$\{x \notin \text{\textbf{dom}}(\Gamma) \wedge \alpha = \Gamma(x)\}
+    y = \Pi x : A. P(x)\{P =  [x/\alpha]P' \wedge \Upsilon(y) =  \Pi x : A. P(x)\}$ 
     \normalsize
   \end{center}
   \caption{Dependedent Type Definition Rule using Hoare Logic}
@@ -1168,10 +1225,6 @@ and $\tau$ the type of $x$. This notation allows us to apply the universal
 The Hoare Logic above reiterates this behaviour by stating that all values $\alpha$ with 
 type $\Pi a.P(a)$ in the state will have their typing updated with the new value 
 of $a$.
-
-\subsubsection{Practical Considertaions}
-
-
 
 \section{Introducing Arrays to Simple-$\Pi$}
 
