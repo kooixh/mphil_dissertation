@@ -1232,8 +1232,18 @@ The Hoare Logic above reiterates this behaviour by stating that all values $\alp
 type $\Pi a.P(a)$ in the state will have their typing updated with the new value 
 of $a$.
 
-\section{Introducing Arrays to Simple-$\Pi$}
+This section presented multiple solution to achieving reassignment in a 
+dependently typed language. While all of the proposed solutions have their 
+merits, we decided to use the final approach of Dynamic Dependent Types in our 
+language going forward. We believe that approach provides the most usable 
+implementation of dependent types and serves best as a research topic as 
+introducing new features could present interesting problems. 
 
+\section{Introduction of Vectors and Aliases}
+In this next section we will be presenting dependently typed vectors/arrays in 
+our language. The introduction of arrays ties closely with aliases, the 
+behaviours of these two addition will be discussed and specified in this 
+section.
 
 
 
