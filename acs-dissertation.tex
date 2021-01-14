@@ -639,8 +639,6 @@ the language's syntax and typing rules. The language follows
 the imperative paradigm, specifically a procedural language.
 
 \section{Language Syntax}
-This section will describe the syntax for the Simple-$\Pi$ language. 
-
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{l l l}
@@ -655,12 +653,17 @@ This section will describe the syntax for the Simple-$\Pi$ language.
       $\text{\textbf{call}}(x, e)$ $|$ \textbf{skip}\\
       \textit{Variables} & $vars$& $:$ $x \in {a,b,c...z}$\\
       \textit{Values} & $vals$& $:$ $\mathbb{Z}$ $|$ $\mathbb{B}$ $|$ $(e, e')$ $|$ $\{a\text{ }:
-      \text{ }T\text{ }|\text{ } P(a)\}$\text{ }$|$ $\lambda x.e$\\
-      \textit{Value Variable Context} & $\Gamma$& $:$ $vars \mapsto vals$
+      \text{ }T\text{ }|\text{ } P(a)\}$\text{ }$|$ $\lambda x.e$ $|$ $nil$\\
+      \textit{Variable Types Context} & $\Gamma$& $:$ $vars \mapsto T$\\
+      \textit{Variable Values Context} & $\sigma$& $:$ $vars \mapsto vals$
     \end{tabular}
   \end{center}
   \caption{Language Syntax for Simple-$\Pi$}
 \end{figure}
+
+\par
+Figure 3.1 shown above is the syntax of Simple-$\Pi$, the paragraphs below 
+explains the language in details.
 
 \paragraph{Types} The Simple-$\Pi$ language has support the following five data types. 
 \begin{itemize}
@@ -711,13 +714,19 @@ The language supports the following built in operators.
 variables, as one would expect in imperative programming. We use $x$ to denote a 
 variable. Variables can take values as suggested by the types, all the integer 
 literals $\mathbb{Z}$, booleans $\mathbb{B}$, dependent type values 
-$\{x: T\text{ }|\text{ }P(x)\}$ and functions $\lambda x.e$.
+$\{x: T\text{ }|\text{ }P(x)\}$, functions $\lambda x.e$ and $nil$ 
+which is $void$ type.
 
-\paragraph{Value Variable Context} Variables are mapped to values in the program 
-context $\Gamma$. Each reference variable is allowed to only appear once in 
-the context. We use \textbf{dom}($\Gamma$) to retrive the domain which represent 
-the set of declared variables. We will use the notation $\Gamma(x)$ 
+\paragraph{Variable Values Context} Variables are mapped to values in the program 
+context $\sigma$. Each reference variable is allowed to only appear once in 
+the context. We use \textbf{dom}($\sigma$) to retrive the domain which represent 
+the set of declared variables. We will use the notation $\sigma(x)$ 
 to retrieve the value bound to variable $x$.
+
+\paragraph{Variable Types Context} Variables are also mapped to their types 
+in the type context $\Gamma$. Each variable is allowed to only appear once in 
+the context. This context will be used to type check the program using the 
+typing judgement in the next section.
 
 \section{Typing Rules}
 This section defines the typing rules for the Simple-$\Pi$ language.
@@ -739,7 +748,8 @@ values \textit{int} and \textit{bool}.
   \begin{center}
     \begin{tabular} {c}
       $\forall n \in \mathbb{Z}$, $\Gamma \vdash n : int$ & 
-      $\forall b \in \mathbb{B}$, $\Gamma \vdash b : bool$ &       
+      $\forall b \in \mathbb{B}$, $\Gamma \vdash b : bool$ & 
+      $\Gamma \vdash nil : void$      
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Base Values}
@@ -769,8 +779,8 @@ calls are presented in figure 3.3 below.
         {\Gamma \vdash \text{\textbf{if }} e_1 \text{\textbf{ then }} 
         e_2 \text{\textbf{ else }} e_3: T}[(\textbf{if else})]
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: T}
-        {\Gamma \vdash \text{\textbf{while }} e_1 \text{\textbf{ do }} e_2 : T} [(\textbf{while do})] & \\
-      \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
+        {\Gamma \vdash \text{\textbf{while }} e_1 \text{\textbf{ do }} e_2 : void} [(\textbf{while do})] & \\
+      \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: void} 
         {\Gamma \vdash x := e_1 : T} [($:=$)] \text{ }
       \inference {\Gamma \vdash x : T_1 \longrightarrow T_2  & \Gamma \vdash e: T_1}
         {\Gamma \vdash \text{\textbf{call}}(x, e) : T_2}[(\textbf{call})]
@@ -844,43 +854,43 @@ Simple-$\Pi$.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      $\langle v, s \rangle \longrightarrow \langle v, s \rangle$ ($vals$ evaluation) 
+      $\langle v, \sigma \rangle \longrightarrow \langle v, \sigma \rangle$ ($vals$ evaluation) 
       & \\
-      \inference {n = n_1 + n_2}{\langle n_1 + n_2, s \rangle \longrightarrow \langle n, s\rangle}[(op +)] \text{ }
-      \inference {n = n_1 - n_2}{\langle n_1 - n_2, s \rangle \longrightarrow \langle n, s\rangle}[(op -)]
+      \inference {n = n_1 + n_2}{\langle n_1 + n_2, \sigma \rangle \longrightarrow \langle n, \sigma\rangle}[(op +)] \text{ }
+      \inference {n = n_1 - n_2}{\langle n_1 - n_2, \sigma \rangle \longrightarrow \langle n, \sigma\rangle}[(op -)]
       & \\
-      \inference {b = b_1 \wedge b_2}{\langle b_1 \wedge b_2, s \rangle \longrightarrow \langle b, s \rangle}[(op $\wedge$)] \text{ }
-      \inference {b = b_1 \vee b_2}{\langle b_1 \vee b_2, s \rangle \longrightarrow \langle b, s \rangle}[(op $\vee$)]
+      \inference {b = b_1 \wedge b_2}{\langle b_1 \wedge b_2, \sigma \rangle \longrightarrow \langle b, \sigma \rangle}[(op $\wedge$)] \text{ }
+      \inference {b = b_1 \vee b_2}{\langle b_1 \vee b_2, \sigma \rangle \longrightarrow \langle b, \sigma \rangle}[(op $\vee$)]
       & \\
-      \inference {\langle e_1, s\rangle \longrightarrow \langle e'_1, s\rangle & 
-        \langle e_2, s\rangle \longrightarrow \langle e'_2, s\rangle }
-        {\langle e_1\text{ }ops\text{ }e_2, s  
-        \rangle \longrightarrow \langle e'_1\text{ }ops\text{ }e'_2, s \rangle}[($ops$)]
+      \inference {\langle e_1, \sigma\rangle \longrightarrow \langle e'_1, \sigma\rangle & 
+        \langle e_2, \sigma\rangle \longrightarrow \langle e'_2, \sigma\rangle }
+        {\langle e_1\text{ }ops\text{ }e_2, \sigma  
+        \rangle \longrightarrow \langle e'_1\text{ }ops\text{ }e'_2, \sigma \rangle}[($ops$)]
       & \\
-      \inference {\langle e_1, s \rangle \longrightarrow \langle e'_1, s' \rangle}
-        {\langle e_1;e_2, s \rangle \longrightarrow \langle e'_1;e_2, s' \rangle}[($e_1;e_2$)]
+      \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e'_1, \sigma' \rangle}
+        {\langle e_1;e_2, \sigma \rangle \longrightarrow \langle e'_1;e_2, \sigma' \rangle}[($e_1;e_2$)]
       & \\
-      $\langle \text{\textbf{skip}};e2, s \rangle \longrightarrow \langle e2, s \rangle$ (\textbf{skip})
+      $\langle \text{\textbf{skip}};e2, \sigma \rangle \longrightarrow \langle e2, \sigma \rangle$ (\textbf{skip})
       & \\
       $\langle \text{\textbf{if } \textit{true}} \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
-        e_2, s \rangle \longrightarrow \langle e_1, s\rangle$ (\textbf{if} true)
+        e_2, \sigma \rangle \longrightarrow \langle e_1, s\rangle$ (\textbf{if} true)
       & \\
       $\langle \text{\textbf{if } \textit{false}} \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
-        e_2, s \rangle \longrightarrow \langle e_1, s\rangle$ (\textbf{if} false)
+        e_2, \sigma \rangle \longrightarrow \langle e_1, \sigma\rangle$ (\textbf{if} false)
       & \\
-      \inference {\langle e, s\rangle \longrightarrow \langle e', s \rangle}
+      \inference {\langle e, \sigma\rangle \longrightarrow \langle e', \sigma \rangle}
         {\langle \text{\textbf{if }} e \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
-        e_2, s \rangle \longrightarrow \langle \textbf{if } e \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
-        e_2, s \rangle}[(\textbf{if} $expr$)] 
+        e_2, \sigma \rangle \longrightarrow \langle \textbf{if } e \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
+        e_2, \sigma \rangle}[(\textbf{if} $expr$)] 
       & \\
-      $\langle \text{\textbf{while }} c \text{\textbf{ do }} e, s \rangle \longrightarrow \langle 
+      $\langle \text{\textbf{while }} c \text{\textbf{ do }} e, \sigma \rangle \longrightarrow \langle 
         \text{\textbf{if }} c \text{\textbf{ then }} e;
-        (\text{\textbf{while }} c \text{\textbf{ do }} e) \text{\textbf{ else }} \textbf{skip}, s \rangle$ (\textbf{while do})
+        (\text{\textbf{while }} c \text{\textbf{ do }} e) \text{\textbf{ else }} \textbf{skip}, \sigma \rangle$ (\textbf{while do})
       & \\
-      $\langle x := v, s \rangle \longrightarrow \langle skip, s \uplus \{x \mapsto v\} \rangle $ (assignment $vals$)
+      $\langle x := v, \sigma \rangle \longrightarrow \langle skip, \sigma \uplus \{x \mapsto v\} \rangle $ (assignment $vals$)
       & \\
-      \inference {\langle e, s \rangle \longrightarrow \langle e', s' \rangle} 
-      {\langle x := e, s \rangle \longrightarrow \langle x := e', s'\rangle} (assignment $expr$ ) \text{ }
+      \inference {\langle e, \sigma \rangle \longrightarrow \langle e', \sigma' \rangle} 
+      {\langle x := e, \sigma \rangle \longrightarrow \langle x := e', \sigma'\rangle} (assignment $expr$ ) \text{ }
       & \\
      \end{tabular}
   \end{center}
@@ -889,7 +899,7 @@ Simple-$\Pi$.
 
 \par
 Functions in Simple-$\Pi$ are call by values only, we use the notation $e[x/v]$ 
-to express substituion. A substitution $\sigma$ is a mapping from variables to 
+to express substituion. A substitution is a mapping from variables to 
 expression such that we replace occurence of the variable with the expression. 
 $e[x/v]$ replaces all variable $x$ in the expression e with $v$. For a multiple 
 parameter function, we replace all the variables $x_1$ to $x_n$ with their 
@@ -901,9 +911,9 @@ The evaluation rules for functions is shown below.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      $\langle \textbf{call}(\lambda void.e, v), s \rangle \longrightarrow \langle e, s \rangle$ (\textbf{call} with void)
+      $\langle \textbf{call}(\lambda void.e, v), \sigma \rangle \longrightarrow \langle e, \sigma \rangle$ (\textbf{call} with void)
       & \\
-      $\langle \textbf{call}(\lambda (x,x_1...x_n).e, (v_1,v_2...v_n)), s \rangle \longrightarrow \langle [x_1/v_1...x_n/v_n]e, s \rangle$ (\textbf{call} with params)
+      $\langle \textbf{call}(\lambda (x,x_1...x_n).e, (v_1,v_2...v_n)), \sigma \rangle \longrightarrow \langle [x_1/v_1...x_n/v_n]e, \sigma \rangle$ (\textbf{call} with params)
     \end{tabular}
   \end{center}
   \caption{Functions Call Semantics for Simple-$\Pi$}
@@ -966,14 +976,13 @@ question of what should happen when the value bound to the variable change. In
 this subsection we will define different methods to handle this behaviour and 
 formalise their specification.
 
-
 \par
 First we need to introduce a new expression for type definition, in the example 
 above we used an equal sign (=) to denote a new type. In our example, we mean 
 that a new type named $BoundedIntY$ is created. We need to add this construct 
 into our syntax.In our current syntax, we have a context for variables and 
 values, We would also need a similar mapping for types, We use $\Upsilon$ to 
-represent the type variable map. 
+represent the type name map. 
 
 \par
 The syntax is extended by adding the following: 
@@ -981,23 +990,20 @@ The syntax is extended by adding the following:
   \begin{center}
     \begin{tabular} {l l l}
       \textit{Expression} & $e$ & $:$ ... $|$ $x = T$ \\
-      \textit{Value Variable Context} & $\Gamma$& $:$ $vars \mapsto 
-      vals$ \\
-      \textit{Type Variable Context} & $\Upsilon$& $:$ $vars \mapsto T$ \\
+      \textit{Type Name Context} & $\Upsilon$& $:$ $vars \mapsto T$ \\
     \end{tabular}
   \end{center}
   \caption{Extended Syntax for Simple-$\Pi$}
 \end{figure}
 
 \par
-We then define the operational semantics, let $t$ range over all Type Variable 
-Context: 
+We then define the operational semantics: 
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {x \notin \text{\textbf{dom}}(s)}{\langle x = A, s, t \rangle \longrightarrow 
-        \langle \text{\textbf{skip}}, s, t \uplus \{x \mapsto A\}\rangle}[(= type assign)] \text{ }    
+      \inference {x \notin \text{\textbf{dom}}(\sigma)}{\langle x = A, \sigma, \Upsilon \rangle \longrightarrow 
+        \langle \text{\textbf{skip}}, \sigma, \Upsilon \uplus \{x \mapsto A\}\rangle}[(= type assign)] \text{ }    
     \end{tabular}
   \end{center}
 \end{figure}
@@ -1030,7 +1036,7 @@ Using Hoare Logic, we specify the rule for assignment as follows:
 
 \begin{figure}[H]
   \begin{center}
-    $\{x \notin \text{\textbf{dom}}(\Gamma)\}x := e\{\Gamma(x) = e\}$
+    $\{x \notin \text{\textbf{dom}}(\sigma)\}x := e\{\sigma(x) = e\}$
   \end{center}  
   \caption{Hoare Logic for Immutable Assignment}
 \end{figure}
@@ -1072,9 +1078,9 @@ We capture the specifications using the two Hoare Logic rules below
   \begin{center}
     
     \begin{tabular}{c}
-      $\{a \notin \text{\textbf{dom}}(\Gamma)\}a = \Pi x. P(x)\{consts = consts' \cup \{x\} 
+      $\{a \notin \text{\textbf{dom}}(\sigma)\}a = \Pi x. P(x)\{consts = consts' \cup \{x\} 
       \wedge \Upsilon(a) = \Pi x. P(x)\}$ & \\  
-      $\{x \notin consts\}x := e\{\Gamma(x) = e\}$
+      $\{x \notin consts\}x := e\{\sigma(x) = e\}$
     \end{tabular}
   \end{center}
   \caption{Immutable Variable Rule}
@@ -1102,7 +1108,7 @@ The specification for dependent type definition written using hoare logic is as 
 
 \begin{figure}[H]
   \begin{center}
-    \small$\{x \notin \text{\textbf{dom}}(\Gamma) \wedge \alpha = \Gamma(x)\}
+    \small$\{x \notin \text{\textbf{dom}}(\sigma) \wedge \alpha = \sigma(x)\}
     y = \Pi x : A. P(x)\{P =  [x/\alpha]P' \wedge \Upsilon(y) =  \Pi x : A. P(x)\}$ 
     \normalsize
   \end{center}
@@ -1190,17 +1196,17 @@ well typed for $\Pi e_1.P(e_1)$, the new value of $x$.
 Notice that our current value variable context does not 
 provide the type that a variable possess, we only have the value. 
 In order to formalise the behaviour in Hoare Logic, we will need to typing 
-information of a variable. Adding this necessary information requires us to 
-make changes to our syntax by adding some minor modifications to the value 
-variable context.
+information of a variable. We are able to retrive this information from the 
+Variable Type Context $\Gamma$, however we for a better and more concise 
+notation we decided to use the syntax defined below.
 
 \par
-We modified the value variable context as shown below:
+First we modified the value variable context as shown below:
  
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {l l l}
-      \textit{Value Variable Context} & $\Gamma, \sigma$& $:$ $vars \mapsto vals : T$ 
+      \textit{Variables Values Context} & $\sigma$& $:$ $vars \mapsto vals : T$ 
     \end{tabular}
   \end{center}
   \caption{Extended Value Variable Context with Type}
@@ -1213,7 +1219,7 @@ and $\tau$ the type of $x$. This notation allows us to apply the universal
 
 \begin{figure}[H]
   \begin{center}
-    \footnotesize$\{\tau = \{\alpha : \beta \in \Gamma\text{ }|\text{ }\beta = \Pi a. P(a)\}\}a := e\{\Gamma(a) = e \wedge 
+    \footnotesize$\{\tau = \{\alpha : \beta \in \sigma\text{ }|\text{ }\beta = \Pi a. P(a)\}\}a := e\{\sigma(a) = e \wedge 
     \forall \alpha : \beta \in \tau\text{ }s.t.\text{ }\beta = \Pi a. P(a)\}$ 
     \normalsize
   \end{center}
