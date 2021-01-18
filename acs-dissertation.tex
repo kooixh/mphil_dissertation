@@ -643,17 +643,18 @@ the imperative paradigm, specifically a procedural language.
   \begin{center}
     \begin{tabular}{l l l}
       \textit{Types} & $T$ & $:\text{ }int\text{ }|\text{ }bool\text{ }|\text{ }\Pi x: A.P(x)
-      \text{ }|\text{ }T \times T\text{ }|\text{ }void$\\
-      \textit{Functions} & $\lambda$ & $:\text{ }T\longrightarrow T$\\
+      |\text{ }void$\\
+      \textit{Functions} & $f$ & $:\text{ }T_1, T_2,T_3...T_n\longrightarrow T_0$\\
       \textit{Operators} & $ops$ & $:$ $+$ $|$ $-$ $|$ $\wedge$ $|$ $\vee$ \\
-      \textit{Expressions} & $e$ & $:$ $vals$ $|$ $x$ $|$ $x\text{ }:= e$ $|$ 
-      $e_1 + e_2$ $| \text{ }e_1 - e_2$ $|$ $e_1 \wedge e_2$ $|$ \\ 
-      & & \; $e_1 \vee e_2$ $|$ $e1;e2$ $|$ \textbf{if} $e_1$ \textbf{then} $e_2$ \textbf{then} $e_3$ $|$\\
-      & & \;  \textbf{while} $e_1$ \textbf{do} $e_2$ $|$ 
-      $\text{\textbf{call}}(x, e)$ $|$ \textbf{skip}\\
+      \textit{Expressions} & $e$ & $:$ $vals$ $|$ $x$ $|$ $x\text{ }:= e_1$ $|$ 
+        $e_1$ $ops$ $e_2$ $|$ $e_1;e_2$ $|$ $f(e_1...e_n)$ \\ 
+        & & \; $|$ \textbf{skip} $|$ \textbf{return} $e_1$ $|$ 
+        \textbf{while} $e_1$ \textbf{do} $e_2$ $|$ \\ & & \;
+        \textbf{if} $e_1$ \textbf{then} $e_2$ \textbf{else} $e_3$ $|$ 
+        \textbf{let} $x = e_1$ \textbf{in} $e_2$ \textbf{end}\\
       \textit{Variables} & $vars$& $:$ $x \in {a,b,c...z}$\\
-      \textit{Values} & $vals$& $:$ $\mathbb{Z}$ $|$ $\mathbb{B}$ $|$ $(e, e')$ $|$ $\{a\text{ }:
-      \text{ }T\text{ }|\text{ } P(a)\}$\text{ }$|$ $\lambda x.e$ $|$ $nil$\\
+      \textit{Values} & $vals$& $:$ $\forall v \in \mathbb{Z}$ $|$ $\forall v \in \mathbb{B}$ 
+        $|$ $nil$\\
       \textit{Variable Types Context} & $\Gamma$& $:$ $vars \mapsto T$\\
       \textit{Variable Values Context} & $\sigma$& $:$ $vars \mapsto vals$
     \end{tabular}
@@ -663,25 +664,32 @@ the imperative paradigm, specifically a procedural language.
 
 \par
 Figure 3.1 shown above is the syntax of Simple-$\Pi$, the paragraphs below 
-explains the language in details.
+explains the language in details. In constrast to other literatures in this area, 
+Simple-$\Pi$ is a \textit{First Order Programming Language} \cite{FOL} modelled 
+after the C programming language rather than a Higher Order Language. As is the 
+nature of first order programming, functions cannot be passed as arguments or 
+returned as result. 
 
-\paragraph{Types} The Simple-$\Pi$ language has support the following five data types. 
+\par
+In order to achieve simplicity and observe the core behaviour of dependent 
+types, the language is kept at a minimum with only the necessary construct. 
+
+\paragraph{Types} The Simple-$\Pi$ language has support the following four data types. 
 \begin{itemize}
   \item The basic integer type \textit{int}
   \item The basic boolean type \textit{bool}
   \item The dependent product type, written as $\Pi x: A.P(x)$, is used to 
   define a type $B$ that depends on the variable $x$ of type A.
-  \item The product type $(T \times T)$ which denotes an ordered pair $(T, T)$.
   \item The \textit{void} type to represent empty or null.
 \end{itemize}
 
 \paragraph{Functions}
-Functions are defined in Simple-$\Pi$ as $(T \longrightarrow T)$, taking a type 
-and returning a type. Using the product type, representation of a function 
-taking multiple parameter can be achived using a pair with containing a pair. 
-For instance, a function $f(x,y,z)$ can be formalised as 
-$\lambda$ : $(T \times T) \times T \longrightarrow T$. Note that functions are 
-not first-class in this language.
+Functions are defined in Simple-$\Pi$ as $(T_1, T_2,T_3...T_n \longrightarrow T_0)$, 
+taking a up to $n$ types and returning a type. Note that functions are 
+not first-class in this language, unlike a higher order 
+language, functions are not types in this case, functions cannot be passed to 
+other functions, nor can it return a function as a result. One can compare 
+functions in Simple-$\Pi$ as functions in C or Java. 
 
 \paragraph{Operators}
 The language supports the following built in operators.
@@ -699,23 +707,31 @@ The language supports the following built in operators.
   \item Variable and values represents the most basic form of an expression.
   \item The four operators are expressions operator on two other expressions $e_1$ 
   and $e_2$
-  \item The assignment statement $(:=)$ assigns an expression $e_1$ to a 
-  free variable $x$.
-  \item The \textbf{if then} and \textbf{while do} statements are the standard control flow 
-  operations one would expect.
-  \item The \textbf{call} statement is used to indicate function calls, 
-  \textbf{call}($x, e$) will invoke the function bounded to $x$ using the 
-  parameter $e$.
-  \item The \textbf{skip} statment is use to indicate an empty expression and 
+  \item The assignment statement $(:=)$ assigns an expression $e_1$ to variable 
+  $x$, note $x$ must have already been declared. 
+  \item The \textbf{if then} and \textbf{while do} statements are the standard 
+  control flow operations one would expect.
+  \item The function call $f(e_1..e_n)$ invokes function $f$ with arguments 
+  $e_1..e_n$ and return the result.
+  \item The \textbf{skip} statement is use to indicate an empty expression and 
   does not perform any meaningful action. 
+  \item The \textbf{let} statement is used to bind new variables in an 
+  expression. It is modelled after the same statement in Haskell, where \textbf{let} 
+  $x = e_1$ \textbf{in} $e_2$ \textbf{end} declare a variable $x$ with the value after 
+  evaluating $e_1$, the variable is then available in the scope $e_2$ until 
+  \textbf{end}.
+  \item The \textbf{return} represents the termination of a function call and 
+  end of scope. It returns an expression to the previous scope. 
 \end{itemize}
 
 \paragraph{Variables and Values} In Simple-$\Pi$, all variable are reference 
 variables, as one would expect in imperative programming. We use $x$ to denote a 
 variable. Variables can take values as suggested by the types, all the integer 
-literals $\mathbb{Z}$, booleans $\mathbb{B}$, dependent type values 
-$\{x: T\text{ }|\text{ }P(x)\}$, functions $\lambda x.e$ and $nil$ 
-which is $void$ type.
+literals $\mathbb{Z}$, booleans $\mathbb{B}$ and $nil$ which is $void$ type. 
+While values have a 1-on-1 correspondance with a type, it is obvious that a 
+dependent type in the language will be a subset of either 
+$\mathbb{Z}$ or $\mathbb{B}$ and as such will have already been a member of 
+values.
 
 \paragraph{Variable Values Context} Variables are mapped to values in the program 
 context $\sigma$. Each reference variable is allowed to only appear once in 
@@ -756,13 +772,9 @@ values \textit{int} and \textit{bool}.
 \end{figure}
 
 \par
-Functions are treated similarly, a function $\lambda x.e$ with function type 
-$T \longrightarrow T$ under context $\Gamma$ is written as 
-$\Gamma \vdash \lambda x.e : T \longrightarrow T$.
-
-\par
 The remaining typing rules for the operators, statements and function 
-calls are presented in figure 3.3 below.
+calls are presented in figure 3.3 below. Most of the typing rule are straightforward and what one would expect from the 
+type checker. 
 
 \begin{figure}[H]
   \begin{center}
@@ -780,20 +792,34 @@ calls are presented in figure 3.3 below.
         e_2 \text{\textbf{ else }} e_3: T}[(\textbf{if else})]
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: T}
         {\Gamma \vdash \text{\textbf{while }} e_1 \text{\textbf{ do }} e_2 : void} [(\textbf{while do})] & \\
-      \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: void} 
+      \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
         {\Gamma \vdash x := e_1 : T} [($:=$)] \text{ }
-      \inference {\Gamma \vdash x : T_1 \longrightarrow T_2  & \Gamma \vdash e: T_1}
-        {\Gamma \vdash \text{\textbf{call}}(x, e) : T_2}[(\textbf{call})]
+      \inference {\Gamma \vdash e_1: T_1 & \Gamma \vdash e_2: T_2} 
+        {\Gamma \vdash \textbf{let } x = e_1 \textbf{ in } e_2: T_2} [(\textbf{let in})] \text{ }
     \end{tabular}
   \end{center}
 \caption{Basic Typing Rules for Simple-$\Pi$}
 \end{figure}
 
-Most of the typing rule are straightforward and what one would expect from the 
-type checker. For ther function call, notice that the variable $x$ has to be a 
-function in the context. The type of the function is from $T_1 \longrightarrow 
-T_2$, because multiple arguments are represented as pairs for a n-nary function, 
-we avoid having to arbitrary check the argument type $T_1$ to $T_n$.
+\par
+For a function call, we use the type judgement above. We use  
+first order logic to write $f(e_1...e_n)$ as an n-nary function of 
+type $T_1$ to $T_n$, then the arguments $e_1$ to $e_n$ must be of same type. 
+Evaluation of the function will then satisfy the return type $T_0$.
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {\Gamma \vdash e: T} 
+        {\Gamma \vdash \textbf{return } e: T} [(\textbf{return})] \text{ }
+      & \\
+      \inference {f : T_1,T_2...T_n \longrightarrow T_0 \\ 
+      \Gamma \vdash e_1 : T_1 & \Gamma \vdash e_2 : T_2 &...& \Gamma \vdash e_n : T_n}
+        {\Gamma \vdash f(e_1...e_n): T_2}[(\textit{functions})]
+    \end{tabular}
+  \end{center}
+  \caption{Typing Rules for Functions in Simple-$\Pi$}
+\end{figure}
 
 
 \subsection{Dependent Types Rules}
@@ -845,11 +871,13 @@ state $s$ with $\{x \mapsto e\}$ update the state $s$ such that now $s(x) =
 e$.
   \item The metavariable $v$ to range over all values.
   \item Uppercase letters $A,B,C$ to range over all types.
-  \item Greek letters ($\alpha$, $\pi$, $\upsilon$) to define local varibles in 
+  \item Greek letters ($\alpha$, $\pi$, $\upsilon$) to define local variables in 
   the formuli. 
 \end{itemize}
-Figure 4.1 defines the operation semantics to capture the basic behaviour of 
-Simple-$\Pi$.
+We first define the operational semantics for the basics expression in 
+Simple-$\Pi$ for the basic configuration. A configuration is defined as a 
+pair $\langle e, \sigma \rangle$, an expression $e$ and value context $\sigma$.
+
 
 \begin{figure}[H]
   \begin{center}
@@ -887,36 +915,108 @@ Simple-$\Pi$.
         \text{\textbf{if }} c \text{\textbf{ then }} e;
         (\text{\textbf{while }} c \text{\textbf{ do }} e) \text{\textbf{ else }} \textbf{skip}, \sigma \rangle$ (\textbf{while do})
       & \\
-      $\langle x := v, \sigma \rangle \longrightarrow \langle skip, \sigma \uplus \{x \mapsto v\} \rangle $ (assignment $vals$)
+      \inference {x \in \textbf{dom}(\sigma)} 
+      {\langle x := v, \sigma \rangle \longrightarrow \langle \text{\textbf{skip}}, \sigma \uplus \{x \mapsto v\}\rangle} [(assignment $vals$)] \text{ }
       & \\
       \inference {\langle e, \sigma \rangle \longrightarrow \langle e', \sigma' \rangle} 
-      {\langle x := e, \sigma \rangle \longrightarrow \langle x := e', \sigma'\rangle} (assignment $expr$ ) \text{ }
-      & \\
+      {\langle x := e, \sigma \rangle \longrightarrow \langle x := e', \sigma'\rangle} [(assignment $expr$)] \text{ }
      \end{tabular}
   \end{center}
   \caption{Operational Semantics for Simple-$\Pi$}
 \end{figure}
 
+
+
+\subsection{Scoping}
+Scoping has an important role in imperative languages, variables can be defined 
+in scopes and are unavailable once outside. While there are many different 
+variables that does not follow this rule, such as static variables, global 
+variables and reference variables. For simplicity, we will focus initially on local 
+variables. 
+
 \par
-Functions in Simple-$\Pi$ are call by values only, we use the notation $e[x/v]$ 
-to express substituion. A substitution is a mapping from variables to 
-expression such that we replace occurence of the variable with the expression. 
-$e[x/v]$ replaces all variable $x$ in the expression e with $v$. For a multiple 
-parameter function, we replace all the variables $x_1$ to $x_n$ with their 
-respective argument.
+In order to formalise the operational semantics, we first define a runtime 
+environment $\rho$. $\rho$ holds the previous scope's configuration and behaves like 
+the stack data structure, once out of scope, the evaluation returns to the previous 
+scope, i.e. the configuration on top of $\rho$, which will be removed 
+subsequently.
+
+\par
+First, define the following operations. 
+\begin{itemize}
+  \item $push(\rho, \langle e, \sigma \rangle)$ push a configuration on to $\rho$ 
+  and return the new $\rho$
+  \item $top(\rho)$ return the top of $\rho$, i.e. the previous scope.
+  \item $pop(\rho)$ removes the top element of $\rho$ and return the modified 
+  $\rho$.
+\end{itemize}
+
+We define the behaviour of scopes using the following evaluation rules. 
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{c}
+      \inference {\sigma' = \sigma + \{x \mapsto v\} & \rho' = push(\rho, \langle \text{\textbf{skip}}, \sigma \rangle)} 
+      {\langle \text{\textbf{let }}x = v \text{\textbf{ in }} e_1 \text{\textbf{ end}}, \sigma, \rho \rangle 
+      \longrightarrow \langle e_1;\textbf{return }nil, \sigma'', \rho'\rangle} [(\textbf{let in} values)] 
+      & \\
+      \inference {\sigma' = \sigma + \{x \mapsto v\} & \rho' = push(\rho, \langle e_2, \sigma \rangle)} 
+      {\langle \text{\textbf{let }}x = v \text{\textbf{ in }} e_1 \text{\textbf{ end}};e_2, \sigma, \rho \rangle 
+      \longrightarrow \langle e_1;\textbf{return }nil, \sigma'', \rho' \rangle} [(\textbf{let in} values contd)] 
+      & \\
+      \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e_1', \sigma'\rangle} 
+      {\langle \text{\textbf{let }}x = e_1 \text{\textbf{ in }} e_2 \text{\textbf{ end}}, \sigma, \rho \rangle 
+      \longrightarrow \langle \text{\textbf{let }}x = e_1' \text{\textbf{ in }} e_2\text{\textbf{ end}}, \sigma', \rho'\rangle} 
+      [(\textbf{let in} $expr$)] 
+      &\\
+      \inference {\langle e_2, \sigma' \rangle = top(\rho) & \rho' = pop(\rho)} {\langle \textbf{return } e_1, 
+      \sigma, \rho \rangle \longrightarrow \langle e_1;e_2, \sigma', \rho' \rangle} [(\textbf{return} expr)]
+      &\\
+      \inference {\langle e_2, \sigma' \rangle = top(\rho) & \rho' = pop(\rho)} {\langle \textbf{return } nil, 
+      \sigma, \rho \rangle \longrightarrow \langle e_2, \sigma', \rho' \rangle} [(\textbf{return} nil)]
+    \end{tabular}
+  \end{center}
+  \caption{Scoping Rules for Simple-$\Pi$}
+\end{figure}
+
+\par
+The \textbf{let in} statement opens a new scope which assigns $x$ the value $v$, the 
+previous scope is pushed on to $\rho$. Notice we manually added a return 
+statement at the end of the expression $e_2$ to represent end of scope. 
+
+\par
+Upon reaching a \textbf{return} statement the evaluations continue with the 
+previous scope and its context. If the \textbf{return} statement returns non-nil 
+then the expression is evaluated before continuing with the remaining 
+expressions. 
+
+\subsection{Functions}
+Functions in almost all imperative language are in their own scope. In many 
+cases they do not have the access to the variables out of their scope however 
+one can pass data using arguments. Functions in Simple-$\Pi$ are call by values, 
+changing the value of an argument in the function does not change the value in 
+the outside scope. 
+
+\par
+In order to define the operational semantics of a function we will need to 
+specify the function signature. We define a mapping \textit{fns} $: f \mapsto ((x_1, x_2...x_n), e)$, 
+using this mapping allows us to retrieve the signature of a function. Since functions 
+definition cannot be changed at runtime, this does not need to be part of the 
+configuration and can be consider as a static context.
 
 \par
 The evaluation rules for functions is shown below.
-
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      $\langle \textbf{call}(\lambda void.e, v), \sigma \rangle \longrightarrow \langle e, \sigma \rangle$ (\textbf{call} with void)
+      \inference {((x_1..x_n), e_{body}) = \textit{fns}(f) 
+        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \rho' = push(\rho, \sigma)}
+      {\langle f(v_1...v_n), \sigma, \rho' \rangle \longrightarrow \langle e_{body}, \sigma', \rho' \rangle} [(function call vals)]
       & \\
-      $\langle \textbf{call}(\lambda (x,x_1...x_n).e, (v_1,v_2...v_n)), \sigma \rangle \longrightarrow \langle [x_1/v_1...x_n/v_n]e, \sigma \rangle$ (\textbf{call} with params)
+      \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e_1, \sigma', \rho \rangle &...& \langle e_n, \sigma' \rangle \longrightarrow \langle e_n', \sigma'' \rangle}
+      {\langle f(e_1...e_n), \sigma \rangle \longrightarrow \langle f(e_1'...e_n'), \sigma'', \rho \rangle} [(function call expr)]
     \end{tabular}
   \end{center}
-  \caption{Functions Call Semantics for Simple-$\Pi$}
+  \caption{Functions Semantics for Simple-$\Pi$}
 \end{figure}
 
 \section{Dependent Types Semantics}
