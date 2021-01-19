@@ -136,13 +136,22 @@ access to the literature and motivate more studies into dependenty types.
 \par
 In chapter 3 we will be defining the syntax, typing rules and semantics 
 of a basic language with dependent types support which will be studied 
-and extended throughout the disseratation. In chapter 4 we will be observing 
-multiple scenarios that dependent types cause uncertainties when used with 
-imperative languages. We will be providing the semantics required for them 
-to behave correctly. In chapter 5 we will discuss our work with regards to the 
-existing work done in the area and how it completments the literature. 
+and extended throughout the disseratation. Our language, named Simple-$\Pi$ is a 
+First-Order Programming Language which highly resembles the C programming 
+language. Our aim with the language is to capture the core behaviour of 
+dependent types and thus for the pursuit of simplicity is kept at a minimal with 
+only the fundamental features. 
 
 \par
+In chapter 4 we will be presenting the semantics of Simple-$\Pi$, in addition 
+to the basic operational semantics, we will discuss
+multiple scenarios that dependent types cause uncertainties when used with 
+imperative languages. We proposed different solutions to resolve the 
+uncertainties and observes how these different features interact. 
+
+\par
+In chapter 5 we will discuss our work with regards to the 
+existing work done in the area and how it completments the literature. 
 Finally we will conclude by discussing advanced features that can be integrated 
 into our languages and how it can further complicate the language. We will also 
 discuss some of the other considerations that need to be taken account when 
@@ -462,6 +471,11 @@ provide any analysis on the language itself.
 However, the language is worth a mention here as it shows the feasibility of 
 imperative languages having full dependent typing. The research by the authors 
 are impressive and it serves as inspiration for our project. 
+
+\par
+Our project complements the work by Xi by providing analysis on the problem at 
+hand. The original paper merely demonstrated the development and semantics of 
+Xanadu, our project aims to discuss more on the topic. 
 
 \subsection{C++ Templates}
 \textit{C++ Templates} \cite{cppTemplate} are a way of passing the type of a 
@@ -855,17 +869,17 @@ how from an expression of $\Pi$ one could gets the expression of others type.
 
 
 \chapter{Semantics for Simple-$\Pi$}
-In this chapter we will define the basic semantics for Simple-$\Pi$, we will 
-then build up the semantics gradually to formalise the behavour of certain 
+In this chapter we will be covering the semantics of Simple-$\Pi$, we will 
+then build up the semantics gradually, starting from the basic 
+operational semantics and eventaully formalise the behavour of certain 
 non-trivial behaviour involving dependent types such as reassignments and 
-arrays. In the final section of this chapter we will extend the syntax in 
-order to incorporate vectors into the language.
+arrays. Throughout the chapter we will be extending the syntax defined in the 
+previous chapter in order to accomodate more features.
 
 \section{Operational Semantics}
 In this section we will define the \textit{Operational Semantics} 
-\cite{operationalSemantics} of our language. 
-We will use the \textit{Structured Operational Semantics} \cite{plotkinSOS} (SOS) to 
-formalise the rules. 
+\cite{operationalSemantics} for the Simple-$\Pi$ language 
+using the \textit{Structured Operational Semantics} \cite{plotkinSOS} (SOS) rules. 
 
 \par
 Throughout the text we will use the following metavariables and notations. 
