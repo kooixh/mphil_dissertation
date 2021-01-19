@@ -32,6 +32,12 @@
 \usepackage{semantic}
 \usepackage{float}
 
+\usepackage{tabto}
+
+\newenvironment{tabs}[1]
+ {\flushleft\TabPositions{#1}}
+ {\endflushleft}
+
 \usepackage[british]{babel}
 \usepackage[%
   backend=bibtex      % biber or bibtex
@@ -643,14 +649,14 @@ the imperative paradigm, specifically a procedural language.
   \begin{center}
     \begin{tabular}{l l l}
       \textit{Types} & $T$ & $:\text{ }int\text{ }|\text{ }bool\text{ }|\text{ }\Pi x: A.P(x)
-      |\text{ }void$\\
+      \text{ }|\text{ }void$\\
       \textit{Functions} & $f$ & $:\text{ }T_1, T_2,T_3...T_n\longrightarrow T_0$\\
       \textit{Operators} & $ops$ & $:$ $+$ $|$ $-$ $|$ $\wedge$ $|$ $\vee$ \\
       \textit{Expressions} & $e$ & $:$ $vals$ $|$ $x$ $|$ $x\text{ }:= e_1$ $|$ 
         $e_1$ $ops$ $e_2$ $|$ $e_1;e_2$ $|$ $f(e_1...e_n)$ \\ 
         & & \; $|$ \textbf{skip} $|$ \textbf{return} $e_1$ $|$ 
-        \textbf{while} $e_1$ \textbf{do} $e_2$ $|$ \\ & & \;
-        \textbf{if} $e_1$ \textbf{then} $e_2$ \textbf{else} $e_3$ $|$ 
+        \textbf{while} $e_1$ \textbf{do} $e_2$ \\ & & \;
+        $|$ \textbf{if} $e_1$ \textbf{then} $e_2$ \textbf{else} $e_3$ $|$ 
         \textbf{let} $x = e_1$ \textbf{in} $e_2$ \textbf{end}\\
       \textit{Variables} & $vars$& $:$ $x \in {a,b,c...z}$\\
       \textit{Values} & $vals$& $:$ $\forall v \in \mathbb{Z}$ $|$ $\forall v \in \mathbb{B}$ 
@@ -780,13 +786,13 @@ type checker.
   \begin{center}
     \begin{tabular} {c}
       \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int}
-        {\Gamma \vdash e_1 + e_2 : int}[(+)] \text{ }
+        {\Gamma \vdash e_1 + e_2 : int}[(\textbf{op} $+$)] \text{ }
       \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int} 
-        {\Gamma \vdash e_1 - e_2 : int}[(-)] & \\
+        {\Gamma \vdash e_1 - e_2 : int}[(\textbf{op} $-$)] & \\
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool}
-        {\Gamma \vdash e_1 \wedge e_2 : bool}[($\wedge$)] \text{ }
+        {\Gamma \vdash e_1 \wedge e_2 : bool}[(\textbf{op} $\wedge$)] \text{ }
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool} 
-        {\Gamma \vdash e_1 \vee e_2 : bool}[($\vee$)] & \\
+        {\Gamma \vdash e_1 \vee e_2 : bool}[(\textbf{op} $\vee$)] & \\
       \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash e_2: T & \Gamma \vdash e_3: T}
         {\Gamma \vdash \text{\textbf{if }} e_1 \text{\textbf{ then }} 
         e_2 \text{\textbf{ else }} e_3: T}[(\textbf{if else})]
@@ -795,7 +801,7 @@ type checker.
       \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
         {\Gamma \vdash x := e_1 : T} [($:=$)] \text{ }
       \inference {\Gamma \vdash e_1: T_1 & \Gamma \vdash e_2: T_2} 
-        {\Gamma \vdash \textbf{let } x = e_1 \textbf{ in } e_2: T_2} [(\textbf{let in})] \text{ }
+        {\Gamma \vdash \textbf{let } x = e_1 \textbf{ in } e_2 \textbf{ end }: T_2} [(\textbf{let in})] \text{ }
     \end{tabular}
   \end{center}
 \caption{Basic Typing Rules for Simple-$\Pi$}
@@ -856,55 +862,52 @@ arrays. In the final section of this chapter we will extend the syntax in
 order to incorporate vectors into the language.
 
 \section{Operational Semantics}
-In this section we will define the \textit{operational semantics} 
-\cite{operationalSemantics} of the language.
+In this section we will define the \textit{Operational Semantics} 
+\cite{operationalSemantics} of our language. 
+We will use the \textit{Structured Operational Semantics} \cite{plotkinSOS} (SOS) to 
+formalise the rules. 
 
 \par
-We will use the \textit{Structured Operational Semantics} \cite{plotkinSOS} to 
-formalise the basic semantics. Throughout the text we will use the following 
-metavariables. 
+Throughout the text we will use the following metavariables and notations. 
 \begin{itemize}
   \item The metavarible $ops$ to range over all operators.
-  \item The metavariable $s$ to range over all states $\Gamma$ 
-  (mapping from variables to values). The operator $\uplus$ when used on 
-state $s$ with $\{x \mapsto e\}$ update the state $s$ such that now $s(x) = 
+  \item The operator $\uplus$ when used on context $\sigma$ with $\{x \mapsto e\}$ updates $\sigma$ such that now $\sigma(x) = 
 e$.
   \item The metavariable $v$ to range over all values.
   \item Uppercase letters $A,B,C$ to range over all types.
   \item Greek letters ($\alpha$, $\pi$, $\upsilon$) to define local variables in 
   the formuli. 
 \end{itemize}
-We first define the operational semantics for the basics expression in 
-Simple-$\Pi$ for the basic configuration. A configuration is defined as a 
-pair $\langle e, \sigma \rangle$, an expression $e$ and value context $\sigma$.
-
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
       $\langle v, \sigma \rangle \longrightarrow \langle v, \sigma \rangle$ ($vals$ evaluation) 
       & \\
-      \inference {n = n_1 + n_2}{\langle n_1 + n_2, \sigma \rangle \longrightarrow \langle n, \sigma\rangle}[(op +)] \text{ }
-      \inference {n = n_1 - n_2}{\langle n_1 - n_2, \sigma \rangle \longrightarrow \langle n, \sigma\rangle}[(op -)]
+      \inference {v = v_1 + v_2}{\langle v_1 + v_2, \sigma \rangle \longrightarrow \langle v, \sigma\rangle}[(op $+$)] \text{ }
+      \inference {v = v_1 - v_2}{\langle v_1 - v_2, \sigma \rangle \longrightarrow \langle v, \sigma\rangle}[(op $-$)]
       & \\
-      \inference {b = b_1 \wedge b_2}{\langle b_1 \wedge b_2, \sigma \rangle \longrightarrow \langle b, \sigma \rangle}[(op $\wedge$)] \text{ }
-      \inference {b = b_1 \vee b_2}{\langle b_1 \vee b_2, \sigma \rangle \longrightarrow \langle b, \sigma \rangle}[(op $\vee$)]
+      \inference {v = v_1 \wedge v_2}{\langle v_1 \wedge v_2, \sigma \rangle \longrightarrow \langle v, \sigma \rangle}[(op $\wedge$)] \text{ }
+      \inference {v = v_1 \vee v_2}{\langle v_1 \vee v_2, \sigma \rangle \longrightarrow \langle v, \sigma \rangle}[(op $\vee$)]
       & \\
-      \inference {\langle e_1, \sigma\rangle \longrightarrow \langle e'_1, \sigma\rangle & 
-        \langle e_2, \sigma\rangle \longrightarrow \langle e'_2, \sigma\rangle }
+      \inference {\langle e_1, \sigma\rangle \longrightarrow \langle e_1', \sigma\rangle}
         {\langle e_1\text{ }ops\text{ }e_2, \sigma  
-        \rangle \longrightarrow \langle e'_1\text{ }ops\text{ }e'_2, \sigma \rangle}[($ops$)]
+        \rangle \longrightarrow \langle e_1'\text{ }ops\text{ }e_2, \sigma' \rangle}[($ops$ $expr$)]
       & \\
-      \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e'_1, \sigma' \rangle}
+      \inference {\langle e_2, \sigma\rangle \longrightarrow \langle e_2', \sigma\rangle}
+        {\langle v\text{ }ops\text{ }e_2, \sigma  
+        \rangle \longrightarrow \langle v\text{ }ops\text{ }e_2', \sigma' \rangle}[($ops$ $expr$ 2)]
+      & \\
+      \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e_1', \sigma' \rangle}
         {\langle e_1;e_2, \sigma \rangle \longrightarrow \langle e'_1;e_2, \sigma' \rangle}[($e_1;e_2$)]
       & \\
       $\langle \text{\textbf{skip}};e2, \sigma \rangle \longrightarrow \langle e2, \sigma \rangle$ (\textbf{skip})
       & \\
-      $\langle \text{\textbf{if } \textit{true}} \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
+      $\langle \text{\textbf{if }\textit{true}} \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
         e_2, \sigma \rangle \longrightarrow \langle e_1, s\rangle$ (\textbf{if} true)
       & \\
-      $\langle \text{\textbf{if } \textit{false}} \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
-        e_2, \sigma \rangle \longrightarrow \langle e_1, \sigma\rangle$ (\textbf{if} false)
+      $\langle \text{\textbf{if }\textit{false}} \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
+        e_2, \sigma \rangle \longrightarrow \langle e_2, \sigma\rangle$ (\textbf{if} false)
       & \\
       \inference {\langle e, \sigma\rangle \longrightarrow \langle e', \sigma \rangle}
         {\langle \text{\textbf{if }} e \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
@@ -925,6 +928,10 @@ pair $\langle e, \sigma \rangle$, an expression $e$ and value context $\sigma$.
   \caption{Operational Semantics for Simple-$\Pi$}
 \end{figure}
 
+\par
+Figure 4.1 above defines the operational semantics for the 
+basics expression in Simple-$\Pi$ under the configuration $\langle e, \sigma 
+\rangle$.
 
 
 \subsection{Scoping}
@@ -938,7 +945,7 @@ variables.
 In order to formalise the operational semantics, we first define a runtime 
 environment $\rho$. $\rho$ holds the previous scope's configuration and behaves like 
 the stack data structure, once out of scope, the evaluation returns to the previous 
-scope, i.e. the configuration on top of $\rho$, which will be removed 
+scope, the configuration on top of $\rho$, which will be removed 
 subsequently.
 
 \par
@@ -950,16 +957,14 @@ First, define the following operations.
   \item $pop(\rho)$ removes the top element of $\rho$ and return the modified 
   $\rho$.
 \end{itemize}
-
-We define the behaviour of scopes using the following evaluation rules. 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
-      \inference {\sigma' = \sigma + \{x \mapsto v\} & \rho' = push(\rho, \langle \text{\textbf{skip}}, \sigma \rangle)} 
+      \inference {\sigma' = \sigma \uplus \{x \mapsto v\} & \rho' = push(\rho, \langle \text{\textbf{skip}}, \sigma \rangle)} 
       {\langle \text{\textbf{let }}x = v \text{\textbf{ in }} e_1 \text{\textbf{ end}}, \sigma, \rho \rangle 
       \longrightarrow \langle e_1;\textbf{return }nil, \sigma'', \rho'\rangle} [(\textbf{let in} values)] 
       & \\
-      \inference {\sigma' = \sigma + \{x \mapsto v\} & \rho' = push(\rho, \langle e_2, \sigma \rangle)} 
+      \inference {\sigma' = \sigma \uplus \{x \mapsto v\} & \rho' = push(\rho, \langle e_2, \sigma \rangle)} 
       {\langle \text{\textbf{let }}x = v \text{\textbf{ in }} e_1 \text{\textbf{ end}};e_2, \sigma, \rho \rangle 
       \longrightarrow \langle e_1;\textbf{return }nil, \sigma'', \rho' \rangle} [(\textbf{let in} values contd)] 
       & \\
@@ -979,6 +984,9 @@ We define the behaviour of scopes using the following evaluation rules.
 \end{figure}
 
 \par
+Figure 4.2 above defines the scoping rules for Simple-$\Pi$.
+
+\par
 The \textbf{let in} statement opens a new scope which assigns $x$ the value $v$, the 
 previous scope is pushed on to $\rho$. Notice we manually added a return 
 statement at the end of the expression $e_2$ to represent end of scope. 
@@ -990,8 +998,8 @@ then the expression is evaluated before continuing with the remaining
 expressions. 
 
 \subsection{Functions}
-Functions in almost all imperative language are in their own scope. In many 
-cases they do not have the access to the variables out of their scope however 
+Functions in almost all imperative language operates in their own scope. In many 
+cases they do not have the access to the local variables out of their scope however 
 one can pass data using arguments. Functions in Simple-$\Pi$ are call by values, 
 changing the value of an argument in the function does not change the value in 
 the outside scope. 
@@ -1063,13 +1071,15 @@ Consider the uncertainty of using variables to define dependent types. For
 instance: 
 
 \begin{figure} [H]
-  \begin{center}
-    $y\text{ }:\text{ }int := 10$ \\
-    $BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$ \\ 
-    $y := 5$
-  \end{center}
+  \begin{tabs}{1cm,2cm}
+    \textbf{let }$y\text{ }:\text{ } int = 10$ \textbf{ in } \\
+    \tab\textbf{typedef }$BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$; \\ 
+    \tab\textbf{let }$x\text{ }:\text{ }BoundedIntY = 4$ \textbf{ in }$y := 5$\textbf { end} \\
+    \textbf {end}
+  \end{tabs}  
   \caption{Mutation to Variable Depended On}
 \end{figure}
+
 \par
 How would this behaviour work in practice? Recall from chapter 2 we proposed the 
 question of what should happen when the value bound to the variable change. In 
@@ -1078,10 +1088,11 @@ formalise their specification.
 
 \par
 First we need to introduce a new expression for type definition, in the example 
-above we used an equal sign (=) to denote a new type. In our example, we mean 
+above we used the expression (\textbf{typedef} $x = T$) to denote a new type. 
+In our example, we mean 
 that a new type named $BoundedIntY$ is created. We need to add this construct 
-into our syntax.In our current syntax, we have a context for variables and 
-values, We would also need a similar mapping for types, We use $\Upsilon$ to 
+into our syntax. In our current syntax, we have a context for variables and 
+values, We would also need a similar mapping for types, We use $\tau$ to 
 represent the type name map. 
 
 \par
@@ -1089,8 +1100,8 @@ The syntax is extended by adding the following:
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {l l l}
-      \textit{Expression} & $e$ & $:$ ... $|$ $x = T$ \\
-      \textit{Type Name Context} & $\Upsilon$& $:$ $vars \mapsto T$ \\
+      \textit{Expression} & $e$ & $:$ ... $|$ \textbf{typedef }$x = T$ \\
+      \textit{Type Name Context} & $\tau$& $:$ $vars \mapsto T$ \\
     \end{tabular}
   \end{center}
   \caption{Extended Syntax for Simple-$\Pi$}
@@ -1102,16 +1113,17 @@ We then define the operational semantics:
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {x \notin \text{\textbf{dom}}(\sigma)}{\langle x = A, \sigma, \Upsilon \rangle \longrightarrow 
-        \langle \text{\textbf{skip}}, \sigma, \Upsilon \uplus \{x \mapsto A\}\rangle}[(= type assign)] \text{ }    
+      \inference {x \notin \text{\textbf{dom}}(\sigma)}{\langle \textbf{typedef }x = A, 
+      \sigma, \rho, \tau \rangle \longrightarrow 
+        \langle \text{\textbf{skip}}, \sigma, \rho, \tau \uplus \{x \mapsto A\}\rangle}[(\textbf{typedef})] \text{ }    
     \end{tabular}
   \end{center}
 \end{figure}
 
 \par
 The operational semantic above simply adds a new type definition with name $x$ 
-into the type variable context. Importantly, the variable $x$ cannot have 
-already been defined as a value variable. 
+into the Type Name context $\tau$. Importantly, the variable $x$ cannot have 
+already been defined as a value variable n $\sigma$. 
 
 
 \subsubsection{Complete Immutability}
@@ -1132,17 +1144,10 @@ sought after however we decided to formalise it for completeness and serves as
 a building block for our language. 
 
 \par
-Using Hoare Logic, we specify the rule for assignment as follows:
-
-\begin{figure}[H]
-  \begin{center}
-    $\{x \notin \text{\textbf{dom}}(\sigma)\}x := e\{\sigma(x) = e\}$
-  \end{center}  
-  \caption{Hoare Logic for Immutable Assignment}
-\end{figure}
-
-In the rule above we simply forbid the any changes to already defined variable 
-in the program state, this avoid any complications regarding dependent types as 
+To achieve complete immutability immutability we can simply ``disable'' the 
+reassignment feature. We could remove the assignment operator $(:=)$ from our 
+syntax and will achieve immutability. This will avoid any complications 
+regarding dependent types as 
 if they are well typed during definition it will stay well typed. 
 
 \par
@@ -1178,8 +1183,8 @@ We capture the specifications using the two Hoare Logic rules below
   \begin{center}
     
     \begin{tabular}{c}
-      $\{a \notin \text{\textbf{dom}}(\sigma)\}a = \Pi x. P(x)\{consts = consts' \cup \{x\} 
-      \wedge \Upsilon(a) = \Pi x. P(x)\}$ & \\  
+      $\{a \notin \text{\textbf{dom}}(\sigma)\}\textbf{typedef }a = \Pi x. P(x)\{consts = consts' \cup \{x\} 
+      \wedge \tau(a) = \Pi x. P(x)\}$ & \\  
       $\{x \notin consts\}x := e\{\sigma(x) = e\}$
     \end{tabular}
   \end{center}
@@ -1192,37 +1197,39 @@ If we further analyse our design, we notice that if our dependent type is
 constructed using a value then we would not have the problem of variable change. 
 In languages such as C/C++, \textit{pass by value} \cite{pbv} is a way of 
 passing a parameter into a function in a way that any modification to the 
-parameter in the function does not reflect changes outside and vice versa. 
+parameter in the function does not reflect changes outside and vice versa. The 
+same cocept is used for functions in Simple-$\Pi$.
 
 \par
-A similar approach can be taken in our definitions for dependent types. For 
+The similar approach can be taken in our definitions for dependent types. For 
 instance, taking the example in figure 4.2, if the variable $y$ in the dependent 
 type function is different from the variable $y$ in the program state, then any 
 changes to the variable $y$ will not effect the type definition and the program 
-will stay well typed. 
+will stay well typed.
+ 
+\par
+In subsection 4.1.2 we defined the functions' evaluation rules using scopes. 
+Here instead, we will define the Hoare Logic that specify the behaviour.
 
 \par 
-We use the notation $[x/a]P$ to denote that in the function $P$, replace all 
-occurence of variable $x$ with variable $a$. 
+We use the notation $[x/\alpha]P$ to denote that in the function $P$, replace all 
+occurence of variable $x$ with local variable $\alpha$. 
 The specification for dependent type definition written using hoare logic is as follows: 
 
 \begin{figure}[H]
   \begin{center}
-    \small$\{x \notin \text{\textbf{dom}}(\sigma) \wedge \alpha = \sigma(x)\}
-    y = \Pi x : A. P(x)\{P =  [x/\alpha]P' \wedge \Upsilon(y) =  \Pi x : A. P(x)\}$ 
+    \small$\{y \notin \text{\textbf{dom}}(\sigma)\}
+    \textbf{typedef }y = \Pi x : A. P(x)\{P =  [x/\alpha]P' \wedge \tau(y) =  \Pi \alpha : A. P(\alpha)\}$ 
     \normalsize
   \end{center}
   \caption{Dependedent Type Definition Rule using Hoare Logic}
 \end{figure}
 
 \par
-The precoditions states that the $\alpha$ is the value of $x$ in the 
-program context. After execution the type assignment, 
-the function $P$ would have been substituted 
-such that all occurence of variable $x$ is replaced with the value $\alpha$. Note 
-that we are substituting the variable with a value, essentially fixing the value 
-of $x$ in the function. So any changes to $x$ in the program will now no longer 
-have an impact on the type.
+The postcondition states that function $P$ would have been substituted 
+such that all occurence of variable $x$ is replaced with the variable $\alpha$. 
+The variable $\alpha$ is independent from the local variable $x$ in the program 
+context, changes to $x$ does not reflect on $\alpha$. 
 
 \par
 This semantic allow the language to allow us to define types using variable 
@@ -1237,18 +1244,8 @@ in imperative languages called \textit{Dynamic Dependent Types}. It is a type
 that will allow the definition of dependent types to change during runtime and 
 still guarantees a well-typed program. 
 
-
-\begin{figure} [H]
-  \begin{center}
-    $y\text{ }:\text{ }int := 10$ \\
-    $BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$ \\ 
-    $x\text{ }:\text{ }BoundedIntY := 4$ \\
-    $y := 5$ \\
-  \end{center}
-  \caption{Dynamically Changing Dependent Types}
-\end{figure}
-
-Figure 4.6 extends the previous example, in this scenario, the variable $x$ is 
+\par
+Notice that in figure 4.5, the variable $x$ is 
 of type $BoundedIntY$ and has the value 4 which is well typed. In the next line, 
 the value of $y$ is reassigned the value 5. In this approach, rather than having 
 no effect on the type definition, the type of $BoundedIntY$ changes with the 
@@ -1256,13 +1253,17 @@ value $y$, being now bounded to $5$. In our example, $x$ is still well typed so
 everything is valid. 
 
 
+\par
+However, consider the following examples with certain values replaced. 
+
 \begin{figure} [H]
-  \begin{center}
-    $y\text{ }:\text{ }int := 10$ \\
-    $BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$ \\ 
-    $x\text{ }:\text{ }BoundedIntY := 6$ \\
-    $y := 5$ // Error \\
-  \end{center}
+  \begin{tabs}{1cm,2cm}
+    \textbf{let }$y\text{ }:\text{ } int = 10$ \textbf{ in } \\
+    \tab\textbf{typedef }$BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$; \\ 
+    \tab\textbf{let }$x\text{ }:\text{ }BoundedIntY = 6$ \textbf{ in }$y := 5$\textbf { end }\textit{// Error}
+ \\
+    \textbf {end}
+  \end{tabs}  
   \caption{Ill-Typed Dynamically Changing Dependent Types}
 \end{figure}
 
@@ -1282,15 +1283,16 @@ We modify the typing judgement for assignment by adding a new condition:
 \begin{figure}[H]
   \begin{center}
    \begin {tabular} {c} 
-     \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T \\ \Gamma \vdash \forall \alpha : \Pi x. P(x)\text{ }s.t.\text{ }\alpha : \Pi e_1. P(e_1)} 
-          {\Gamma \vdash x := e_1 : T} [($:=$)] \text{ }
+     \inference {\Gamma \vdash x: T & \Gamma \vdash v: T 
+     \\ \Gamma \vdash \forall \alpha : \Pi x. P(x)\text{ }s.t.\text{ }\alpha : \Pi v. P(v)} 
+          {\Gamma \vdash x := v : T} [($:=$ dynamic dependent types)] \text{ }
     \end{tabular}
   \end{center}
   \caption{Dynamic Dependedent Type Reassignment Rule}
 \end{figure}
 
 The rule above states that for all $\alpha$ of a type $\Pi x.P(x)$ it will be 
-well typed for $\Pi e_1.P(e_1)$, the new value of $x$.
+well typed for $\Pi v.P(v)$, the new value of $x$.
 
 \par
 Notice that our current value variable context does not 
@@ -1313,14 +1315,16 @@ First we modified the value variable context as shown below:
 \end{figure}
 
 This means that a varible now maps to a value with type $T$. The notation of 
-$\Gamma(x)$ to retrieve a value used in previous semantics still hold, now we 
-can write $\alpha : \tau = \Gamma(x)$ which gets $\alpha$ the value of $x$ 
-and $\tau$ the type of $x$. This notation allows us to apply the universal 
+$\sigma(x)$ to retrieve a value used in previous semantics still hold, now we 
+can write $\alpha : \beta = \sigma(x)$ which gets $\alpha$ the value of $x$ 
+and $\beta$ the type of $x$. This notation allows us to apply the universal 
+quantifier.
 
 \begin{figure}[H]
   \begin{center}
-    \footnotesize$\{\tau = \{\alpha : \beta \in \sigma\text{ }|\text{ }\beta = \Pi a. P(a)\}\}a := e\{\sigma(a) = e \wedge 
-    \forall \alpha : \beta \in \tau\text{ }s.t.\text{ }\beta = \Pi a. P(a)\}$ 
+    \footnotesize$\{\gamma = \{\alpha : \beta \in \sigma\text{ }|\text{ }\beta = 
+    \Pi a. P(a)\}\}a := e\{\sigma(a) = e \wedge 
+    \forall \alpha : \beta \in \gamma\text{ }s.t.\text{ }\beta = \Pi a. P(a)\}$ 
     \normalsize
   \end{center}
   \caption{Dynamic Dependedent Type Reassignment Rule}
@@ -1344,10 +1348,6 @@ In this next section we will be presenting dependently typed vectors/arrays in
 our language. The introduction of arrays ties closely with aliases, the 
 behaviours of these two addition will be discussed and specified in this 
 section.
-
-
-
-
 
 \chapter{Related Work}
 
