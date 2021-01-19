@@ -1274,8 +1274,7 @@ However, consider the following examples with certain values replaced.
   \begin{tabs}{1cm,2cm}
     \textbf{let }$y\text{ }:\text{ } int = 10$ \textbf{ in } \\
     \tab\textbf{typedef }$BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$; \\ 
-    \tab\textbf{let }$x\text{ }:\text{ }BoundedIntY = 6$ \textbf{ in }$y := 5$\textbf { end }\textit{// Error}
- \\
+    \tab\textbf{let }$x\text{ }:\text{ }BoundedIntY = 6$ \textbf{ in }$y := 5$\textbf { end }\textit{// Error}\\
     \textbf {end}
   \end{tabs}  
   \caption{Ill-Typed Dynamically Changing Dependent Types}
@@ -1357,11 +1356,39 @@ language going forward. We believe that approach provides the most usable
 implementation of dependent types and serves best as a research topic as 
 introducing new features could present interesting problems. 
 
-\section{Introduction of Vectors and Aliases}
+\section{Pointers and Vectors}
 In this next section we will be presenting dependently typed vectors/arrays in 
-our language. The introduction of arrays ties closely with aliases, the 
-behaviours of these two addition will be discussed and specified in this 
+our language. The introduction of arrays ties closely with pointers and aliases, 
+the behaviours of these two addition will be discussed and specified in this 
 section.
+
+\subsection{Introduction of Heap Memory Allocation}
+In order to be able to accomodate arrays in a programming language we will have 
+to deal with allocating memory using \textit{Heaps} \cite{heapVsStack}. 
+Currently in the Simple-$\Pi$ language we have not explicitly discussed our 
+memory model but it is obvious it is using the stack memory. As we are dealing 
+with dependent types and arrays are likely to be dynamic, we decided to use heap 
+memory to handle arrays. 
+\par
+In this subsection we will extend the syntax to include the array data types, 
+expressions on arrays and the heap memory structure. 
+
+\subsubsection{Syntax Extension}
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {l l l}
+      \textit{Types} & $T$& $:$ $...\text{ }|\text{ }T\text{ \textit{ref }}|\text{ } T \text{ }array}$ \\
+      \textit{Expressions} & $e$& $:$ $...\text{ }|\text{ }e_1[e_2]\text{ }
+        |\text{ }e_1[e_2] := e_3\text{ }|\text{ }\textbf{size}(e_1)$ \\
+        & & \; $|\text{ }\textbf{newarray}(e_1, e_2)\text{ }|\text{ }!e_1\text{ }|\text{ \textbf{new}}(T)$ \\
+     \textit{Values} & $vals$& $:$ $...\text{ }|\text{ }h\text{ }|\text{ }(h_0,h_1...h_n)$ \\
+     \textit{Heap Address} & $\Delta$& $:$ $h \in \{h_1,h_2, h_3...\}$ \\
+    \end{tabular}
+  \end{center}
+  \caption{Extended Syntax for Simple-$\Pi$}
+\end{figure}
+
+
 
 \chapter{Related Work}
 
