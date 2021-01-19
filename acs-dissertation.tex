@@ -287,7 +287,7 @@ error handling code. This example demonstrated using an object-oriented style
 language by Vasconcelos \cite{objOritentedDependentType}.
 
 
-\chapter{Background: State of Dependent Types in Programming} 
+\chapter{Background: State of Dependently Typed in Language} 
 In this chapter we will be reviewing the current knowledge of dependent types 
 in different programming languages. It will cover languages with full dependent 
 types support as well as some languages with similar concepts and point out how 
@@ -1118,7 +1118,7 @@ The syntax is extended by adding the following:
       \textit{Type Name Context} & $\tau$& $:$ $vars \mapsto T$ \\
     \end{tabular}
   \end{center}
-  \caption{Extended Syntax for Simple-$\Pi$}
+  \caption{Type Name Context Extension for Simple-$\Pi$}
 \end{figure}
 
 \par
@@ -1182,7 +1182,7 @@ variable.
       \textit{Immutable Variable} & $consts$& $:$ $\{vars\}$ \\
     \end{tabular}
   \end{center}
-  \caption{Extended Syntax for Simple-$\Pi$}
+  \caption{Immutable Variable Context for Simple-$\Pi$}
 \end{figure}
 
 The set $const$ is simply a set of variables that are deemed to be immutable. To 
@@ -1202,7 +1202,7 @@ We capture the specifications using the two Hoare Logic rules below
       $\{x \notin consts\}x := e\{\sigma(x) = e\}$
     \end{tabular}
   \end{center}
-  \caption{Immutable Variable Rule}
+  \caption{Hoare Logic for Immutable Variable}
 \end{figure}
 
 \subsubsection{Passing by Value}
@@ -1357,36 +1357,59 @@ implementation of dependent types and serves best as a research topic as
 introducing new features could present interesting problems. 
 
 \section{Pointers and Vectors}
-In this next section we will be presenting dependently typed vectors/arrays in 
-our language. The introduction of arrays ties closely with pointers and aliases, 
-the behaviours of these two addition will be discussed and specified in this 
+In this next section we will be presenting dependently typing with regards to 
+arrays. The introduction of arrays ties in closely with pointers and aliasing, 
+the behaviours of these additional features will be discussed and specified in this 
 section.
 
-\subsection{Introduction of Heap Memory Allocation}
-In order to be able to accomodate arrays in a programming language we will have 
-to deal with allocating memory using \textit{Heaps} \cite{heapVsStack}. 
-Currently in the Simple-$\Pi$ language we have not explicitly discussed our 
-memory model but it is obvious it is using the stack memory. As we are dealing 
-with dependent types and arrays are likely to be dynamic, we decided to use heap 
+\subsection{Heap Memory Allocation}
+In programming languages, there are three different types of memory allocation, 
+static, stack and heaps \cite{heapVsStack}. While we have not explicitly 
+discussed our memory management model, it is rather obvious that Simple-$\Pi$ 
+operates on a stack based model. It is apparent in the behaviour of locals 
+variable which are inaccesible once out of scope as discussed in subsection 
+4.1.1. While arrays can be allocated on the stack, since we are dealing 
+with dependent types and arrays are likely to be dynamic, we have decided to use heap 
 memory to handle arrays. 
-\par
-In this subsection we will extend the syntax to include the array data types, 
-expressions on arrays and the heap memory structure. 
 
 \subsubsection{Syntax Extension}
+First we will have to extend our syntax to accomodate these new features, the 
+new syntax is shown in figure 4.14 below.
+
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {l l l}
       \textit{Types} & $T$& $:$ $...\text{ }|\text{ }T\text{ \textit{ref }}|\text{ } T \text{ }array}$ \\
       \textit{Expressions} & $e$& $:$ $...\text{ }|\text{ }e_1[e_2]\text{ }
         |\text{ }e_1[e_2] := e_3\text{ }|\text{ }\textbf{size}(e_1)$ \\
-        & & \; $|\text{ }\textbf{newarray}(e_1, e_2)\text{ }|\text{ }!e_1\text{ }|\text{ \textbf{new}}(T)$ \\
+        & & \; $|\text{ }\textbf{newarray}(e_1, T)\text{ }|\text{ }!e_1\text{ }|\text{ \textbf{new}}(T)$ \\
      \textit{Values} & $vals$& $:$ $...\text{ }|\text{ }h\text{ }|\text{ }(h_0,h_1...h_n)$ \\
      \textit{Heap Address} & $\Delta$& $:$ $h \in \{h_1,h_2, h_3...\}$ \\
     \end{tabular}
   \end{center}
-  \caption{Extended Syntax for Simple-$\Pi$}
+  \caption{Heap Memory Allocation in Simple-$\Pi$}
 \end{figure}
+
+
+\par
+We introduced two new types, $T$ \textit{ref} is a reference type, it behaves 
+like a pointer in C/C++, like pointers, references are typed and its value is a heap address. 
+$T$ $array$ is an array type. Like most languages, arrays are typed 
+and all elements in the array must be of type $T$.
+
+\par
+We introduced the following expressions into the language:
+
+\begin{itemize}
+  \item $e_1[e_1]$ to index an element in an array, like C/C++, arrays are 
+  0-indexed. $e_1[e_2] := e_3$ to assign values into arrays.
+  \item \textbf{size}$(e_1)$ to retrive the size of an array.
+  \item \textbf{newarray}$(e_1, T)$ to allocate a new array of $T$ that is of 
+  \textbf{size}$(e_1)$.
+  \item $!e_1$ to dereference the $T$ \textit{ref} represented by $e_1$.
+  \item \textbf{new}($T$) to allocate and return a $T$ \textit{ref}.
+\end{itemize}
+
 
 
 
