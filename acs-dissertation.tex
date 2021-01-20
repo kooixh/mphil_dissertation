@@ -651,6 +651,47 @@ Java and C++ resembles the fixed size vector however they are quite similar. In
 the subsequent chapters of this dissertation we will define a language to 
 address these uncertainties. 
 
+
+\section{Summary of Dependently Typed Langauge}
+\begin{table} [H]
+  \begin{tabular}{|p{2cm}|p{2cm}|p{10cm}|}
+    \hline
+    \textbf{Name} & \textbf{Paradigm} & \textbf{Notes} \\ 
+    \hline
+    Agda & Purely Functional & Actively developed but 
+      Predominantly used for theorem proving rather than general programming. \\ 
+    \hline
+    Haskell & Functional & Widely used as a general purpose programming language, however not natively dependently typed. \\ 
+    \hline
+    Idris & Purely Functional & More general purpose compared to Agda however 
+      still lacks mainstream recognition. \\
+    \hline
+    \textit{ATS} \cite{ATS} & Functional & Developed by Xi who created Xanadu, 
+      support dependent typing however only for static terms. \\
+    \hline
+    \textit{F*} \cite{FStar} & Functional & Jointly developed by Microsoft 
+    Research and Inria aimed at program verification. Lacks mainstream 
+    programming recognition.\\
+    \hline
+  \end{tabular}
+  \caption{Summary of Dependently Typed Language}
+\end{table}
+
+\par
+The table above shows a number of languages that supports dependent typing, we 
+observed that majority of the languages in this category are using the 
+functional paradigm. As functional languages pale in comparison to imperative 
+languages in terms of populatiry, the general awareness for dependent types 
+remains low. 
+
+\par
+Our aim for this project is to i) Explore how dependent types should behave in 
+an imperative language and how a language can use different mechanism to enable 
+this behaviour. ii) Encourage the research into dependent types by extending the 
+WHILE language \cite{whileLanguage} to support dependent typing. We chose this 
+language because of its simple and familair syntax which at its core resembles 
+popular languages such as C. 
+
 \chapter{The Simple-$\Pi$ Language}
 To address the uncertainties introduced in the previous chapter and provide a 
 base for research in dependent types among imperative languages, we look to 
@@ -897,6 +938,8 @@ e$.
   \begin{center}
     \begin{tabular} {c}
       $\langle v, \sigma \rangle \longrightarrow \langle v, \sigma \rangle$ ($vals$ evaluation) 
+      \text{ }
+      \inference {x \in \textbf{dom}(\sigma)}{\langle x, \sigma \rangle \longrightarrow \langle \sigma(x), \sigma\rangle}[($vars$) evaluation] 
       & \\
       \inference {v = v_1 + v_2}{\langle v_1 + v_2, \sigma \rangle \longrightarrow \langle v, \sigma\rangle}[(op $+$)] \text{ }
       \inference {v = v_1 - v_2}{\langle v_1 - v_2, \sigma \rangle \longrightarrow \langle v, \sigma\rangle}[(op $-$)]
