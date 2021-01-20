@@ -1031,8 +1031,12 @@ The evaluation rules for functions is shown below.
   \begin{center}
     \begin{tabular} {c}
       \inference {((x_1..x_n), e_{body}) = \textit{fns}(f) 
-        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \rho' = push(\rho, \sigma)}
+        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \rho' = push(\rho, \langle \textbf{skip}, \sigma) \rangle}
       {\langle f(v_1...v_n), \sigma, \rho' \rangle \longrightarrow \langle e_{body}, \sigma', \rho' \rangle} [(function call vals)]
+      & \\
+      \inference {((x_1..x_n), e_{body}) = \textit{fns}(f) 
+        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \rho' = push(\rho, \langle e_1, \sigma) \rangle}
+      {\langle f(v_1...v_n);e_1, \sigma, \rho' \rangle \longrightarrow \langle e_{body}, \sigma', \rho' \rangle} [(function call vals)]
       & \\
       \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e_1, \sigma', \rho \rangle &...& \langle e_n, \sigma' \rangle \longrightarrow \langle e_n', \sigma'' \rangle}
       {\langle f(e_1...e_n), \sigma \rangle \longrightarrow \langle f(e_1'...e_n'), \sigma'', \rho \rangle} [(function call expr)]
@@ -1087,7 +1091,7 @@ instance:
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
     \textbf{let }$y\text{ }:\text{ } int = 10$ \textbf{ in } \\
-    \tab\textbf{typedef }$BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$; \\ 
+    \tab\textbf{typedef }$BoundedIntY$ = $\Pi y : int. \{i : Int\text{ }|\text{ }i < y\}$; \\ 
     \tab\textbf{let }$x\text{ }:\text{ }BoundedIntY = 4$ \textbf{ in }$y := 5$\textbf { end} \\
     \textbf {end}
   \end{tabs}  
@@ -1223,27 +1227,58 @@ will stay well typed.
  
 \par
 In subsection 4.1.2 we defined the functions' evaluation rules using scopes. 
-Here instead, we will define the Hoare Logic that specify the behaviour.
+Here instead, we will define the Hoare Logic that specify the behaviour. If 
+$\Pi x : A. P(x)$ is a dependent type that depends on $x$ of type $A$ then $P \in $ 
+\textit{dfns}, \textit{dfns} behaves like \textit{fns}, 
+holding the signature of all dependent type functions.
 
-\par 
-We use the notation $[x/\alpha]P$ to denote that in the function $P$, replace all 
-occurence of variable $x$ with local variable $\alpha$. 
-The specification for dependent type definition written using hoare logic is as follows: 
+\par
+We first require modification to our \textbf{return} statement, which at the 
+moment only returns expressions, as dependent type functions return types, we 
+need to accomodate that.
 
 \begin{figure}[H]
   \begin{center}
-    \small$\{y \notin \text{\textbf{dom}}(\sigma)\}
-    \textbf{typedef }y = \Pi x : A. P(x)\{P =  [x/\alpha]P' \wedge \tau(y) =  \Pi \alpha : A. P(\alpha)\}$ 
-    \normalsize
+    \begin{tabular} {l l l}
+      \textit{Expressions} & $e$& $:$ $\textbf{return }T$ \\
+    \end{tabular}
   \end{center}
-  \caption{Dependedent Type Definition Rule using Hoare Logic}
+  \caption{Return statement for Types in Simple-$\Pi$}
 \end{figure}
 
 \par
-The postcondition states that function $P$ would have been substituted 
-such that all occurence of variable $x$ is replaced with the variable $\alpha$. 
-The variable $\alpha$ is independent from the local variable $x$ in the program 
-context, changes to $x$ does not reflect on $\alpha$. 
+Using the return statement above, when one define a dependent type, our 
+semantics will evaluate the function until a type is returned. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {((x_1), e_{body}) = \textit{dfns(P)} 
+      \\ \sigma' = \{x_1 \mapsto v\} & \rho' = push(\rho, \langle e_1, \sigma, \tau \rangle)}
+      {\langle\textbf{typedef } x = \Pi v : A.P(v);e_1, 
+      \sigma, \rho, \tau \rangle \longrightarrow 
+        \langle \textbf{typedef } x = e_{body}, \sigma', \rho', \tau \rangle}[(\textbf{typedef}) $\Pi$]  
+      & \\
+      \inference {\langle e_1, \sigma, \rho, \tau \rangle \longrightarrow \langle e_1', \sigma', \rho', \tau' \rangle}
+      {\langle \textbf{typedef }x = e_1, \sigma, \rho, \tau \rangle \longrightarrow 
+        \langle \textbf{typedef }x = e_1', \sigma', \rho', \tau' \rangle}[(\textbf{typedef}) $\Pi$ eval] 
+      & \\ 
+      \inference {\langle e_1, \sigma', \tau' \rangle = top(\rho) & \rho' = pop(\rho)}
+      {\langle \textbf{typedef } x = \textbf{return }T, \sigma, \rho, \tau \rangle \longrightarrow 
+        \langle e_1, \sigma', \rho', \tau' \uplus {x \mapsto T} \rangle}[(\textbf{typedef}) $\Pi$ return] 
+    \end{tabular}
+  \end{center}
+  \caption{Evaluation of Dependent Type Functions}
+\end{figure}
+
+\par 
+The three rules above formalise the semantics for dependent type definitions in 
+Simple-$\Pi$. The dependent type function is evaluated in its own scope. Note 
+that in our evalutation the \textbf{typedef} statement is being written 
+repeatedly such that we are able to pass back \textbf{return} $T$ to 
+\textbf{typedef}. If we were to use the same evaluation as our previous return 
+statement then $T$ would have to be an expression and could potentitally results 
+in further complications. 
 
 \par
 This semantic allow the language to allow us to define types using variable 
@@ -1305,7 +1340,11 @@ We modify the typing judgement for assignment by adding a new condition:
 \end{figure}
 
 The rule above states that for all $\alpha$ of a type $\Pi x.P(x)$ it will be 
-well typed for $\Pi v.P(v)$, the new value of $x$.
+well typed for $\Pi v.P(v)$, the new value of $x$. Our logic here works simply 
+by using the concept of type membership, which similar to the the 
+concept of set membership in set theory \cite{RussellMathematicalLA}. 
+The above statement can simply be rewritten in logic as 
+$\forall \alpha \in A\text{ }s.t.\text{ }\alpha \in B$.
 
 \par
 Notice that our current value variable context does not 
@@ -1335,9 +1374,10 @@ quantifier.
 
 \begin{figure}[H]
   \begin{center}
+    $\forall \gamma \in \mathcal{P}(\sigma).$\\
     \footnotesize$\{\gamma = \{\alpha : \beta \in \sigma\text{ }|\text{ }\beta = 
-    \Pi a. P(a)\}\}a := e\{\sigma(a) = e \wedge 
-    \forall \alpha : \beta \in \gamma\text{ }s.t.\text{ }\beta = \Pi a. P(a)\}$ 
+    \Pi x : A. P(x)\}\}x:= e\{\sigma(x) = e \wedge 
+    \forall \alpha : \beta \in \gamma\text{ }s.t.\text{ }\beta = \Pi x : A. P(x)\}$ 
     \normalsize
   \end{center}
   \caption{Dynamic Dependedent Type Reassignment Rule}
@@ -1346,8 +1386,8 @@ quantifier.
 
 \par
 The Hoare Logic above reiterates this behaviour by stating that all values $\alpha$ with 
-type $\Pi a.P(a)$ in the state will have their typing updated with the new value 
-of $a$.
+type $\Pi x : A.P(x)$ in the state will have their typing updated with the new value 
+of $x$.
 
 This section presented multiple solution to achieving reassignment in a 
 dependently typed language. While all of the proposed solutions have their 
@@ -1384,7 +1424,7 @@ new syntax is shown in figure 4.14 below.
         |\text{ }e_1[e_2] := e_3\text{ }|\text{ }\textbf{size}(e_1)$ \\
         & & \; $|\text{ }\textbf{newarray}(e_1, T)\text{ }|\text{ }!e_1\text{ }|\text{ \textbf{new}}(T)$ \\
      \textit{Values} & $vals$& $:$ $...\text{ }|\text{ }h\text{ }|\text{ }(h_0,h_1...h_n)$ \\
-     \textit{Heap Address} & $\Delta$& $:$ $h \in \{h_1,h_2, h_3...\}$ \\
+     \textit{Heap} & $\Delta$& $:$ $h \in \{h_1,h_2, h_3...\}$ \\
     \end{tabular}
   \end{center}
   \caption{Heap Memory Allocation in Simple-$\Pi$}
@@ -1399,7 +1439,6 @@ and all elements in the array must be of type $T$.
 
 \par
 We introduced the following expressions into the language:
-
 \begin{itemize}
   \item $e_1[e_1]$ to index an element in an array, like C/C++, arrays are 
   0-indexed. $e_1[e_2] := e_3$ to assign values into arrays.
@@ -1409,6 +1448,16 @@ We introduced the following expressions into the language:
   \item $!e_1$ to dereference the $T$ \textit{ref} represented by $e_1$.
   \item \textbf{new}($T$) to allocate and return a $T$ \textit{ref}.
 \end{itemize}
+
+\par
+Values are extended such that it now includes heap address $h$ or in the case of 
+an array, a tuple of head addresses $(h_0...h_n)$. 
+
+\par
+Finally, Heap $\Delta$ is a set of heap addresses $\{h_0, h_1, h_2...\}$, 
+realisticly $\Delta$ will be a finite set however, in our case we are assuming 
+$\Delta$ be an infinite set of heap addresses as we consider cases of 
+insufficient memory out of scope for our project. 
 
 
 
