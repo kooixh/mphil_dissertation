@@ -985,12 +985,6 @@ e$.
   \caption{Operational Semantics for Simple-$\Pi$}
 \end{figure}
 
-\par
-Figure 4.1 above defines the operational semantics for the 
-basics expression in Simple-$\Pi$ under the configuration $\langle e, \sigma 
-\rangle$.
-
-
 \subsection{Scoping}
 Scoping has an important role in imperative languages, variables can be defined 
 in scopes and are unavailable once outside. While there are many different 
@@ -1445,7 +1439,7 @@ arrays. The introduction of arrays ties in closely with pointers and aliasing,
 the behaviours of these additional features will be discussed and specified in this 
 section.
 
-\subsection{Heap Memory Allocation}
+\subsection{Heap Memory Location}
 In programming languages, there are three different types of memory allocation, 
 static, stack and heaps \cite{heapVsStack}. While we have not explicitly 
 discussed our memory management model, it is rather obvious that Simple-$\Pi$ 
@@ -1467,7 +1461,7 @@ new syntax is shown in figure 4.14 below.
         |\text{ }e_1[e_2] := e_3\text{ }|\text{ }\textbf{size}(e_1)$ \\
         & & \; $|\text{ }\textbf{newarray}(e_1, T)\text{ }|\text{ }!e_1\text{ }|\text{ \textbf{new}}(T)$ \\
      \textit{Values} & $vals$& $:$ $...\text{ }|\text{ }h\text{ }|\text{ }(h_0,h_1...h_n)$ \\
-     \textit{Heap} & $\Delta$& $:$ $h \in \{h_1,h_2, h_3...\}$ \\
+     \textit{Heap} & $\Delta$& $:$ $h \in \{h_1,h_2, h_3...\} \mapsto vals$\\
     \end{tabular}
   \end{center}
   \caption{Heap Memory Allocation in Simple-$\Pi$}
@@ -1491,16 +1485,101 @@ We introduced the following expressions into the language:
   \item $!e_1$ to dereference the $T$ \textit{ref} represented by $e_1$.
   \item \textbf{new}($T$) to allocate and return a $T$ \textit{ref}.
 \end{itemize}
+\par
+For simplicity, we have ommited the need for manual memory management and memory 
+deallocation.
 
 \par
 Values are extended such that it now includes heap address $h$ or in the case of 
 an array, a tuple of head addresses $(h_0...h_n)$. 
 
 \par
-Finally, Heap $\Delta$ is a set of heap addresses $\{h_0, h_1, h_2...\}$, 
-realisticly $\Delta$ will be a finite set however, in our case we are assuming 
+Finally, Heap $\Delta$ is a set of heap addresses $\{h_0, h_1, h_2...\}$ currently in use, 
+realisticly $\Delta$ will be a finite mapping however, in our case we are assuming 
 $\Delta$ be an infinite set of heap addresses as we consider cases of 
-insufficient memory out of scope for our project. 
+insufficient memory out of scope for our project. We use the notation, $\Delta(h)$ 
+to get the value held at a particular heap address. 
+
+\subsubsection{Typing Rules}
+
+We first define the base types for heap address and array values. 
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {\Gamma(h) : T\textit{ ref}} 
+        {\Gamma \vdash h : T\text{ }ref}[(heap address type)]
+      & \\
+      \inference {\Gamma(h_0) : T\textit{ ref} & \Gamma(h_1) : T\textit{ ref} &...& \Gamma(h_n) = T\textit{ ref}} 
+        {\Gamma \vdash (h_0,h_1...h_n) : T\text{ }array}[($array$ type)] 
+    \end{tabular}
+  \end{center}
+  \caption{Typing Rules for the Array and Ref Type}
+\end{figure}
+
+\par
+We then define the rules for the expressions regarding array indexing and 
+pointer dereferencing. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {\Gamma \vdash e_1 : T\text{ }array & \Gamma \vdash e_2 : int} 
+        {\Gamma \vdash e_1[e_2] : T}[($array$ indexing)]
+      & \\
+      \inference {\Gamma \vdash e_1 : T\text{ }array & \Gamma \vdash e_2 : int \\ \Gamma \vdash e_3 : T} 
+        {\Gamma \vdash e_1[e_2] := e_3 : T}[($array$ mutation)] 
+      & \\
+      \inference {\Gamma \vdash e_1 : T\text{ }array} 
+        {\Gamma \vdash \textbf{size}(e_1) : int}[(\textbf{size} of $array$)]
+      & \\
+      \inference {\Gamma \vdash e_1 : int} 
+        {\Gamma \vdash \textbf{newarray}(e_1, T) : T\text{ }array}[(\textbf{newarray} formation)]
+      & \\
+      \inference {\Gamma \vdash e_1 : T\text{ }ref} 
+        {\Gamma \vdash !e_1 : T}[(dereferencing)]
+      & \\
+      \inference {\Gamma \vdash e_1 : T\textit{ ref}} 
+        {\Gamma \vdash \textbf{new}(T) : T\textit{ ref}}[(\textbf{new} reference)]
+    \end{tabular}
+  \end{center}
+  \caption{More Typing Rules for the Array and Ref Type}
+\end{figure}
+
+\subsubsection{Operational Semantics}
+Lastly, we need to define the operational semantics for the new addition. We 
+begin by defining the SOS rules for pointers.
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {v = \Delta(h_1)}
+      {\langle !h_1, \sigma, \rho, \tau, \Delta \rangle \longrightarrow \langle v, 
+      \sigma, \rho, \tau, \Delta \rangle} [(Pointer dereferencing)]
+      & \\
+      \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta 
+        \uplus \{h \mapsto nil\}}
+        {\langle \textbf{new}(T), \sigma, \rho, \tau, \Delta \rangle \longrightarrow \langle v, 
+        \sigma, \rho, \tau, \Delta' \rangle} [(Pointer allocation)]
+    \end{tabular}
+  \end{center}
+  \caption{Operational Semantics for Pointers}
+\end{figure}
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {v_0 = (h_0,h_1...h_n) & v_1 >= 0 & v_1 <= n} 
+        {\langle v_0[v_1], \sigma, \rho,\tau,\Delta \rangle 
+          \longrightarrow \langle !h_{v_1}, \sigma, \rho, \tau, \Delta \rangle} [($array$ indexing)]
+      & \\
+      \inference {v_0 = (h_0,h_1...h_n) & v_1 >= 0 & v_1 <= n & \Delta(h_{v_1}) := v_2} 
+        {\langle v_0[v_1] := v_2, \sigma, \rho,\tau,\Delta \rangle 
+          \longrightarrow \langle v_2, \sigma, \rho, \tau, \Delta' \rangle} [($array$ mutation)]
+    \end{tabular}
+  \end{center}
+  \caption{Operational Semantics for Arrays}
+\end{figure}
+
 
 
 
