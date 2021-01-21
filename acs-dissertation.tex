@@ -1547,7 +1547,7 @@ pointer dereferencing.
       \inference {\Gamma \vdash e_1 : T\text{ }ref} 
         {\Gamma \vdash !e_1 : T}[(dereferencing)]
       & \\
-        $\Gamma \vdash \textbf{new}(T) : T\textit{ ref}}$ (\textbf{new} reference)
+      $\Gamma \vdash \textbf{new}(T) : T\textit{ ref}$ (\textbf{new} reference)
     \end{tabular}
   \end{center}
   \caption{More Typing Rules for the Array and Ref Type}
@@ -1595,7 +1595,7 @@ we use the type $nil$ to represent the default value.
         {\langle v_0[v_1] := v_2, \sigma, \rho,\tau,\Delta \rangle 
           \longrightarrow \langle v_2, \sigma, \rho, \tau, \Delta' \rangle} [($array$ mutation)]
      & \\
-     \inference {v_0 = (h_0,h_1...h_{v_1}) \\ \Delta' = \Delta \uplus \{h_{0} \mapsto nil, h_1 \mapsto nil,...h_{v_1} \mapsto nil\}} 
+     \inference {v_0 = (h_0,h_1...h_{v_1}) \\ \Delta' = \Delta \uplus \{h_0 \mapsto nil, h_1 \mapsto nil,...h_{v_1} \mapsto nil\}} 
         {\langle \textbf{newarray}(v_1, T), \sigma, \rho,\tau,\Delta \rangle 
           \longrightarrow \langle v_0, \sigma, \rho, \tau, \Delta' \rangle} [($array$ creation)]
     \end{tabular}
