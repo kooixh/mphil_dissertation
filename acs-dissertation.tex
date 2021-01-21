@@ -937,7 +937,7 @@ e$.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      $\langle v, \sigma \rangle \longrightarrow \langle v, \sigma \rangle$ ($vals$ evaluation) 
+      $\langle v, \sigma \rangle \longrightarrow \langle \textbf{skip}, \sigma \rangle$ ($vals$ evaluation) 
       \text{ }
       \inference {x \in \textbf{dom}(\sigma)}{\langle x, \sigma \rangle \longrightarrow \langle \sigma(x), \sigma\rangle}[($vars$) evaluation] 
       & \\
@@ -1502,14 +1502,23 @@ to get the value held at a particular heap address.
 
 \subsubsection{Typing Rules}
 
-We first define the base types for heap address and array values. 
+We first define the base types for heap address and array values. As it is with 
+many languages, the $nil$ type is a reference type.
+\begin{center}
+   $\Gamma \vdash nil : T\text{ }ref$ ($nil$ reference type)
+\end{center}
+
+\par
+We define the type of a heap address simply by checking its type of reference. 
+For an array, all heap addresses has to be of the same type. 
+
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\Gamma(h) : T\textit{ ref}} 
+      \inference {\Gamma(h) = T\textit{ ref}} 
         {\Gamma \vdash h : T\text{ }ref}[(heap address type)]
       & \\
-      \inference {\Gamma(h_0) : T\textit{ ref} & \Gamma(h_1) : T\textit{ ref} &...& \Gamma(h_n) = T\textit{ ref}} 
+      \inference {\Gamma(h_0) = T\textit{ ref} & \Gamma(h_1) = T\textit{ ref} &...& \Gamma(h_n) = T\textit{ ref}} 
         {\Gamma \vdash (h_0,h_1...h_n) : T\text{ }array}[($array$ type)] 
     \end{tabular}
   \end{center}
@@ -1538,8 +1547,7 @@ pointer dereferencing.
       \inference {\Gamma \vdash e_1 : T\text{ }ref} 
         {\Gamma \vdash !e_1 : T}[(dereferencing)]
       & \\
-      \inference {\Gamma \vdash e_1 : T\textit{ ref}} 
-        {\Gamma \vdash \textbf{new}(T) : T\textit{ ref}}[(\textbf{new} reference)]
+        $\Gamma \vdash \textbf{new}(T) : T\textit{ ref}}$ (\textbf{new} reference)
     \end{tabular}
   \end{center}
   \caption{More Typing Rules for the Array and Ref Type}
@@ -1547,22 +1555,33 @@ pointer dereferencing.
 
 \subsubsection{Operational Semantics}
 Lastly, we need to define the operational semantics for the new addition. We 
-begin by defining the SOS rules for pointers.
+begin by defining the SOS rules for pointers. As the reduction rules for 
+expressions are largely similar to before we will be ommiting them and only 
+focus on the value itself. 
+
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {v = \Delta(h_1)}
+      \inference {h_1 \in \textbf{dom}(\Delta) & v = \Delta(h_1) & v \neq nil}
       {\langle !h_1, \sigma, \rho, \tau, \Delta \rangle \longrightarrow \langle v, 
       \sigma, \rho, \tau, \Delta \rangle} [(Pointer dereferencing)]
       & \\
+      \inference {h_1 \in \textbf{dom}(\Delta) & \Delta' = \Delta \uplus \{h_1 \mapsto v_1\}}
+        {\langle h_1 := v_1, \sigma, \rho, \tau, \Delta \rangle \longrightarrow \langle v_1, 
+        \sigma, \rho, \tau, \Delta' \rangle} [(Pointer assignment)]
+      & \\
       \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta 
         \uplus \{h \mapsto nil\}}
-        {\langle \textbf{new}(T), \sigma, \rho, \tau, \Delta \rangle \longrightarrow \langle v, 
+        {\langle \textbf{new}(T), \sigma, \rho, \tau, \Delta \rangle \longrightarrow \langle h, 
         \sigma, \rho, \tau, \Delta' \rangle} [(Pointer allocation)]
     \end{tabular}
   \end{center}
   \caption{Operational Semantics for Pointers}
 \end{figure}
+
+\par
+Pointer allocation simply allocates a new heap address and add it to the heap, 
+we use the type $nil$ to represent the default value. 
 
 
 \begin{figure}[H]
@@ -1572,9 +1591,13 @@ begin by defining the SOS rules for pointers.
         {\langle v_0[v_1], \sigma, \rho,\tau,\Delta \rangle 
           \longrightarrow \langle !h_{v_1}, \sigma, \rho, \tau, \Delta \rangle} [($array$ indexing)]
       & \\
-      \inference {v_0 = (h_0,h_1...h_n) & v_1 >= 0 & v_1 <= n & \Delta(h_{v_1}) := v_2} 
+      \inference {v_0 = (h_0,h_1...h_n) & v_1 >= 0 & v_1 \leq n & \Delta' = \Delta \uplus \{h_{v_1} \mapsto v_2\}} 
         {\langle v_0[v_1] := v_2, \sigma, \rho,\tau,\Delta \rangle 
           \longrightarrow \langle v_2, \sigma, \rho, \tau, \Delta' \rangle} [($array$ mutation)]
+     & \\
+     \inference {v_0 = (h_0,h_1...h_{v_1}) \\ \Delta' = \Delta \uplus \{h_{0} \mapsto nil, h_1 \mapsto nil,...h_{v_1} \mapsto nil\}} 
+        {\langle \textbf{newarray}(v_1, T), \sigma, \rho,\tau,\Delta \rangle 
+          \longrightarrow \langle v_0, \sigma, \rho, \tau, \Delta' \rangle} [($array$ creation)]
     \end{tabular}
   \end{center}
   \caption{Operational Semantics for Arrays}
