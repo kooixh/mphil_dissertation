@@ -855,7 +855,7 @@ type checker.
         {\Gamma \vdash \text{\textbf{while }} e_1 \text{\textbf{ do }} e_2 : void} [(\textbf{while do})] & \\
       \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
         {\Gamma \vdash x := e_1 : T} [($:=$)] \text{ }
-      \inference {\Gamma \vdash e_1: T_1 & \Gamma \vdash e_2: T_2} 
+      \inference {\Gamma \vdash e_1: T_1 & \Gamma, x : T_1 \vdash e_2: T_2} 
         {\Gamma \vdash \textbf{let } x = e_1 \textbf{ in } e_2 \textbf{ end }: T_2} [(\textbf{let in})] \text{ }
     \end{tabular}
   \end{center}
@@ -882,33 +882,6 @@ Evaluation of the function will then satisfy the return type $T_0$.
   \caption{Typing Rules for Functions in Simple-$\Pi$}
 \end{figure}
 
-
-\subsection{Dependent Types Rules}
-Finally we define the formation, introduction and elimination rules for 
-the dependent product types as follows.
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {c}
-      \inference {\Gamma \vdash A : T \\ \Gamma, x : A \vdash P(x) : T} 
-        {\Gamma \vdash \Pi x. P(x) : T}[($\Pi$ F)] \text{ }
-      \inference {\Gamma \vdash A : T \\ \Gamma, x : A \vdash e : P(x)} 
-        {\Gamma \vdash \lambda x : A. e : \Pi x : A. P(x) }[($\Pi$ I)] & \\
-      \inference {\Gamma \vdash f : \Pi x : A. P(x) & \Gamma \vdash x : A} 
-        {\Gamma, x: A \vdash f(x) : P(x)}[($\Pi$ E)] \text{ }
-    \end{tabular}
-  \end{center}
-  \caption{Typing Rules for the Dependent Product Type}
-\end{figure}
-
-\par
-The dependent product type formation rule ($\Pi$ F) defines the rules in order 
-for a dependent product type to be formed. The introduction rule ($\Pi$ I) 
-defines the rules in order for expressions to take the type of $\Pi$. Finally, 
-the elimination rule ($\Pi$ E) acts as the modus ponens of $\Pi$ I and states 
-how from an expression of $\Pi$ one could gets the expression of others type. 
-
-
 \chapter{Semantics for Simple-$\Pi$}
 In this chapter we will be covering the semantics of Simple-$\Pi$, we will 
 then build up the semantics gradually, starting from the basic 
@@ -920,14 +893,15 @@ previous chapter in order to accomodate more features.
 \section{Operational Semantics}
 In this section we will define the \textit{Operational Semantics} 
 \cite{operationalSemantics} for the Simple-$\Pi$ language 
-using the \textit{Structured Operational Semantics} \cite{plotkinSOS} (SOS) rules. 
+using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rules. 
 
 \par
 Throughout the text we will use the following metavariables and notations. 
 \begin{itemize}
   \item The metavarible $ops$ to range over all operators.
-  \item The operator $\uplus$ when used on context $\sigma$ with $\{x \mapsto e\}$ updates $\sigma$ such that now $\sigma(x) = 
-e$.
+  \item $\sigma[x \mapsto v]$ updates $\sigma$ such that now $\sigma(x) = e$ and 
+  $\sigma + \{x \mapsto v\}$ adds $\{x \mapsto v\}$ to $\sigma$ provided 
+  initially $x \notin\textbf{dom}(\sigma)$.
   \item The metavariable $v$ to range over all values.
   \item Uppercase letters $A,B,C$ to range over all types.
   \item Greek letters ($\alpha$, $\pi$, $\upsilon$) to define local variables in 
@@ -976,7 +950,7 @@ e$.
         (\text{\textbf{while }} c \text{\textbf{ do }} e) \text{\textbf{ else }} \textbf{skip}, \sigma \rangle$ (\textbf{while do})
       & \\
       \inference {x \in \textbf{dom}(\sigma)} 
-      {\langle x := v, \sigma \rangle \longrightarrow \langle \text{\textbf{skip}}, \sigma \uplus \{x \mapsto v\}\rangle} [(assignment $vals$)] \text{ }
+      {\langle x := v, \sigma \rangle \longrightarrow \langle \text{\textbf{skip}}, \sigma[x \mapsto v] \rangle} [(assignment $vals$)] \text{ }
       & \\
       \inference {\langle e, \sigma \rangle \longrightarrow \langle e', \sigma' \rangle} 
       {\langle x := e, \sigma \rangle \longrightarrow \langle x := e', \sigma'\rangle} [(assignment $expr$)] \text{ }
@@ -991,44 +965,27 @@ in scopes and are unavailable once outside. While there are many different
 variables that does not follow this rule, such as static variables, global 
 variables and reference variables. For simplicity, we will focus initially on local 
 variables. 
+\par
+In order to help us formalise the notion of scopes we define a new notation, 
+$\longrightarrow^{*}$ as a multi-step evaluation. The evaluation rule 
+$\langle e, \sigma \rangle \longrightarrow^{*}  \langle v, \sigma' \rangle$ simply 
+evaluate the expression $e$ one or more times until it evaluates to $v$. 
 
 \par
-In order to formalise the operational semantics, we first define a runtime 
-environment $\rho$. $\rho$ holds the previous scope's configuration and behaves like 
-the stack data structure, once out of scope, the evaluation returns to the previous 
-scope, the configuration on top of $\rho$, which will be removed 
-subsequently.
-
-\par
-First, define the following operations. 
-\begin{itemize}
-  \item $push(\rho, \langle e, \sigma \rangle)$ push a configuration on to $\rho$ 
-  and return the new $\rho$
-  \item $top(\rho)$ return the top of $\rho$, i.e. the previous scope.
-  \item $pop(\rho)$ removes the top element of $\rho$ and return the modified 
-  $\rho$.
-\end{itemize}
+Using a multi step evaluation, We can easily define the scoping rules as shown 
+below.
+  
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
-      \inference {\sigma' = \sigma \uplus \{x \mapsto v\} & \rho' = push(\rho, \langle \text{\textbf{skip}}, \sigma \rangle)} 
-      {\langle \text{\textbf{let }}x = v \text{\textbf{ in }} e_1 \text{\textbf{ end}}, \sigma, \rho \rangle 
-      \longrightarrow \langle e_1;\textbf{return }nil, \sigma'', \rho'\rangle} [(\textbf{let in} values)] 
-      & \\
-      \inference {\sigma' = \sigma \uplus \{x \mapsto v\} & \rho' = push(\rho, \langle e_2, \sigma \rangle)} 
-      {\langle \text{\textbf{let }}x = v \text{\textbf{ in }} e_1 \text{\textbf{ end}};e_2, \sigma, \rho \rangle 
-      \longrightarrow \langle e_1;\textbf{return }nil, \sigma'', \rho' \rangle} [(\textbf{let in} values contd)] 
+      \inference {\sigma' = \sigma + \{x \mapsto v\} & x \notin \sigma \\ \langle e_1, \sigma' \rangle \longrightarrow^{*} \langle v, \sigma'' \rangle} 
+      {\langle \text{\textbf{let }}x = v \text{\textbf{ in }} e_1 \text{\textbf{ end}}, \sigma \rangle 
+      \longrightarrow \langle v, \sigma\rangle} [(\textbf{let in} values)] 
       & \\
       \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e_1', \sigma'\rangle} 
-      {\langle \text{\textbf{let }}x = e_1 \text{\textbf{ in }} e_2 \text{\textbf{ end}}, \sigma, \rho \rangle 
-      \longrightarrow \langle \text{\textbf{let }}x = e_1' \text{\textbf{ in }} e_2\text{\textbf{ end}}, \sigma', \rho'\rangle} 
-      [(\textbf{let in} $expr$)] 
-      &\\
-      \inference {\langle e_2, \sigma' \rangle = top(\rho) & \rho' = pop(\rho)} {\langle \textbf{return } e_1, 
-      \sigma, \rho \rangle \longrightarrow \langle e_1;e_2, \sigma', \rho' \rangle} [(\textbf{return} expr)]
-      &\\
-      \inference {\langle e_2, \sigma' \rangle = top(\rho) & \rho' = pop(\rho)} {\langle \textbf{return } nil, 
-      \sigma, \rho \rangle \longrightarrow \langle e_2, \sigma', \rho' \rangle} [(\textbf{return} nil)]
+      {\langle \text{\textbf{let }}x = e_1 \text{\textbf{ in }} e_2 \text{\textbf{ end}}, \sigma \rangle 
+      \longrightarrow \langle \text{\textbf{let }}x = e_1' \text{\textbf{ in }} e_2\text{\textbf{ end}}, \sigma' \rangle} 
+      [(\textbf{let in} $expr$)]
     \end{tabular}
   \end{center}
   \caption{Scoping Rules for Simple-$\Pi$}
@@ -1038,49 +995,76 @@ First, define the following operations.
 Figure 4.2 above defines the scoping rules for Simple-$\Pi$.
 
 \par
-The \textbf{let in} statement opens a new scope which assigns $x$ the value $v$, the 
-previous scope is pushed on to $\rho$. Notice we manually added a return 
-statement at the end of the expression $e_2$ to represent end of scope. 
+The \textbf{let in} statement opens a new scope $\sigma'$ which 
+assigns $x$ the value $v$, the in expression, $e_1$ is then evaluated with the 
+new context using the multi-step evaluation until it no longer can be evaluted, 
+the resulting expression is passed back to the original context.
 
 \par
-Upon reaching a \textbf{return} statement the evaluations continue with the 
-previous scope and its context. If the \textbf{return} statement returns non-nil 
-then the expression is evaluated before continuing with the remaining 
-expressions. 
+The multi-step evaluation provides us to much more easily express scoping rules, 
+the alternative would be to model an explicit call stack, which complicates the 
+formulas.
 
 \subsection{Functions}
 Functions in almost all imperative language operates in their own scope. In many 
 cases they do not have the access to the local variables out of their scope however 
 one can pass data using arguments. Functions in Simple-$\Pi$ are call by values, 
 changing the value of an argument in the function does not change the value in 
-the outside scope. 
+the outside scope. Our multi-step evaluation rule defined previously helps us 
+evaluate functions in their own scope. 
 
 \par
 In order to define the operational semantics of a function we will need to 
-specify the function signature. We define a mapping \textit{fns} $: f \mapsto ((x_1, x_2...x_n), e)$, 
-using this mapping allows us to retrieve the signature of a function. Since functions 
+specify the function body. We define a mapping \textit{fns} $: f \mapsto ((x_1, x_2...x_n), e)$, 
+using this mapping allows us to retrieve the body of a function. Since functions 
 definition cannot be changed at runtime, this does not need to be part of the 
 configuration and can be consider as a static context.
 
 \par
-The evaluation rules for functions is shown below.
+We begin defining the evaluation rules for functions, first we define the 
+operational semantics for the \textbf{return } statement which simply evaluates 
+to the value returned. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      $\langle \textbf{return } v, \sigma \rangle \longrightarrow \langle v, \sigma \rangle$ (\textbf{return} value)
+      &\\
+      \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e_1', \sigma' \rangle} {\langle \textbf{return } e_1, 
+      \sigma \rangle \longrightarrow \langle e_1', \sigma' \rangle} [(\textbf{return} nil)]
+    \end{tabular}
+  \end{center}
+  \caption{Evaluation Rules for Return Statement}
+\end{figure}
+
+\par
+We can then evalute the function body which using the multi-step evaluation.
+
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
       \inference {((x_1..x_n), e_{body}) = \textit{fns}(f) 
-        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \rho' = push(\rho, \langle \textbf{skip}, \sigma) \rangle}
-      {\langle f(v_1...v_n), \sigma, \rho' \rangle \longrightarrow \langle e_{body}, \sigma', \rho' \rangle} [(function call vals)]
+        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \langle e_{body}, \sigma' \rangle \longrightarrow^{*} \langle v, \sigma'' \rangle}
+      {\langle f(v_1...v_n), \sigma, \rho' \rangle \longrightarrow \langle v, \sigma \rangle} [(function call vals)]
       & \\
-      \inference {((x_1..x_n), e_{body}) = \textit{fns}(f) 
-        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \rho' = push(\rho, \langle e_1, \sigma) \rangle}
-      {\langle f(v_1...v_n);e_1, \sigma, \rho' \rangle \longrightarrow \langle e_{body}, \sigma', \rho' \rangle} [(function call vals)]
-      & \\
-      \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e_1, \sigma', \rho \rangle &...& \langle e_n, \sigma' \rangle \longrightarrow \langle e_n', \sigma'' \rangle}
-      {\langle f(e_1...e_n), \sigma \rangle \longrightarrow \langle f(e_1'...e_n'), \sigma'', \rho \rangle} [(function call expr)]
+      \inference {\langle e_k, \sigma \rangle \longrightarrow \langle e_k', \sigma' \rangle}
+      {\langle f(v_0...v_{k - 1},e_k...e_n), \sigma \rangle \longrightarrow \langle f(v_0...v_{k - 1}, e_{k}'...e_n), \sigma' \rangle} [(function call expr)]
     \end{tabular}
   \end{center}
   \caption{Functions Semantics for Simple-$\Pi$}
 \end{figure}
+
+\par
+The first rule (function call vals) resembles the evaluation rule for 
+\textbf{let in} but it differs in a crucial way, in the new context for a 
+function call, none of the variabels from the previous scope transfer over, only 
+those of the argument are copied. We then evaluates the function body until it 
+evaluates to a value which is then returned to the caller's context. 
+
+\par
+The second rule (function call $expr$) evaluates the expression passed into the 
+function as arguments. Our language defines a strict behaviour that all 
+arguments are evaluated in the order they are passed in, i.e. from left to right. 
 
 \section{Dependent Types Semantics}
 Programming languages often have a wide range of features, often the team behind 
@@ -1169,8 +1153,8 @@ We then define the operational semantics:
   \begin{center}
     \begin{tabular} {c}
       \inference {x \notin \text{\textbf{dom}}(\sigma)}{\langle \textbf{typedef }x = A, 
-      \sigma, \rho, \tau \rangle \longrightarrow 
-        \langle \text{\textbf{skip}}, \sigma, \rho, \tau \uplus \{x \mapsto A\}\rangle}[(\textbf{typedef})] \text{ }    
+      \sigma, \tau \rangle \longrightarrow 
+        \langle \text{\textbf{skip}}, \sigma, \tau + \{x \mapsto A\}\rangle}[(\textbf{typedef})] \text{ }    
     \end{tabular}
   \end{center}
 \end{figure}
@@ -1220,30 +1204,57 @@ variable.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {l l l}
-      \textit{Immutable Variable} & $consts$& $:$ $\{vars\}$ \\
+      \textit{Expressions} & $e$& $:$ $...\text{ }|\text{ }
+        \textbf{consts }x := e_1 \textbf{ in }e_2\textbf{ end}$ \\
+      \textit{Immutable Variables} & $\Sigma$ & $:$ $vars$ \\
     \end{tabular}
   \end{center}
   \caption{Immutable Variable Context for Simple-$\Pi$}
 \end{figure}
 
-The set $const$ is simply a set of variables that are deemed to be immutable. To 
-keep it simple, we do not offer a way of defining a $consts$, instead we 
-consider that any variables that are being dependend on are automatically 
-immutable. 
-
-\par
-We capture the specifications using the two Hoare Logic rules below
+The set $const$ is simply a set of variables that are deemed to be immutable. 
+One construct an immutable variable as though they are defining a mutable 
+variable, using the \textbf{const in} statement. We define the semantics as 
+below, we will use the following notation $x \in \Sigma$ to state that $x$ is 
+immutable.
 
 \begin{figure}[H]
   \begin{center}
-    
     \begin{tabular}{c}
-      $\{a \notin \text{\textbf{dom}}(\sigma)\}\textbf{typedef }a = \Pi x. P(x)\{consts = consts' \cup \{x\} 
-      \wedge \tau(a) = \Pi x. P(x)\}$ & \\  
-      $\{x \notin consts\}x := e\{\sigma(x) = e\}$
+      \inference {\langle e_1, \sigma', \Sigma' \rangle \longrightarrow^{*} \langle v, \sigma'', \Sigma'' \rangle \\ \sigma' = \sigma + \{x \mapsto v\} & x \notin \sigma & \Sigma' = \Sigma \cup \{x\}} 
+      {\langle \text{\textbf{const }}x = v \text{\textbf{ in }} e_1 \text{\textbf{ end}}, \sigma, \Sigma \rangle 
+      \longrightarrow \langle v, \sigma, \Sigma \rangle} [(\textbf{let in} values)] 
+      & \\
+      \inference {\langle e_1, \sigma, \Sigma \rangle \longrightarrow \langle e_1', \sigma', \Sigma \rangle} 
+      {\langle \text{\textbf{const }}x = e_1 \text{\textbf{ in }} e_2 \text{\textbf{ end}}, \sigma, \Sigma \rangle 
+      \longrightarrow \langle \text{\textbf{const }}x = e_1' \text{\textbf{ in }} e_2\text{\textbf{ end}}, \sigma', \Sigma \rangle} 
+      [(\textbf{const in} $expr$)]
+      & \\
+      \inference {x \in \textbf{dom}(\sigma) & x \notin \Sigma} 
+      {\langle x := v, \sigma \rangle \longrightarrow \langle \text{\textbf{skip}}, \sigma[x \mapsto v] \rangle} [(assignment $vals$)] \text{ }
     \end{tabular}
   \end{center}
-  \caption{Hoare Logic for Immutable Variable}
+  \caption{Immutable Variables Rules for Simple-$\Pi$}
+\end{figure}
+
+\par
+Once we defined the ability to define immutable variables, we can utilise it in 
+our type definition. First we refine our specification for \textbf{typedef} 
+with regards to dependent types using the evaluation rules and Hoare Logic 
+defined below. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{c}
+      \inference {a \notin \text{\textbf{dom}}(\sigma) & x \in \Sigma & a \notin \textbf{dom}(\tau)}{\langle \textbf{typedef }a = \Pi x : A.P(x), 
+      \sigma, \Sigma, \tau \rangle \longrightarrow 
+        \langle \text{\textbf{skip}}, \sigma, \Sigma, \tau + \{a \mapsto \Pi x : A.P(x)\}\rangle}[(\textbf{typedef}) $\Pi$] \text{ }    
+      & \\
+      $\{a \notin \textbf{dom}(\tau) \wedge a \notin \textbf{dom}(\sigma) \wedge x \in \Sigma\}\textbf{typedef }a = \Pi x. P(x)
+        \{\tau(a) = \Pi x. P(x)\}$
+    \end{tabular}
+  \end{center}
+  \caption{Dependent Type Definition Rules}
 \end{figure}
 
 \subsubsection{Passing by Value}
@@ -1264,15 +1275,17 @@ will stay well typed.
  
 \par
 In subsection 4.1.2 we defined the functions' evaluation rules using scopes. 
-Here instead, we will define the Hoare Logic that specify the behaviour. If 
-$\Pi x : A. P(x)$ is a dependent type that depends on $x$ of type $A$ then $P \in $ 
-\textit{dfns}, \textit{dfns} behaves like \textit{fns}, 
-holding the signature of all dependent type functions.
+We will be adapating a similar approach for our dependent type functions. If 
+$\Pi x : A. P(x)$ is a dependent type that depends on $x$ of type $A$ then we have  
+$\Pi x : A.P(x) \in $ \textit{dfns}, \textit{dfns} behaves like \textit{fns}, 
+holding the definitions of all dependent type functions. The only difference 
+here is that a dependent type only takes a singular parameter. 
 
 \par
 We first require modification to our \textbf{return} statement, which at the 
 moment only returns expressions, as dependent type functions return types, we 
-need to accomodate that.
+need to accomodate that. We define a special return statement, \textbf{return } 
+$T$, this statement is only to be used with dependent type function. 
 
 \begin{figure}[H]
   \begin{center}
@@ -1283,6 +1296,39 @@ need to accomodate that.
   \caption{Return statement for Types in Simple-$\Pi$}
 \end{figure}
 
+We define the typing rule for this return statement using the idea of 
+\textit{universes} \cite{martinLof} 
+in type theory, using the notation $\Gamma \vdash A : Type$ we say that $A$ is a 
+type. 
+
+We define the formation rule for a dependent type as so: 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {\Gamma \vdash A : Type \\ \Gamma, x : A \vdash P(x) : Type} 
+        {\Gamma \vdash \Pi x. P(x) : Type}[($\Pi$ F)] \text{ }
+    \end{tabular}
+  \end{center}
+  \caption{Typing Rules for the Dependent Product Type}
+\end{figure}
+
+\par
+The dependent product type formation rule ($\Pi$ F) defines the rules in order 
+for a dependent product type to be formed. Similarly, we define the 
+type judgement for a \textbf{return }$T$ statement, it 
+returns a type. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference{\Gamma \vdash A : Type}{\Gamma \vdash \textbf{return } A : Type} [(\textbf{return }T)]
+    \end{tabular}
+  \end{center}
+  \caption{Typing Rules for Base Values}
+\end{figure}
+
+
 \par
 Using the return statement above, when one define a dependent type, our 
 semantics will evaluate the function until a type is returned. 
@@ -1290,26 +1336,18 @@ semantics will evaluate the function until a type is returned.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {((x_1), e_{body}) = \textit{dfns(P)} 
-      \\ \sigma' = \{x_1 \mapsto v\} & \rho' = push(\rho, \langle e_1, \sigma, \tau \rangle)}
-      {\langle\textbf{typedef } x = \Pi v : A.P(v);e_1, 
+      \inference {((x_1), e_{body}) = \textit{dfns}(\Pi v : A.P(v)) 
+      \\ \sigma' = \{x_1 \mapsto v\} &  \langle e_{body} , \sigma, \tau \rangle \longrightarrow^{*} \langle \textbf{return }T, \sigma, \tau \rangle}
+      {\langle\textbf{typedef } x = \Pi v : A.P(v), 
       \sigma, \rho, \tau \rangle \longrightarrow 
-        \langle \textbf{typedef } x = e_{body}, \sigma', \rho', \tau \rangle}[(\textbf{typedef}) $\Pi$]  
-      & \\
-      \inference {\langle e_1, \sigma, \rho, \tau \rangle \longrightarrow \langle e_1', \sigma', \rho', \tau' \rangle}
-      {\langle \textbf{typedef }x = e_1, \sigma, \rho, \tau \rangle \longrightarrow 
-        \langle \textbf{typedef }x = e_1', \sigma', \rho', \tau' \rangle}[(\textbf{typedef}) $\Pi$ eval] 
-      & \\ 
-      \inference {\langle e_1, \sigma', \tau' \rangle = top(\rho) & \rho' = pop(\rho)}
-      {\langle \textbf{typedef } x = \textbf{return }T, \sigma, \rho, \tau \rangle \longrightarrow 
-        \langle e_1, \sigma', \rho', \tau' \uplus {x \mapsto T} \rangle}[(\textbf{typedef}) $\Pi$ return] 
+        \langle \textbf{typedef } x = T, \sigma, \tau \rangle}[(\textbf{typedef}) $\Pi$]  
     \end{tabular}
   \end{center}
   \caption{Evaluation of Dependent Type Functions}
 \end{figure}
 
 \par 
-The three rules above formalise the semantics for dependent type definitions in 
+The rule above formalise the semantics for dependent type definitions in 
 Simple-$\Pi$. The dependent type function is evaluated in its own scope. Note 
 that in our evalutation the \textbf{typedef} statement is being written 
 repeatedly such that we are able to pass back \textbf{return} $T$ to 
