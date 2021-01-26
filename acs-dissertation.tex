@@ -1410,27 +1410,6 @@ type checking by only allowing assignment if the all variables of a dependent
 type that depnds on $x$ holds after reassignment of $x$.
 
 \par
-We modify the typing judgement for assignment by adding a new condition:
-
-\begin{figure}[H]
-  \begin{center}
-   \begin {tabular} {c} 
-     \inference {\Gamma \vdash x: T & \Gamma \vdash v: T 
-     \\ \Gamma \vdash \forall \alpha : \Pi x. P(x)\text{ }s.t.\text{ }\alpha : \Pi v. P(v)} 
-          {\Gamma \vdash x := v : T} [($:=$ dynamic dependent types)] \text{ }
-    \end{tabular}
-  \end{center}
-  \caption{Dynamic Dependedent Type Reassignment Rule}
-\end{figure}
-
-The rule above states that for all $\alpha$ of a type $\Pi x.P(x)$ it will be 
-well typed for $\Pi v.P(v)$, the new value of $x$. Our logic here works simply 
-by using the concept of type membership, which similar to the the 
-concept of set membership in set theory \cite{RussellMathematicalLA}. 
-The above statement can simply be rewritten in logic as 
-$\forall \alpha \in A\text{ }s.t.\text{ }\alpha \in B$.
-
-\par
 Notice that our current value variable context does not 
 provide the type that a variable possess, we only have the value. 
 In order to formalise the behaviour in Hoare Logic, we will need to typing 
@@ -1455,6 +1434,29 @@ $\sigma(x)$ to retrieve a value used in previous semantics still hold, now we
 can write $\alpha : \beta = \sigma(x)$ which gets $\alpha$ the value of $x$ 
 and $\beta$ the type of $x$. This notation allows us to apply the universal 
 quantifier.
+
+
+\begin{figure}[H]
+  \begin{center}
+   \begin {tabular} {c} 
+     \inference {x \in \sigma
+     \\ \forall \alpha : \Pi x. P(x) \in\textbf{rng}(\sigma)\text{ }s.t.\text{ }\alpha : \Pi v. P(v)
+     \\ \sigma' = \sigma \uplus \{\beta \mapsto \alpha : \Pi v. P(v)\text{ }|\text{ }\beta \in \textbf{dom}(\sigma) \wedge \sigma(\beta) = \alpha : \Pi x. P(x)\}
+     \\ \tau' = \tau \uplus \{\beta \mapsto \Pi v. P(v)\text{ }|\text{ }\beta \in \textbf{dom}(\tau) \wedge \tau(\beta) = \Pi x. P(x)\}} 
+          {\langle x := v, \sigma, \tau \rangle \longrightarrow \langle \textbf{skip}, \sigma', \tau' \rangle}
+    \end{tabular}
+  \end{center}
+  \caption{Dynamic Dependedent Type Reassignment Rule}
+\end{figure}
+
+
+The rule above states that for all $\alpha$ of a type $\Pi x.P(x)$ it will be 
+well typed for $\Pi v.P(v)$, the new value of $x$. Our logic here works simply 
+by using the concept of type membership, which similar to the the 
+concept of set membership in set theory \cite{RussellMathematicalLA}. 
+The above statement can simply be rewritten in logic as 
+$\forall \alpha \in A\text{ }s.t.\text{ }\alpha \in B$.
+
 
 \begin{figure}[H]
   \begin{center}
