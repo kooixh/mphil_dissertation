@@ -1221,7 +1221,7 @@ variable.
   \caption{Immutable Variable Context for Simple-$\Pi$}
 \end{figure}
 
-The set $const$ is simply a set of variables that are deemed to be immutable. 
+The set $\Sigma$ is simply a set of variables that are deemed to be immutable. 
 One construct an immutable variable as though they are defining a mutable 
 variable, using the \textbf{const in} statement. We define the semantics as 
 below, we will use the following notation $x \in \Sigma$ to state that $x$ is 
@@ -1476,11 +1476,10 @@ type $\Pi x : A.P(x)$ in the state will have their typing updated with the new v
 of $x$.
 
 This section presented multiple solution to achieving reassignment in a 
-dependently typed language. While all of the proposed solutions have their 
-merits, we decided to use the final approach of Dynamic Dependent Types in our 
-language going forward. We believe that approach provides the most usable 
-implementation of dependent types and serves best as a research topic as 
-introducing new features could present interesting problems. 
+dependently typed language. All approaches has their own advantages and 
+disadvantages. The dynamic dependent types approach while flexible and useful, 
+the act of typing checking and converting the types of multiple variable is a 
+big overhead and might be detremental in practice. 
 
 \section{Pointers and Vectors}
 In this next section we will be presenting dependently typing with regards to 
@@ -1651,6 +1650,10 @@ we use the type $nil$ to represent the default value.
   \end{center}
   \caption{Operational Semantics for Arrays}
 \end{figure}
+
+
+\subsubsection{Depending on an Alias Variables}
+In our previous 
 
 
 
