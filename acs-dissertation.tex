@@ -1278,9 +1278,13 @@ defined below.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
-      \inference {a \notin \text{\textbf{dom}}(\sigma) & x \in \Sigma & a \notin \textbf{dom}(\tau)}{\langle \textbf{typedef }a = \Pi x : A.P(x), 
+      \inference {
+      \langle e_1, \sigma, \Sigma, \tau + \{a \mapsto \Pi x : A.P(x)\} \rangle 
+      \longrightarrow^{*} \langle v, \sigma', \Sigma', \tau' \rangle
+      \\ a \notin \text{\textbf{dom}}(\sigma) & x \in \Sigma & a \notin \textbf{dom}(\tau)}
+      {\langle \textbf{typedef } a = \Pi x :A .P(x) \textbf{ in }e_1\textbf{ end}, 
       \sigma, \Sigma, \tau \rangle \longrightarrow 
-        \langle \text{\textbf{skip}}, \sigma, \Sigma, \tau + \{a \mapsto \Pi x : A.P(x)\}\rangle}[(\textbf{typedef}) $\Pi$] \text{ }    
+        \langle v, \sigma', \Sigma', \tau' - \{a\}\rangle}[(\textbf{typedef}) $\Pi$] \text{ }    
       & \\
       $\{a \notin \textbf{dom}(\tau) \wedge a \notin \textbf{dom}(\sigma) \wedge x \in \Sigma\}\textbf{typedef }a = \Pi x. P(x)
         \{\tau(a) = \Pi x. P(x)\}$
@@ -1372,7 +1376,7 @@ semantics will evaluate the function until a type is returned.
       \\ \sigma' = \{x_1 \mapsto v\} &  \langle e_{body} , \sigma, \tau \rangle \longrightarrow^{*} \langle \textbf{return }T, \sigma, \tau \rangle}
       {\langle\textbf{typedef } x = \Pi v : A.P(v), 
       \sigma, \rho, \tau \rangle \longrightarrow 
-        \langle \textbf{typedef } x = T, \sigma, \tau \rangle}[(\textbf{typedef}) $\Pi$]  
+        \langle \textbf{typedef } x = T \textbf{ in }e_1\textbf{ end}, \sigma, \tau \rangle}[(\textbf{typedef}) $\Pi$]  
     \end{tabular}
   \end{center}
   \caption{Evaluation of Dependent Type Functions}
