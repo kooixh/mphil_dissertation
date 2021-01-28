@@ -827,23 +827,26 @@ This judgement represents that expression $e$ under the context $\Gamma$ has the
 type $T$.
 
 \par
-Using the judgement rule we can easily define the fist two typing rules for base 
-values \textit{int} and \textit{bool}.
+Using the judgement rule we can easily define the fist few typing rules for base 
+values \textit{int}, \textit{bool}, $nil$ and variables.
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
       $\forall n \in \mathbb{Z}$, $\Gamma \vdash n : int$ & 
       $\forall b \in \mathbb{B}$, $\Gamma \vdash b : bool$ & 
-      $\Gamma \vdash nil : void$      
+      $\Gamma \vdash nil : void$ & 
+      $x : T, \Gamma \vdash x : T$
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Base Values}
 \end{figure}
 
 \par
-The remaining typing rules for the operators, statements and function 
-calls are presented in figure 3.3 below. Most of the typing rule are straightforward and what one would expect from the 
+The remaining typing rules for the operators, statements and function  
+calls are presented below. First we define the 
+basic rules in figure 3.3, 
+most of the typing rule are straightforward and what one would expect from the 
 type checker. 
 
 \begin{figure}[H]
@@ -866,6 +869,9 @@ type checker.
         {\Gamma \vdash x := e_1 : T} [($:=$)] \text{ }
       \inference {\Gamma \vdash e_1: T_1 & \Gamma, x : T_1 \vdash e_2: T_2} 
         {\Gamma \vdash \textbf{let } x = e_1 \textbf{ in } e_2 \textbf{ end }: T_2} [(\textbf{let in})] \text{ }
+      & \\
+      \inference {\Gamma \vdash e_1: T_1 & \Gamma \vdash e_2: T_2} 
+        {\Gamma \vdash e_1;e_2 : T_2} [(concatenation $;$)] \text{ }
     \end{tabular}
   \end{center}
 \caption{Basic Typing Rules for Simple-$\Pi$}
@@ -907,12 +913,12 @@ using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rule
 \par
 Throughout the text we will use the following metavariables and notations. 
 \begin{itemize}
-  \item The metavarible $ops$ to range over all operators.
+  \item The metavarible $op$ as one of a range of operators. 
   \item $\sigma[x \mapsto v]$ updates $\sigma$ such that now $\sigma(x) = e$ and 
   $\sigma + \{x \mapsto v\}$ adds $\{x \mapsto v\}$ to $\sigma$ provided 
   initially $x \notin\textbf{dom}(\sigma)$.
   \item The metavariable $v$ to range over all values.
-  \item Uppercase letters $A,B,C$ to range over all types.
+  \item The uppercase letter $T$ to range over all types.
   \item Greek letters ($\alpha$, $\pi$, $\upsilon$) to define local variables in 
   the formuli. 
 \end{itemize}
@@ -920,7 +926,7 @@ Throughout the text we will use the following metavariables and notations.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      $\langle v, \sigma \rangle \longrightarrow \langle \textbf{skip}, \sigma \rangle$ ($vals$ evaluation) 
+      $\langle v_1;e_1, \sigma \rangle \longrightarrow \langle e_1, \sigma \rangle$ ($vals$ evaluation) 
       \text{ }
       \inference {x \in \textbf{dom}(\sigma)}{\langle x, \sigma \rangle \longrightarrow \langle \sigma(x), \sigma\rangle}[($vars$) evaluation] 
       & \\
@@ -931,12 +937,12 @@ Throughout the text we will use the following metavariables and notations.
       \inference {v = v_1 \vee v_2}{\langle v_1 \vee v_2, \sigma \rangle \longrightarrow \langle v, \sigma \rangle}[(op $\vee$)]
       & \\
       \inference {\langle e_1, \sigma\rangle \longrightarrow \langle e_1', \sigma\rangle}
-        {\langle e_1\text{ }ops\text{ }e_2, \sigma  
-        \rangle \longrightarrow \langle e_1'\text{ }ops\text{ }e_2, \sigma' \rangle}[($ops$ $expr$)]
+        {\langle e_1\text{ }op\text{ }e_2, \sigma  
+        \rangle \longrightarrow \langle e_1'\text{ }op\text{ }e_2, \sigma' \rangle}[($op$ $expr$)]
       & \\
       \inference {\langle e_2, \sigma\rangle \longrightarrow \langle e_2', \sigma\rangle}
-        {\langle v\text{ }ops\text{ }e_2, \sigma  
-        \rangle \longrightarrow \langle v\text{ }ops\text{ }e_2', \sigma' \rangle}[($ops$ $expr$ 2)]
+        {\langle v\text{ }op\text{ }e_2, \sigma  
+        \rangle \longrightarrow \langle v\text{ }op\text{ }e_2', \sigma' \rangle}[($op$ $expr$ 2)]
       & \\
       \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e_1', \sigma' \rangle}
         {\langle e_1;e_2, \sigma \rangle \longrightarrow \langle e'_1;e_2, \sigma' \rangle}[($e_1;e_2$)]
@@ -944,22 +950,22 @@ Throughout the text we will use the following metavariables and notations.
       $\langle \text{\textbf{skip}};e2, \sigma \rangle \longrightarrow \langle e2, \sigma \rangle$ (\textbf{skip})
       & \\
       $\langle \text{\textbf{if }\textit{true}} \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
-        e_2, \sigma \rangle \longrightarrow \langle e_1, s\rangle$ (\textbf{if} true)
+        e_2, \sigma \rangle \longrightarrow \langle e_1, \sigma\rangle$ (\textbf{if} true)
       & \\
       $\langle \text{\textbf{if }\textit{false}} \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
         e_2, \sigma \rangle \longrightarrow \langle e_2, \sigma\rangle$ (\textbf{if} false)
       & \\
-      \inference {\langle e, \sigma\rangle \longrightarrow \langle e', \sigma \rangle}
-        {\langle \text{\textbf{if }} e \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
-        e_2, \sigma \rangle \longrightarrow \langle \textbf{if } e \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
+      \inference {\langle e_0, \sigma\rangle \longrightarrow \langle e_0', \sigma \rangle}
+        {\langle \text{\textbf{if }} e_0 \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
+        e_2, \sigma \rangle \longrightarrow \langle \textbf{if } e_0' \text{\textbf{ then }} e_1 \text{\textbf{ else }} 
         e_2, \sigma \rangle}[(\textbf{if} $expr$)] 
       & \\
-      $\langle \text{\textbf{while }} c \text{\textbf{ do }} e, \sigma \rangle \longrightarrow \langle 
-        \text{\textbf{if }} c \text{\textbf{ then }} e;
-        (\text{\textbf{while }} c \text{\textbf{ do }} e) \text{\textbf{ else }} \textbf{skip}, \sigma \rangle$ (\textbf{while do})
+      $\langle \text{\textbf{while }} e_0 \text{\textbf{ do }} e_1, \sigma \rangle \longrightarrow \langle 
+        \text{\textbf{if }} e_0 \text{\textbf{ then }} e_1;
+        (\text{\textbf{while }} e_0 \text{\textbf{ do }} e_1) \text{\textbf{ else }} \textbf{skip}, \sigma \rangle$ (\textbf{while do})
       & \\
       \inference {x \in \textbf{dom}(\sigma)} 
-      {\langle x := v, \sigma \rangle \longrightarrow \langle \text{\textbf{skip}}, \sigma[x \mapsto v] \rangle} [(assignment $vals$)] \text{ }
+      {\langle x := v, \sigma \rangle \longrightarrow \langle v, \sigma[x \mapsto v] \rangle} [(assignment $vals$)] \text{ }
       & \\
       \inference {\langle e, \sigma \rangle \longrightarrow \langle e', \sigma' \rangle} 
       {\langle x := e, \sigma \rangle \longrightarrow \langle x := e', \sigma'\rangle} [(assignment $expr$)] \text{ }
@@ -978,7 +984,7 @@ variables.
 In order to help us formalise the notion of scopes we define a new notation, 
 $\longrightarrow^{*}$ as a multi-step evaluation. The evaluation rule 
 $\langle e, \sigma \rangle \longrightarrow^{*}  \langle v, \sigma' \rangle$ simply 
-evaluate the expression $e$ one or more times until it evaluates to $v$. 
+evaluate the expression $e$ one or more times until it evaluates to a value $v$. 
 
 \par
 Using a multi step evaluation, We can easily define the scoping rules as shown 
@@ -987,9 +993,10 @@ below.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
-      \inference {\sigma' = \sigma + \{x \mapsto v\} & x \notin \sigma \\ \langle e_1, \sigma' \rangle \longrightarrow^{*} \langle v, \sigma'' \rangle} 
-      {\langle \text{\textbf{let }}x = v \text{\textbf{ in }} e_1 \text{\textbf{ end}}, \sigma \rangle 
-      \longrightarrow \langle v, \sigma\rangle} [(\textbf{let in} values)] 
+      \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \sigma 
+      \\ \langle e_1, \sigma' \rangle \longrightarrow^{*} \langle v_1, \sigma'' \rangle} 
+      {\langle \text{\textbf{let }}x = v_0 \text{\textbf{ in }} e_1 \text{\textbf{ end}}, \sigma \rangle 
+      \longrightarrow \langle v_1, '' - \{x\} \rangle} [(\textbf{let in} values)] 
       & \\
       \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e_1', \sigma'\rangle} 
       {\langle \text{\textbf{let }}x = e_1 \text{\textbf{ in }} e_2 \text{\textbf{ end}}, \sigma \rangle 
@@ -1008,6 +1015,13 @@ The \textbf{let in} statement opens a new scope $\sigma'$ which
 assigns $x$ the value $v$, the in expression, $e_1$ is then evaluated with the 
 new context using the multi-step evaluation until it no longer can be evaluted, 
 the resulting expression is passed back to the original context.
+
+\par 
+Notice that in the first rule above (\textbf{let in } values), the resulting state 
+uses the notation $\sigma'' - \{x\}$, we define the operator as removing the 
+variables $x$ from the domain of $\sigma$. This is necessary as in a scope it is 
+possible to change the state of the program. Once $x$ goes out of scope the 
+changes still persist. 
 
 \par
 The multi-step evaluation provides us to much more easily express scoping rules, 
@@ -1054,7 +1068,7 @@ We can then evalute the function body which using the multi-step evaluation.
     \begin{tabular} {c}
       \inference {((x_1..x_n), e_{body}) = \textit{fns}(f) 
         \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \langle e_{body}, \sigma' \rangle \longrightarrow^{*} \langle v, \sigma'' \rangle}
-      {\langle f(v_1...v_n), \sigma, \rho' \rangle \longrightarrow \langle v, \sigma \rangle} [(function call vals)]
+      {\langle f(v_1...v_n), \sigma \rangle \longrightarrow \langle v, \sigma \rangle} [(function call vals)]
       & \\
       \inference {\langle e_k, \sigma \rangle \longrightarrow \langle e_k', \sigma' \rangle}
       {\langle f(v_0...v_{k - 1},e_k...e_n), \sigma \rangle \longrightarrow \langle f(v_0...v_{k - 1}, e_{k}'...e_n), \sigma' \rangle} [(function call expr)]
@@ -1068,7 +1082,8 @@ The first rule (function call vals) resembles the evaluation rule for
 \textbf{let in} but it differs in a crucial way, in the new context for a 
 function call, none of the variabels from the previous scope transfer over, only 
 those of the argument are copied. We then evaluates the function body until it 
-evaluates to a value which is then returned to the caller's context. 
+evaluates to a value which is then returned to the caller's context. Unlike 
+scopes, functions cannot alter the program's state. 
 
 \par
 The second rule (function call $expr$) evaluates the expression passed into the 
@@ -1115,15 +1130,16 @@ Hoare Triple provides a much more concise notation.
 
 
 \subsection{Defining Dependent Types with Variable}
-Consider the uncertainty of using variables to define dependent types. For 
+Consider the ambiguity of using variables to define dependent types. For 
 instance: 
 
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
     \textbf{let }$y\text{ }:\text{ } int = 10$ \textbf{ in } \\
-    \tab\textbf{typedef }$BoundedIntY$ = $\Pi y : int. \{i : Int\text{ }|\text{ }i < y\}$; \\ 
-    \tab\textbf{let }$x\text{ }:\text{ }BoundedIntY = 4$ \textbf{ in }$y := 5$\textbf { end} \\
-    \textbf {end}
+    \tab\textbf{typedef }$BoundedIntY$ = $\Pi y : int. \{i : Int\text{ }|\text{ }i < y\}$ \textbf{ in } \\ 
+    \tab\tab\textbf{let }$x\text{ }:\text{ }BoundedIntY = 4$ \textbf{ in }$y := 5$\textbf { end} \\
+    \tab\textbf {end} \\
+    \textbf{end}
   \end{tabs}  
   \caption{Mutation to Variable Depended On}
 \end{figure}
@@ -1136,7 +1152,10 @@ formalise their specification.
 
 \par
 First we need to introduce a new expression for type definition, in the example 
-above we used the expression (\textbf{typedef} $x = T$) to denote a new type. 
+above we used the expression (\textbf{typedef} $x = T$ \textbf{ in }$e_1$ \textbf {end}) 
+to denote a new type $T$ with the name $x$ that exists in the scope of $e_1$. 
+This definition is similar to the \textbf{let in} expression defined previously. 
+
 In our example, we mean 
 that a new type named $BoundedIntY$ is created. We need to add this construct 
 into our syntax. In our current syntax, we have a context for variables and 
@@ -1148,7 +1167,7 @@ The syntax is extended by adding the following:
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {l l l}
-      \textit{Expression} & $e$ & $:$ ... $|$ \textbf{typedef }$x = T$ \\
+      \textit{Expression} & $e$ & $:$ ... $|$ \textbf{typedef }$x = T\textbf{ in } e_1$ \textbf{ end} \\
       \textit{Type Name Context} & $\tau$& $:$ $vars \mapsto T$ \\
     \end{tabular}
   \end{center}
@@ -1161,9 +1180,11 @@ We then define the operational semantics:
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {x \notin \text{\textbf{dom}}(\sigma)}{\langle \textbf{typedef }x = A, 
+      \inference {\langle e_1, \sigma, \tau' \rangle \longrightarrow^{*} \langle v, \sigma', \tau'' \rangle 
+      \\ x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) & \tau' = \tau + \{x \mapsto T\}}
+      {\langle \textbf{typedef }x = A \textbf{ in }e_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow 
-        \langle \text{\textbf{skip}}, \sigma, \tau + \{x \mapsto A\}\rangle}[(\textbf{typedef})] \text{ }    
+        \langle v, \sigma', \tau'' - \{x\}\rangle}[(\textbf{typedef})] \text{ }    
     \end{tabular}
   \end{center}
 \end{figure}
@@ -1171,7 +1192,9 @@ We then define the operational semantics:
 \par
 The operational semantic above simply adds a new type definition with name $x$ 
 into the Type Name context $\tau$. Importantly, the variable $x$ cannot have 
-already been defined as a value variable n $\sigma$. 
+already been defined as a value variable n $\sigma$ and a type of the same name 
+can not already be defined. Logically it is equivalent to the semantics for 
+\textbf{let in}.
 
 
 \subsubsection{Complete Immutability}
@@ -1207,14 +1230,14 @@ that go against the paradigm.
 We observe that only variables associated with dependent typing needs to be 
 immutable to prevent any uncertain behaviours. To improve the flexibility of our 
 language, we could loosen the restrictions by having only the depenent variables 
-be immutable. We introduced a new construct in our syntax to handle immutable 
+be immutable. We now therefore introduced a new construct in our syntax to handle immutable 
 variable. 
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {l l l}
       \textit{Expressions} & $e$& $:$ $...\text{ }|\text{ }
-        \textbf{consts }x := e_1 \textbf{ in }e_2\textbf{ end}$ \\
+        \textbf{consts }x = e_1 \textbf{ in }e_2\textbf{ end}$ \\
       \textit{Immutable Variables} & $\Sigma$ & $:$ $vars$ \\
     \end{tabular}
   \end{center}
@@ -1653,7 +1676,13 @@ we use the type $nil$ to represent the default value.
 
 
 \subsubsection{Depending on an Alias Variables}
-In our previous 
+Previously we explored how restricting mutability for variables allows us to use 
+them in dependent types. It is important to note that we only considered 
+local variables, the notions of pointers and references will complicate matters. 
+While it is perfectly simple to restrict mutation simply by marking a local 
+variable \textit{const}, the same can't be done with pointers. A constant 
+pointer variable simply restrict the address to be change, manipulating the 
+underlying value is still very much possible. 
 
 
 
