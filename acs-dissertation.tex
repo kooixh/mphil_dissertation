@@ -1304,17 +1304,22 @@ the rule.
 We construct our Hoare Triple as follows, first we declare 
 the expression that we would like to evaluate, we do this in two parts.
 
-Let $\{S\}e_1\{T\}$ be a Hoare triple and we have a type declaration defined as 
+Let $\{S\}e_1\{T\}$ be a Hoare triple and we have a type declaration incorporating 
+$e_1$ which will be evaluted in our Hoare Logic as $E$
+
 \begin{center}
   $E = \textbf{let typedef }a = \Pi x. P(x) \textbf{ in } e_1 \textbf{ end }$
 \end{center}
 \par
 
 In order to prevent confusion between our postcondition and our dependent type 
-function, we delcare precondition as $Q$ on our type declaration
+function, we delcare precondition as $Q$ on our type declaration $E$
 \begin{center}
   $Q = a \notin \textbf{dom}(\tau) \wedge a \notin \textbf{dom}(\sigma) \wedge is\_immutable(x)$
 \end{center}
+
+\par
+The Hoare logic can then be written as
 
 \begin{figure}[H]
   \begin{center}
