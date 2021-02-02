@@ -721,7 +721,7 @@ the imperative paradigm, specifically a procedural language.
         & & \; $|$ \textbf{skip} $|$ \textbf{return} $e_1$ $|$ 
         \textbf{while} $e_1$ \textbf{do} $e_2$ \\ & & \;
         $|$ \textbf{if} $e_1$ \textbf{then} $e_2$ \textbf{else} $e_3$ $|$ 
-        \textbf{let} $x = e_1$ \textbf{in} $e_2$ \textbf{end}\\
+        \textbf{let var } $x = e_1$ \textbf{in} $e_2$ \textbf{end}\\
       \textit{Variables} & $vars$& $:$ $x \in {a,b,c...z}$\\
       \textit{Values} & $vals$& $:$ $\forall v \in \mathbb{Z}$ $|$ $\forall v \in \mathbb{B}$ 
         $|$ $nil$\\
@@ -786,7 +786,7 @@ The language supports the following built in operators.
   \item The \textbf{skip} statement is use to indicate an empty expression and 
   does not perform any meaningful action. 
   \item The \textbf{let} statement is used to bind new variables in an 
-  expression. It is modelled after the same statement in Haskell, where \textbf{let} 
+  expression. It is modelled after the same statement in Haskell, where \textbf{let var } 
   $x = e_1$ \textbf{in} $e_2$ \textbf{end} declare a variable $x$ with the value after 
   evaluating $e_1$, the variable is then available in the scope $e_2$ until 
   \textbf{end}.
@@ -836,7 +836,8 @@ values \textit{int}, \textit{bool}, $nil$ and variables.
       $\forall n \in \mathbb{Z}$, $\Gamma \vdash n : int$ & 
       $\forall b \in \mathbb{B}$, $\Gamma \vdash b : bool$ & 
       $\Gamma \vdash nil : void$ & 
-      $x : T, \Gamma \vdash x : T$
+      $x : T, \Gamma \vdash x : T$ & 
+      $\Gamma \vdash \textbf{skip} : void$
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Base Values}
@@ -868,7 +869,7 @@ type checker.
       \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
         {\Gamma \vdash x := e_1 : T} [($:=$)] \text{ }
       \inference {\Gamma \vdash e_1: T_1 & \Gamma, x : T_1 \vdash e_2: T_2} 
-        {\Gamma \vdash \textbf{let } x = e_1 \textbf{ in } e_2 \textbf{ end }: T_2} [(\textbf{let in})] \text{ }
+        {\Gamma \vdash \textbf{let var } x = e_1 \textbf{ in } e_2 \textbf{ end }: T_2} [(\textbf{let in})] \text{ }
       & \\
       \inference {\Gamma \vdash e_1: T_1 & \Gamma \vdash e_2: T_2} 
         {\Gamma \vdash e_1;e_2 : T_2} [(concatenation $;$)] \text{ }
@@ -995,12 +996,12 @@ below.
     \begin{tabular}{c}
       \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \sigma 
       \\ \langle e_1, \sigma' \rangle \longrightarrow^{*} \langle v_1, \sigma'' \rangle} 
-      {\langle \text{\textbf{let }}x = v_0 \text{\textbf{ in }} e_1 \text{\textbf{ end}}, \sigma \rangle 
+      {\langle\textbf{let var }x = v_0 \text{\textbf{ in }} e_1 \text{\textbf{ end}}, \sigma \rangle 
       \longrightarrow \langle v_1, '' - \{x\} \rangle} [(\textbf{let in} values)] 
       & \\
       \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e_1', \sigma'\rangle} 
-      {\langle \text{\textbf{let }}x = e_1 \text{\textbf{ in }} e_2 \text{\textbf{ end}}, \sigma \rangle 
-      \longrightarrow \langle \text{\textbf{let }}x = e_1' \text{\textbf{ in }} e_2\text{\textbf{ end}}, \sigma' \rangle} 
+      {\langle \textbf{let var }x = e_1 \text{\textbf{ in }} e_2 \text{\textbf{ end}}, \sigma \rangle 
+      \longrightarrow \langle\textbf{let var }x = e_1' \text{\textbf{ in }} e_2\text{\textbf{ end}}, \sigma' \rangle} 
       [(\textbf{let in} $expr$)]
     \end{tabular}
   \end{center}
@@ -1135,9 +1136,9 @@ instance:
 
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
-    \textbf{let }$y\text{ }:\text{ } int = 10$ \textbf{ in } \\
+    \textbf{let var }$y\text{ }:\text{ } int = 10$ \textbf{ in } \\
     \tab\textbf{let typedef }$BoundedIntY$ = $\Pi y : int. \{i : Int\text{ }|\text{ }i < y\}$ \textbf{ in } \\ 
-    \tab\tab\textbf{let }$x\text{ }:\text{ }BoundedIntY = 4$ \textbf{ in }$y := 5$\textbf { end} \\
+    \tab\tab\textbf{let var }$x\text{ }:\text{ }BoundedIntY = 4$ \textbf{ in }$y := 5$\textbf { end} \\
     \tab\textbf {end} \\
     \textbf{end}
   \end{tabs}  
@@ -1427,11 +1428,20 @@ semantics will evaluate the function until a type is returned.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {((x_1), e_{body}) = \textit{dfns}(\Pi v : A.P(v)) 
+      
+     \scriptsize
+     \inference {\langle e_1, \sigma, \tau \rangle \longrightarrow \langle e_1', \sigma', \tau' \rangle}
+      {\langle\textbf{let typedef } x = \Pi e_1 : A.P(e_1) \textbf{ in }e_2\textbf{ end}, 
+      \sigma, \tau \rangle \longrightarrow 
+        \langle \textbf{let typedef } x = \Pi e_1' : A.P(e_1') \textbf{ in }e_2\textbf{ end}, \sigma, \tau \rangle} 
+      & \\
+     \footnotesize
+     \inference {((x_1), e_{body}) = \textit{dfns}(\Pi v : A.P(v)) 
       \\ \sigma' = \{x_1 \mapsto v\} &  \langle e_{body} , \sigma, \tau \rangle \longrightarrow^{*} \langle \textbf{return }T, \sigma, \tau \rangle}
-      {\langle\textbf{typedef } x = \Pi v : A.P(v), 
-      \sigma, \rho, \tau \rangle \longrightarrow 
-        \langle \textbf{typedef } x = T \textbf{ in }e_1\textbf{ end}, \sigma, \tau \rangle}[(\textbf{typedef}) $\Pi$]  
+      {\langle\textbf{let typedef } x = \Pi v : A.P(v) \textbf{ in }e_1\textbf{ end}, 
+      \sigma, \tau \rangle \longrightarrow 
+        \langle \textbf{let typedef } x = T \textbf{ in }e_1\textbf{ end}, \sigma, \tau \rangle}
+    \normalsize
     \end{tabular}
   \end{center}
   \caption{Evaluation of Dependent Type Functions}
@@ -1452,6 +1462,39 @@ whose value are available at runtime, i.e. a non constant variable. It provides
 more flexibility in comparison to C++ templates but it is still has limitations. The 
 programmer might sometimes be looking for dependent types whose definitions 
 changes with the value of the variable. 
+
+\par
+As with the previous example, we caputure the behaviour with Hoare Logic as 
+follows. To improve readability, we use local variables to represent certain 
+expressions. 
+
+\par
+We use $E$ to represent the main expression under evaluation, in this example we 
+is defined as
+
+\begin{center}
+  $E = \textbf{let typedef }y = \Pi x : A.P(x) \textbf{ in }e_1\textbf{ end}$  
+\end{center}
+
+\par
+As we did previously, we define a triple $\{S\}e_1\{T\}$ as an arbitrary hoare 
+logic over expression $e_1$. Our triple can then be defined as 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{c}
+      \inference{\{\tau(y) = \Pi \alpha : A.P(\alpha) \wedge S\}e_1\{T\}}{\forall \alpha : A\{\alpha = x\}E\{T\}}
+    \end{tabular}
+  \end{center}
+\end{figure}
+
+\par
+In the above formula, we are using a local variable $\alpha$ to represent 
+passing by value, we are formalising that the variable program varaible $x$ is 
+distinct from $\alpha$ and mutation of $x$ does to reflect on $\alpha$. The 
+dependent type bound to $y$ depends on $\alpha$ and not $x$.
+
+
 
 \subsubsection{Dynamic Dependent Types}
 In this subsection we will be presenting an approach to handling dependent types 
