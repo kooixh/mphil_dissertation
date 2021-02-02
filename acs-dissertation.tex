@@ -1457,13 +1457,6 @@ statement then $T$ would have to be an expression and could potentitally results
 in further complications. 
 
 \par
-This semantic allow the language to allow us to define types using variable 
-whose value are available at runtime, i.e. a non constant variable. It provides 
-more flexibility in comparison to C++ templates but it is still has limitations. The 
-programmer might sometimes be looking for dependent types whose definitions 
-changes with the value of the variable. 
-
-\par
 As with the previous example, we caputure the behaviour with Hoare Logic as 
 follows. To improve readability, we use local variables to represent certain 
 expressions. 
@@ -1494,7 +1487,18 @@ passing by value, we are formalising that the variable program varaible $x$ is
 distinct from $\alpha$ and mutation of $x$ does to reflect on $\alpha$. The 
 dependent type bound to $y$ depends on $\alpha$ and not $x$.
 
+\par
+Unlike C++, this form of sematics allows one to utilise non-constant expression 
+in type definition. This is achieved by taking the \textit{rvalue} \cite{cpplrvalues} 
+of an expression rather than the \textit{lvalue}. The clear advantage of this 
+appraoch is the improved flexibility given to the programmer which allow more 
+variables to be associated with types. 
 
+\par
+Whit this approach does provide more flexibility in comparison to 
+C++ templates it is still has certain limitations. The most obvious is the fact 
+that the programmer might sometimes be looking for dependent types 
+whose definitions changes with the value of the variable. 
 
 \subsubsection{Dynamic Dependent Types}
 In this subsection we will be presenting an approach to handling dependent types 
