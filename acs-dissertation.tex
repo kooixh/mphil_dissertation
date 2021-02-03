@@ -1019,10 +1019,14 @@ the resulting expression is passed back to the original context.
 
 \par 
 Notice that in the first rule above (\textbf{let in } values), the resulting state 
-uses the notation $\sigma'' - \{x\}$, we define the operator as removing the 
-variables $x$ from the domain of $\sigma$. This is necessary as in a scope it is 
-possible to change the state of the program. Once $x$ goes out of scope the 
-changes still persist. 
+uses the notation $-$, we define the operator to operate on a state and a set of 
+$vars$. $\sigma - \{x\}$ states that remove all the variables in the set 
+$\{x\}$ from the domain of $\sigma$. 
+
+\par
+This is necessary as in a scope it is possible to change the state of the 
+program. More importantly, upon exiting a scope the alteration to the program 
+will still hold.
 
 \par
 The multi-step evaluation provides us to much more easily express scoping rules, 
@@ -1560,7 +1564,7 @@ First we modified the value variable context as shown below:
 
 This means that a varible now maps to a value with type $T$. The notation of 
 $\sigma(x)$ to retrieve a value used in previous semantics still hold, now we 
-can write $\alpha : \beta = \sigma(x)$ which gets $\alpha$ the value of $x$ 
+can write $\sigma(x) = \alpha : \beta$ which gets $\alpha$ the value of $x$ 
 and $\beta$ the type of $x$. This notation allows us to apply the universal 
 quantifier.
 
@@ -1570,9 +1574,9 @@ quantifier.
    \begin {tabular} {c} 
      \inference {x \in \sigma
      \\ \forall \alpha : \Pi x. P(x) \in\textbf{rng}(\sigma)\text{ }s.t.\text{ }\alpha : \Pi v. P(v)
-     \\ \sigma' = \sigma \uplus \{\beta \mapsto \alpha : \Pi v. P(v)\text{ }|\text{ }\beta \in \textbf{dom}(\sigma) \wedge \sigma(\beta) = \alpha : \Pi x. P(x)\}
-     \\ \tau' = \tau \uplus \{\beta \mapsto \Pi v. P(v)\text{ }|\text{ }\beta \in \textbf{dom}(\tau) \wedge \tau(\beta) = \Pi x. P(x)\}} 
-          {\langle x := v, \sigma, \tau \rangle \longrightarrow \langle \textbf{skip}, \sigma', \tau' \rangle}
+     \\ \sigma' = \sigma[\beta \mapsto \alpha : \Pi v. P(v)\text{ }|\text{ }\beta \in \textbf{dom}(\sigma) \wedge \sigma(\beta) = \alpha : \Pi x. P(x)]
+     \\ \tau' = \tau[\beta \mapsto \Pi v. P(v)\text{ }|\text{ }\beta \in \textbf{dom}(\tau) \wedge \tau(\beta) = \Pi x. P(x)]} 
+          {\langle x := v, \sigma, \tau \rangle \longrightarrow \langle v, \sigma', \tau' \rangle}
     \end{tabular}
   \end{center}
   \caption{Dynamic Dependedent Type Reassignment Rule}
@@ -1586,13 +1590,33 @@ concept of set membership in set theory \cite{RussellMathematicalLA}.
 The above statement can simply be rewritten in logic as 
 $\forall \alpha \in A\text{ }s.t.\text{ }\alpha \in B$.
 
+\par
+We capture the behaviour of dynamic dependent types in hoare logic by  
+extending the definition of the Hoare Logic for assignment, recall the axiom
+\begin{center}
+  $\{P[e/x]\}x := e\{P\}$
+\end{center}
+The axiom simply states that, in some predicate $P$ holds after the assignment, 
+it holds before the assignment.
+
+\par
+We define $\phi$ as a local function $T \longrightarrow \{vars\}$, defined as 
+
+\begin{center}
+  $\phi(T) = \{x\text{ }|\text{ }x \in \sigma \wedge \sigma(x) = \alpha : T\}$  
+\end{center}
+
+\par
+Given a type $T$, the function $\phi$ returns the set of all variables in the 
+state $\sigma$ that has type $T$.
+
+
+
 
 \begin{figure}[H]
   \begin{center}
-    $\forall \gamma \in \mathcal{P}(\sigma).$\\
-    \footnotesize$\{\gamma = \{\alpha : \beta \in \sigma\text{ }|\text{ }\beta = 
-    \Pi x : A. P(x)\}\}x:= e\{\sigma(x) = e \wedge 
-    \forall \alpha : \beta \in \gamma\text{ }s.t.\text{ }\beta = \Pi x : A. P(x)\}$ 
+    \footnotesize$\forall \gamma \in \mathcal{P}(\sigma)\{\gamma = \phi(\Pi x : A.P(x)) \wedge P[e/x]\}x:= e\{P \wedge 
+    \forall x \in \gamma\text{ }s.t.\text{ }\sigma(x) = \alpha : \Pi e : A. P(e)\}$ 
     \normalsize
   \end{center}
   \caption{Dynamic Dependedent Type Reassignment Rule}
