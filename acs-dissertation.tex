@@ -1657,42 +1657,35 @@ new syntax is shown in figure 4.14 below.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {l l l}
-      \textit{Types} & $T$& $:$ $...\text{ }|\text{ }T\text{ \textit{ref }}|\text{ } T \text{ }array$ \\
-      \textit{Expressions} & $e$& $:$ $...\text{ }|\text{ }e_1[e_2]\text{ }
-        |\text{ }e_1[e_2] := e_3\text{ }|\text{ }\textbf{size}(e_1)$ \\
-        & & \; $|\text{ }\textbf{newarray}(e_1, T)\text{ }|\text{ }!e_1\text{ }|\text{ \textbf{new}}(T)$ \\
-     \textit{Values} & $vals$& $:$ $...\text{ }|\text{ }h\text{ }|\text{ }(h_0,h_1...h_n)$ \\
+      \textit{Types} & $T$ & $:$ $...\text{ }|\text{ }T\text{ \textit{ref }}$ \\
+      \textit{Expressions} & $e$ & $:$ $...\text{ }|\text{ }!e_1\text{ }|\textbf{ new}(T)|\textbf{ new}(T, v)$\\
+     \textit{Values} & $vals$& $:$ $...\text{ }|\text{ }h$ \\
      \textit{Heap} & $\Delta$& $:$ $h \in \{h_1,h_2, h_3...\} \mapsto vals$\\
     \end{tabular}
   \end{center}
   \caption{Heap Memory Allocation in Simple-$\Pi$}
 \end{figure}
 
-
 \par
 We introduced two new types, $T$ \textit{ref} is a reference type, it behaves 
 like a pointer in C/C++, like pointers, references are typed and its value is a heap address. 
-$T$ $array$ is an array type. Like most languages, arrays are typed 
-and all elements in the array must be of type $T$.
+
 
 \par
 We introduced the following expressions into the language:
 \begin{itemize}
-  \item $e_1[e_1]$ to index an element in an array, like C/C++, arrays are 
-  0-indexed. $e_1[e_2] := e_3$ to assign values into arrays.
-  \item \textbf{size}$(e_1)$ to retrive the size of an array.
-  \item \textbf{newarray}$(e_1, T)$ to allocate a new array of $T$ that is of 
-  \textbf{size}$(e_1)$.
   \item $!e_1$ to dereference the $T$ \textit{ref} represented by $e_1$.
-  \item \textbf{new}($T$) to allocate and return a $T$ \textit{ref}.
+  \item \textbf{new}($T$) to allocate and return a $T$ \textit{ref} without specifying the value 
+  which will be assigned $nil$.
+  \item \textbf{new}($T, v$) to allocate and return a $T$ \textit{ref} with the 
+  value $v$.
 \end{itemize}
 \par
 For simplicity, we have ommited the need for manual memory management and memory 
 deallocation.
 
 \par
-Values are extended such that it now includes heap address $h$ or in the case of 
-an array, a tuple of head addresses $(h_0...h_n)$. 
+Values are extended such that it now includes heap address $h$
 
 \par
 Finally, Heap $\Delta$ is a set of heap addresses $\{h_0, h_1, h_2...\}$ currently in use, 
@@ -1703,56 +1696,35 @@ to get the value held at a particular heap address.
 
 \subsubsection{Typing Rules}
 
-We first define the base types for heap address and array values. As it is with 
-many languages, the $nil$ type is a reference type.
+We first define the base types for heap address and array values. As it is the 
+case with many languages, the $nil$ value is a reference type.
 \begin{center}
    $\Gamma \vdash nil : T\text{ }ref$ ($nil$ reference type)
 \end{center}
 
 \par
-We define the type of a heap address simply by checking its type of reference. 
-For an array, all heap addresses has to be of the same type. 
+We define the rest of the typing judgement as shown below.
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\Gamma(h) = T\textit{ ref}} 
+      \inference {\Gamma(\Delta(h)) = T} 
         {\Gamma \vdash h : T\text{ }ref}[(heap address type)]
+      \text{ }
+      \inference {\Gamma \vdash e_1 : T\text{ }ref}{\Gamma \vdash !e_1 : T}[(dereferencing)]
       & \\
-      \inference {\Gamma(h_0) = T\textit{ ref} & \Gamma(h_1) = T\textit{ ref} &...& \Gamma(h_n) = T\textit{ ref}} 
-        {\Gamma \vdash (h_0,h_1...h_n) : T\text{ }array}[($array$ type)] 
+      $\Gamma \vdash \textbf{new}(T) : T\textit{ ref}$ (\textbf{new} reference 1)
+      \text{ }
+      \inference {\Gamma \vdash v : T}{\Gamma \vdash \textbf{new}(T, v) : T\textit{ ref}}[(\textbf{new} reference 2)]
     \end{tabular}
   \end{center}
-  \caption{Typing Rules for the Array and Ref Type}
+  \caption{Typing Rules for Ref Type}
 \end{figure}
 
 \par
-We then define the rules for the expressions regarding array indexing and 
-pointer dereferencing. 
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {c}
-      \inference {\Gamma \vdash e_1 : T\text{ }array & \Gamma \vdash e_2 : int} 
-        {\Gamma \vdash e_1[e_2] : T}[($array$ indexing)]
-      & \\
-      \inference {\Gamma \vdash e_1 : T\text{ }array & \Gamma \vdash e_2 : int \\ \Gamma \vdash e_3 : T} 
-        {\Gamma \vdash e_1[e_2] := e_3 : T}[($array$ mutation)] 
-      & \\
-      \inference {\Gamma \vdash e_1 : T\text{ }array} 
-        {\Gamma \vdash \textbf{size}(e_1) : int}[(\textbf{size} of $array$)]
-      & \\
-      \inference {\Gamma \vdash e_1 : int} 
-        {\Gamma \vdash \textbf{newarray}(e_1, T) : T\text{ }array}[(\textbf{newarray} formation)]
-      & \\
-      \inference {\Gamma \vdash e_1 : T\text{ }ref} 
-        {\Gamma \vdash !e_1 : T}[(dereferencing)]
-      & \\
-      $\Gamma \vdash \textbf{new}(T) : T\textit{ ref}$ (\textbf{new} reference)
-    \end{tabular}
-  \end{center}
-  \caption{More Typing Rules for the Array and Ref Type}
-\end{figure}
+The typing judgement above are straightforward, in the first rule, we check the 
+type $T$ of the underlying value at heap address $h$ then $h$ is of type $T$ 
+\textit{ref}.
 
 \subsubsection{Basic Operational Semantics}
 Lastly, we need to define the operational semantics for the new addition. We 
@@ -1763,47 +1735,33 @@ focus on the value itself.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {h_1 \in \textbf{dom}(\Delta) & v = \Delta(h_1) & v \neq nil}
+      \inference {h_1 \in \textbf{dom}(\Delta) & v = \Delta(h_1) & h_1 \neq nil}
       {\langle !h_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v, 
       \sigma, \tau, \Delta \rangle} [(Pointer dereferencing)]
       & \\
-      \inference {h_1 \in \textbf{dom}(\Delta) & \Delta' = \Delta \uplus \{h_1 \mapsto v_1\}}
+      \inference {h_1 \in \textbf{dom}(\Delta) & h_1 \neq nil & \Delta' = \Delta \uplus \{h_1 \mapsto v_1\}}
         {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v_1, 
         \sigma, \tau, \Delta' \rangle} [(Pointer assignment)]
       & \\
       \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta 
-        \uplus \{h \mapsto nil\}}
-        {\langle \textbf{new}(T), \sigma, \tau, \Delta \rangle \longrightarrow \langle h, 
+        \uplus \{h \mapsto v\}}
+        {\langle \textbf{new}(T, v), \sigma, \tau, \Delta \rangle \longrightarrow \langle h, 
         \sigma, \tau, \Delta' \rangle} [(Pointer allocation)]
+      & \\
+        $\langle \textbf{new}(T), \sigma, \tau, \Delta \rangle \longrightarrow \langle nil, 
+        \sigma, \tau, \Delta' \rangle$ ($nil$ pointer allocation)
     \end{tabular}
   \end{center}
   \caption{Operational Semantics for Pointers}
 \end{figure}
 
 \par
-Pointer allocation simply allocates a new heap address and add it to the heap, 
-we use the type $nil$ to represent the default value. 
-
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {c}
-      \inference {v_0 = (h_0,h_1...h_n) & v_1 >= 0 & v_1 \leq n} 
-        {\langle v_0[v_1], \sigma,\tau,\Delta \rangle 
-          \longrightarrow \langle !h_{v_1}, \sigma, \tau, \Delta \rangle} [($array$ indexing)]
-      & \\
-      \inference {v_0 = (h_0,h_1...h_n) & v_1 >= 0 & v_1 \leq n & \Delta' = \Delta \uplus \{h_{v_1} \mapsto v_2\}} 
-        {\langle v_0[v_1] := v_2, \sigma,\tau,\Delta \rangle 
-          \longrightarrow \langle v_2, \sigma, \tau, \Delta' \rangle} [($array$ mutation)]
-     & \\
-     \inference {v_0 = (h_0,h_1...h_{v_1}) \\ \Delta' = \Delta \uplus \{h_0 \mapsto nil, h_1 \mapsto nil,...h_{v_1} \mapsto nil\}} 
-        {\langle \textbf{newarray}(v_1, T), \sigma,\tau,\Delta \rangle 
-          \longrightarrow \langle v_0, \sigma, \tau, \Delta' \rangle} [($array$ creation)]
-    \end{tabular}
-  \end{center}
-  \caption{Operational Semantics for Arrays}
-\end{figure}
-
+Pointers are allocated in two ways, with and without a value. The first rule for 
+pointer allocation allocates a new heap address and assigns it the value passed 
+in. Calling \textbf{new} without specifying a value, follows the second 
+pointer allocation rule ($nil$ pointer allocation) which evaluates to a $nil$ reference. 
+A $nil$ reference is not allocated in the state $\Delta$ and cannot be deference 
+or assigned to. 
 
 \subsection{Aliases in Dependent Types}
 Previously we explored the behaviour of variables in dependent types and 
@@ -1819,7 +1777,7 @@ approach 1 defined previously to address variables in dependent types.
 
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
-    \textbf{let const }$y\text{ }:\text{ } int \textit{ ref} = \textbf{new}(int)$\textbf{ in } !y := 10; \\
+    \textbf{let const }$y\text{ }:\text{ } int \textit{ ref} = \textbf{new}(int, 10)$\textbf{ in } \\
     \textbf{let const }$x\text{ }:\text{ }int\textit{ ref} = y$\textbf{ in } \\
     \tab\textbf{typedef }$BoundedIntY$ = $\Pi y : int\text{ ref}. \{i : Int\text{ }|\text{ }i < !y\}$ \textbf{ in } \\ 
     \tab\tab\textbf{let var }$z\text{ }:\text{ }BoundedIntY = 6$ \textbf{ in }$!x := 5$\textbf { end }\\
@@ -1886,6 +1844,11 @@ assigns the value $v$.
   \end{center}
   \caption{Typing Rules for Pointer to Constants}
 \end{figure}
+
+\par
+Notice that unlike C/C++, it is not possible to define a constant $nil$ pointer. 
+The reason for this is because we believe that a constant $nil$ pointer 
+serves no purpose and using the $nil$ value is adequate in all operations. 
 
 \par
 The figure above formalises the typing judgement for this new expression and 
@@ -1961,9 +1924,9 @@ The appropriate rule is applied during evaluation, the top rule
 (\textbf{typedef} $\Pi$ vals) is evaluated if the variable depended on $x$ is 
 a local variable and not a reference. In this case, our previous logic would hold, 
 $x$ must be a constant. If, however, $x$ is a pointer variable, then we would have 
-to apply the second rule. In addition to $x$ being a constant and cannot be 
-reassigned to a different head address, the underlying memory location held by $x$ 
-must not be rewriteable. 
+to apply the second rule which asserts that in addition to $x$ being a constant, 
+preventing it to be reassigned to a different heap address, 
+the underlying memory location held by $x$ must not be rewriteable. 
 
 \par
 With our newly defined rules the program in figure 4.24 becomes invalid, 
@@ -1977,11 +1940,91 @@ we can rewrite our program to be correct as shown in the example below.
     \tab\textbf {end} \\
     \textbf{end}
   \end{tabs}  
-  \caption{Changing Values of Aliases within Dependent Types}
+  \caption{Valid use of Pointers in Dependent Types}
 \end{figure}
 
 
+\par
+In this subsection we have adapted our first approach to accomodate advance 
+language features such as heap addresses and aliasing. While minor changes are 
+needed to adapt the reamining two approaches to accomodate, we decided to leave 
+them out of scope for the current project and as an open future work.
+
+
 \subsection{Vectors using Dependent Types}
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {l l l}
+      \textit{Types} & $T$ & $:$ $...\text{ }|\text{ } T \text{ }array$ \\
+      \textit{Expressions} & $e$ & $:$ $...\text{ }|\text{ }e_1[e_2]\text{ }
+        |\text{ }e_1[e_2] := e_3\text{ }|\text{ }\textbf{size}(e_1)$ \\
+        & & \; $|\text{ }\textbf{newarray}(e_1, T)$\\
+     \textit{Values} & $vals$ & $:$ $...\text{ }|\text{ }(h_0,h_1...h_n)$
+    \end{tabular}
+  \end{center}
+  \caption{Heap Memory Allocation in Simple-$\Pi$}
+\end{figure}
+
+\par
+$T$ $array$ is an array type. Like most languages, arrays are typed 
+and all elements in the array must be of type $T$.
+
+We introduced the following expressions into the language:
+\begin{itemize}
+  \item $e_1[e_1]$ to index an element in an array, like C/C++, arrays are 
+  0-indexed. $e_1[e_2] := e_3$ to assign values into arrays.
+  \item \textbf{size}$(e_1)$ to retrive the size of an array.
+  \item \textbf{newarray}$(e_1, T)$ to allocate a new array of $T$ that is of 
+  \textbf{size}$(e_1)$.
+\end{itemize}
+
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {v_0 = (h_0,h_1...h_n) & v_1 >= 0 & v_1 \leq n} 
+        {\langle v_0[v_1], \sigma,\tau,\Delta \rangle 
+          \longrightarrow \langle !h_{v_1}, \sigma, \tau, \Delta \rangle} [($array$ indexing)]
+      & \\
+      \inference {v_0 = (h_0,h_1...h_n) & v_1 >= 0 & v_1 \leq n & \Delta' = \Delta \uplus \{h_{v_1} \mapsto v_2\}} 
+        {\langle v_0[v_1] := v_2, \sigma,\tau,\Delta \rangle 
+          \longrightarrow \langle v_2, \sigma, \tau, \Delta' \rangle} [($array$ mutation)]
+     & \\
+     \inference {v_0 = (h_0,h_1...h_{v_1}) \\ \Delta' = \Delta \uplus \{h_0 \mapsto nil, h_1 \mapsto nil,...h_{v_1} \mapsto nil\}} 
+        {\langle \textbf{newarray}(v_1, T), \sigma,\tau,\Delta \rangle 
+          \longrightarrow \langle v_0, \sigma, \tau, \Delta' \rangle} [($array$ creation)]
+    \end{tabular}
+  \end{center}
+  \caption{Operational Semantics for Arrays}
+\end{figure}
+
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {\Gamma \vdash e_1 : T\text{ }array & \Gamma \vdash e_2 : int} 
+        {\Gamma \vdash e_1[e_2] : T}[($array$ indexing)]
+      & \\
+      \inference {\Gamma(h_0) = T\textit{ ref} & \Gamma(h_1) = T\textit{ ref} &...& \Gamma(h_n) = T\textit{ ref}} 
+        {\Gamma \vdash (h_0,h_1...h_n) : T\text{ }array}[($array$ type)] 
+      & \\
+      \inference {\Gamma \vdash e_1 : T\text{ }array & \Gamma \vdash e_2 : int \\ \Gamma \vdash e_3 : T} 
+        {\Gamma \vdash e_1[e_2] := e_3 : T}[($array$ mutation)] 
+      & \\
+      \inference {\Gamma \vdash e_1 : T\text{ }array} 
+        {\Gamma \vdash \textbf{size}(e_1) : int}[(\textbf{size} of $array$)]
+      & \\
+      \inference {\Gamma \vdash e_1 : int} 
+        {\Gamma \vdash \textbf{newarray}(e_1, T) : T\text{ }array}[(\textbf{newarray} formation)]
+    \end{tabular}
+  \end{center}
+  \caption{More Typing Rules for the Array and Ref Type}
+\end{figure}
+
 
 
 \chapter{Related Work}
