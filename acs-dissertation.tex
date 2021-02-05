@@ -1640,7 +1640,7 @@ arrays. The introduction of arrays ties in closely with pointers and aliasing,
 the behaviours of these additional features will be discussed and specified in this 
 section.
 
-\subsection{Heap Memory Location}
+\subsection{Heap Memory}
 In programming languages, there are three different types of memory allocation, 
 static, stack and heaps \cite{heapVsStack}. While we have not explicitly 
 discussed our memory management model, it is rather obvious that Simple-$\Pi$ 
@@ -1754,7 +1754,7 @@ pointer dereferencing.
   \caption{More Typing Rules for the Array and Ref Type}
 \end{figure}
 
-\subsubsection{Operational Semantics}
+\subsubsection{Basic Operational Semantics}
 Lastly, we need to define the operational semantics for the new addition. We 
 begin by defining the SOS rules for pointers. As the reduction rules for 
 expressions are largely similar to before we will be ommiting them and only 
@@ -1764,17 +1764,17 @@ focus on the value itself.
   \begin{center}
     \begin{tabular} {c}
       \inference {h_1 \in \textbf{dom}(\Delta) & v = \Delta(h_1) & v \neq nil}
-      {\langle !h_1, \sigma, \rho, \tau, \Delta \rangle \longrightarrow \langle v, 
-      \sigma, \rho, \tau, \Delta \rangle} [(Pointer dereferencing)]
+      {\langle !h_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v, 
+      \sigma, \tau, \Delta \rangle} [(Pointer dereferencing)]
       & \\
       \inference {h_1 \in \textbf{dom}(\Delta) & \Delta' = \Delta \uplus \{h_1 \mapsto v_1\}}
-        {\langle h_1 := v_1, \sigma, \rho, \tau, \Delta \rangle \longrightarrow \langle v_1, 
-        \sigma, \rho, \tau, \Delta' \rangle} [(Pointer assignment)]
+        {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v_1, 
+        \sigma, \tau, \Delta' \rangle} [(Pointer assignment)]
       & \\
       \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta 
         \uplus \{h \mapsto nil\}}
-        {\langle \textbf{new}(T), \sigma, \rho, \tau, \Delta \rangle \longrightarrow \langle h, 
-        \sigma, \rho, \tau, \Delta' \rangle} [(Pointer allocation)]
+        {\langle \textbf{new}(T), \sigma, \tau, \Delta \rangle \longrightarrow \langle h, 
+        \sigma, \tau, \Delta' \rangle} [(Pointer allocation)]
     \end{tabular}
   \end{center}
   \caption{Operational Semantics for Pointers}
@@ -1789,41 +1789,40 @@ we use the type $nil$ to represent the default value.
   \begin{center}
     \begin{tabular} {c}
       \inference {v_0 = (h_0,h_1...h_n) & v_1 >= 0 & v_1 \leq n} 
-        {\langle v_0[v_1], \sigma, \rho,\tau,\Delta \rangle 
-          \longrightarrow \langle !h_{v_1}, \sigma, \rho, \tau, \Delta \rangle} [($array$ indexing)]
+        {\langle v_0[v_1], \sigma,\tau,\Delta \rangle 
+          \longrightarrow \langle !h_{v_1}, \sigma, \tau, \Delta \rangle} [($array$ indexing)]
       & \\
       \inference {v_0 = (h_0,h_1...h_n) & v_1 >= 0 & v_1 \leq n & \Delta' = \Delta \uplus \{h_{v_1} \mapsto v_2\}} 
-        {\langle v_0[v_1] := v_2, \sigma, \rho,\tau,\Delta \rangle 
-          \longrightarrow \langle v_2, \sigma, \rho, \tau, \Delta' \rangle} [($array$ mutation)]
+        {\langle v_0[v_1] := v_2, \sigma,\tau,\Delta \rangle 
+          \longrightarrow \langle v_2, \sigma, \tau, \Delta' \rangle} [($array$ mutation)]
      & \\
      \inference {v_0 = (h_0,h_1...h_{v_1}) \\ \Delta' = \Delta \uplus \{h_0 \mapsto nil, h_1 \mapsto nil,...h_{v_1} \mapsto nil\}} 
-        {\langle \textbf{newarray}(v_1, T), \sigma, \rho,\tau,\Delta \rangle 
-          \longrightarrow \langle v_0, \sigma, \rho, \tau, \Delta' \rangle} [($array$ creation)]
+        {\langle \textbf{newarray}(v_1, T), \sigma,\tau,\Delta \rangle 
+          \longrightarrow \langle v_0, \sigma, \tau, \Delta' \rangle} [($array$ creation)]
     \end{tabular}
   \end{center}
   \caption{Operational Semantics for Arrays}
 \end{figure}
 
 
-\subsubsection{Depending on an Alias Variables}
-Previously we explored how restricting mutability for variables allows us to use 
-them in dependent types. It is important to note that we only considered 
+\subsection{Aliases in Dependent Types}
+Previously we explored the behaviour of variables in dependent types and 
+proposed three different solutions to address the ambiguity when depending on 
+variables. It is important to note that we only considered 
 local variables, the notions of pointers and references will complicate matters. 
-While it is perfectly simple to restrict mutation simply by marking a local 
-variable \textit{const}, the same can't be done with pointers. A constant 
-pointer variable simply restrict the address to be change, manipulating the 
-underlying value is still very much possible. 
-
-
+In this subsection we will discuss the potential pitfalls when dependent types 
+involves pointers. 
+ 
 \par
-Consider the following code snippet
+First let us consider the following code snippet, assuming we are utilise 
+approach 1 defined previously to address variables in dependent types.
 
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
-    \textbf{let }$y\text{ }:\text{ } int \textit{ ref} = \textbf{new}(int)$\textbf{ in } y := 10; \\
-    \textbf{let }$x\text{ }:\text{ }int\textit{ ref} = y$\textbf{ in } \\
+    \textbf{let const }$y\text{ }:\text{ } int \textit{ ref} = \textbf{new}(int)$\textbf{ in } !y := 10; \\
+    \textbf{let const }$x\text{ }:\text{ }int\textit{ ref} = y$\textbf{ in } \\
     \tab\textbf{typedef }$BoundedIntY$ = $\Pi y : int\text{ ref}. \{i : Int\text{ }|\text{ }i < !y\}$ \textbf{ in } \\ 
-    \tab\tab\textbf{let }$z\text{ }:\text{ }BoundedIntY = 6$ \textbf{ in }$x := 5$\textbf { end }\\
+    \tab\tab\textbf{let var }$z\text{ }:\text{ }BoundedIntY = 6$ \textbf{ in }$!x := 5$\textbf { end }\\
     \tab\textbf {end} \textbf{end} \\
     \textbf{end}
   \end{tabs}  
@@ -1832,10 +1831,157 @@ Consider the following code snippet
 
 \par
 In the above scenario, a pointer to an $int$ $y$ is declared, another variable $x$ 
-acts as its alias, i.e. both $x$ and $y$ points to the same memory address, 
+acts as its alias, i.e. both $x$ and $y$ points to the same memory address. The 
+expression $!x := 5$ indirectly modified the definition of the type 
+$BoundedIntY$, making $z$ ill-typed. Our defined semantics does not have a way 
+to prevent this,
+
+\par
+In order to address this case, some of our previous proposed solutions 
+to the problem will need to be extended. While it is perfectly reasonable to 
+restrict mutation simply by marking a local variable \textit{const}, 
+the same can't be done with pointers. A constant 
+pointer variable simply restrict the address held by the pointer to be change, 
+manipulating the underlying value is still very much possible.
+
+\par
+A possible approach would be to extend the previously defined semantics to 
+operate on memory location as well as local variables. In C/C++, one is able to 
+declare a pointer to a constant, we would require the same in Simple-$\Pi$. It 
+is important to note the difference between an immutable pointer and a pointer 
+to an immutable. The latter allows the pointer variable to change. In order to 
+concrete differentiate the two in a definite manner, we introduce 
+a new predicate $is\_nonrewriteable(h)$ to specify if a 
+certain heap address can be modified. 
+
+\par
+$is\_nonrewriteable(h)$ holds if and only if the heap address $h$ is a const and cannot 
+be rewritten. The predicate operates directly on heap address rather than 
+pointers itself as 
+it is possible to have a pointer to a pointer which will invalidate the 
+predicate. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {l l l}      
+      \textit{Expressions} & $e$& $:$ $...\text{ }|\text{ \textbf{newconst}}(T, v)$ \\
+    \end{tabular}
+  \end{center}
+  \caption{Heap Memory Allocation in Simple-$\Pi$}
+\end{figure}
 
 
+\par
+We first need to extend our syntax to have a way of declaring pointers to 
+constant. In the pursuit of simplicity, we include a new expression 
+\textbf{newconst}$(T, v)$ to our language, this creates a new pointer to $T$ and 
+assigns the value $v$. 
 
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {\Gamma \vdash v : T} 
+        {\Gamma \vdash \textbf{newconst}(T, v): T \textit{ ref}}[(\textbf{newconst} type)] 
+    \end{tabular}
+  \end{center}
+  \caption{Typing Rules for Pointer to Constants}
+\end{figure}
+
+\par
+The figure above formalises the typing judgement for this new expression and 
+its behaviour is captured using the evaluation rules defined in figure 4.27 
+below.
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta 
+      \uplus \{h \mapsto v\}}
+      {\langle \textbf{newconst}(T, v), \sigma, \tau, \Delta \rangle \longrightarrow \langle h, 
+      \sigma, \tau, \Delta' \rangle} [(\textbf{newconst} 1)]
+      & \\
+      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle e_1', \sigma', \tau', \Delta' \rangle}
+      {\langle \textbf{newconst}(T, e_1), \sigma, \tau, \Delta \rangle \longrightarrow \langle \textbf{newconst}(T, e_1'), 
+      \sigma', \tau', \Delta' \rangle} [(\textbf{newconst} 2)]
+    \end{tabular}
+  \end{center}
+  \caption{Operational Semantics for Pointers to Constants}
+\end{figure}
+
+\par
+Additionally, we need to restrict the ability to rewrite memory location that 
+are deemed non-rewriteable. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {h_1 \in \textbf{dom}(\Delta) & \neg is\_nonrewritable(h_1) & \Delta' = \Delta \uplus \{h_1 \mapsto v_1\}}
+      {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v_1, 
+      \sigma, \tau, \Delta' \rangle} [(Pointer assignment)]
+    \end{tabular}
+  \end{center}
+  \caption{Restricting Write to Immutable Memory Locations}
+\end{figure}
+
+
+\par
+The introduction of immutable memory locations will allow us to specify the 
+behaviour of pointers in dependent types. We formalise the behaviour by 
+decomposing the operational semantics defined in figure 4.10, 
+stipulating different behaviours for values and references. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{c}
+      \inference {
+      \sigma(x) \notin \Delta &
+      a \notin \text{\textbf{dom}}(\sigma) & is\_immutable(x) & a \notin \textbf{dom}(\tau) 
+      \\ \langle e_1, \sigma, \tau + \{a \mapsto \Pi x : A.P(x)\} \rangle 
+      \longrightarrow^{*} \langle v, \sigma', \tau' \rangle}
+      {\langle \textbf{typedef } a = \Pi x :A .P(x) \textbf{ in }e_1\textbf{ end}, 
+      \sigma, \tau \rangle \longrightarrow 
+        \langle v, \sigma', \tau' - \{a\}\rangle}[(\textbf{typedef}) $\Pi$ vals]  
+      & \\
+      \inference {
+      \sigma(x) \in \Delta &
+      a \notin \text{\textbf{dom}}(\sigma) &  a \notin \textbf{dom}(\tau) \\ is\_immutable(x) & is\_nonrewriteable(\sigma(x)) \\
+      & \langle e_1, \sigma, \tau + \{a \mapsto \Pi x : A.P(x)\} \rangle 
+      \longrightarrow^{*} \langle v, \sigma', \tau' \rangle}
+      {\langle \textbf{typedef } a = \Pi x :A .P(x) \textbf{ in }e_1\textbf{ end}, 
+      \sigma, \tau \rangle \longrightarrow 
+        \langle v, \sigma', \tau' - \{a\}\rangle}[(\textbf{typedef}) $\Pi$ refs] 
+    \end{tabular}
+  \end{center}
+  \caption{Operational Semantics Dependent Type Definition with Pointers}
+\end{figure}
+
+
+\par
+The appropriate rule is applied during evaluation, the top rule 
+(\textbf{typedef} $\Pi$ vals) is evaluated if the variable depended on $x$ is 
+a local variable and not a reference. In this case, our previous logic would hold, 
+$x$ must be a constant. If, however, $x$ is a pointer variable, then we would have 
+to apply the second rule. In addition to $x$ being a constant and cannot be 
+reassigned to a different head address, the underlying memory location held by $x$ 
+must not be rewriteable. 
+
+\par
+With our newly defined rules the program in figure 4.24 becomes invalid, 
+we can rewrite our program to be correct as shown in the example below. 
+
+\begin{figure} [H]
+  \begin{tabs}{1cm,2cm}
+    \textbf{let const }$y\text{ }:\text{ } int \textit{ ref} = \textbf{newconst}(int, 10)$\textbf{ in }\\
+    \tab\textbf{typedef }$BoundedIntY$ = $\Pi y : int\text{ ref}. \{i : Int\text{ }|\text{ }i < !y\}$ \textbf{ in } \\ 
+    \tab\tab\textbf{let var }$z\text{ }:\text{ }BoundedIntY = 6$ \textbf{ in skip end}\\
+    \tab\textbf {end} \\
+    \textbf{end}
+  \end{tabs}  
+  \caption{Changing Values of Aliases within Dependent Types}
+\end{figure}
+
+
+\subsection{Vectors using Dependent Types}
 
 
 \chapter{Related Work}
