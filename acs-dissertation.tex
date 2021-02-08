@@ -135,32 +135,42 @@ access to the literature and motivate more studies into dependenty types.
 
 \par
 This dissertation serves as a document for our findings and is organised as 
-follows. We begin by conducting a survey on the current state of dependent types 
+follows. This first chapter serves as an introduction to dependent types and the 
+motivation behind our work.
+
+\par
+Chapter 2 if a survey on the current state of dependent types 
 in programming languages. Different languages with varying paradigm are explored 
 and summarised in order to better understand the extend of their support 
-with regards to dependent types. In particular we look at the lack of supports 
-for dependent types in imperative languages and lack of general awareness of the 
-concept. We propose how our project will address these limitations. 
+for dependent types. Functional lanaguages and theorem provers are studied to 
+understand how dependent types behave in their natural environment. We 
+extensively studied C++ as its templating engine bears strong resemblence to 
+dependent types and we observe its limitation. 
+We conclude the chapter by proposing how our project will address these limitations. 
 
 \par
-In chapter 3 we will be defining the syntax, typing rules and semantics 
-of a basic language with dependent types support which will be studied 
-and extended throughout the disseratation. Our language, named Simple-$\Pi$ is a 
-First-Order Programming Language which highly resembles the C programming 
-language. Our aim with the language is to capture the core behaviour of 
-dependent types and thus for the pursuit of simplicity is kept at a minimal with 
-only the fundamental features. 
+In chapter 3 we will be introducing a dependently typed imperative language. 
+Our language, named Simple-$\Pi$ is a First-Order Programming Language which 
+highly resembles the C programming language. Our aim with the language is to 
+capture the core behaviour of dependent types and thus for the pursuit 
+of simplicity is kept at a minimal with 
+only the fundamental features. In this chapter, we will be 
+defining the syntax, typing rules and semantics 
+of a basic language with dependent types support which serves as a basis 
+which will be studied throughout the chapter. 
+We then present the semantics of Simple-$\Pi$, in addition 
+to the basic operational semantics, we will raise
+multiple scenarios that dependent types cause ambiguity in imperative programming. 
+We start by discussing the impact of mutability has on dependent types and 
+answer the problem by proposing different solutions to resolve the 
+ambiguity and observes how these approaches differs. 
+We follow up our findings by introducing pointers and how the approach used to 
+address mutability can be adapted to handle alias variables. Finally we conclude 
+the chapter by showing an example of building arrays with dependent types. 
 
 \par
-In chapter 4 we will be presenting the semantics of Simple-$\Pi$, in addition 
-to the basic operational semantics, we will discuss
-multiple scenarios that dependent types cause uncertainties when used with 
-imperative languages. We proposed different solutions to resolve the 
-uncertainties and observes how these different features interact. 
-
-\par
-In chapter 5 we will discuss our work with regards to the 
-existing work done in the area and how it completments the literature. 
+In chapter 4 we will discuss our work with regards to the 
+existing work done in the area and how it completments the literature.
 Finally we will conclude by discussing advanced features that can be integrated 
 into our languages and how it can further complicate the language. We will also 
 discuss some of the other considerations that need to be taken account when 
@@ -898,32 +908,45 @@ Evaluation of the function will then satisfy the return type $T_0$.
   \caption{Typing Rules for Functions in Simple-$\Pi$}
 \end{figure}
 
-\chapter{Semantics for Simple-$\Pi$}
-In this chapter we will be covering the semantics of Simple-$\Pi$, we will 
-then build up the semantics gradually, starting from the basic 
-operational semantics and eventaully formalise the behavour of certain 
-non-trivial behaviour involving dependent types such as reassignments and 
-arrays. Throughout the chapter we will be extending the syntax defined in the 
-previous chapter in order to accomodate more features.
-
-\section{Operational Semantics}
-In this section we will define the \textit{Operational Semantics} 
-\cite{operationalSemantics} for the Simple-$\Pi$ language 
-using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rules. 
 
 \par
-Throughout the text we will use the following metavariables and notations. 
+In this section we covered the typing rules for Simple-$\Pi$, typing rules are a 
+way of allowing us to statically check the correctness of our program with 
+regards to typing rules. However, we are not able to analyse their dynamic 
+behaviour. 
+
+\newpage 
+
+\section{Operational Semantics}
+In order to express the behaviour of the language we will have to define its semantics. 
+We will build up the semantics gradually, starting from the basic 
+operational semantics and eventaully formalising the behavour of certain 
+non-trivial behaviour involving dependent types such as reassignments and 
+pointers. In this section we will define the \textit{Operational Semantics} 
+\cite{operationalSemantics} for the Simple-$\Pi$ language 
+using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rules.
+
+\par
+Throughout the text we will be extending the syntax defined in the 
+previous chapter in order to accomodate more features. 
+We will use the following metavariables and notations throughout our 
+definitions.
+
+\renewcommand\labelitemii{$\blacksquare$}
 \begin{itemize}
   \item The metavarible $op$ as one of a range of operators. 
-  \item $\sigma[x \mapsto v]$ updates $\sigma$ such that now $\sigma(x) = e$ and 
-  $\sigma + \{x \mapsto v\}$ adds $\{x \mapsto v\}$ to $\sigma$ provided 
-  initially $x \notin\textbf{dom}(\sigma)$.
   \item The metavariable $v$ to range over all values.
-  \item The uppercase letter $T$ to range over all types.
+  \item The uppercase letters $A,B,C,T$ to range over all types.
   \item Greek letters ($\alpha$, $\pi$, $\upsilon$) to define local variables in 
   the formuli. 
+  \item The following notations to operate on states. 
+    \begin{itemize}
+      \item $\sigma + \{x \mapsto v\}$ adds $\{x \mapsto v\}$ to $\sigma$ provided initially $x \notin\textbf{dom}(\sigma)$. 
+      \item $\sigma[x \mapsto v]$ or $\sigma \uplus \{x \mapsto v\}$ updates $\sigma$ such that now $\sigma(x) = v$.
+      \item $\sigma - \{x\}$ to remove $x$ from $sigma$, provided that $x \in \textbf{dom}(\sigma)$.
+    \end{itemize}
 \end{itemize}
-
+    
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
@@ -1019,14 +1042,14 @@ the resulting expression is passed back to the original context.
 
 \par 
 Notice that in the first rule above (\textbf{let in } values), the resulting state 
-uses the notation $-$, we define the operator to operate on a state and a set of 
-$vars$. $\sigma - \{x\}$ states that remove all the variables in the set 
+uses the notation $-$, recall that the operator removes all the variables in the set 
 $\{x\}$ from the domain of $\sigma$. 
 
 \par
 This is necessary as in a scope it is possible to change the state of the 
 program. More importantly, upon exiting a scope the alteration to the program 
-will still hold.
+will still hold, the only difference is that the variable $x$ is no longer in 
+the state, i.e. has ran out of scope.
 
 \par
 The multi-step evaluation provides us to much more easily express scoping rules, 
@@ -1095,7 +1118,7 @@ The second rule (function call $expr$) evaluates the expression passed into the
 function as arguments. Our language defines a strict behaviour that all 
 arguments are evaluated in the order they are passed in, i.e. from left to right. 
 
-\section{Dependent Types Semantics}
+\section{Dependent Types and Variables}
 Programming languages often have a wide range of features, often the team behind 
 the language have to put extensive thought into the design decisions. As there 
 are often multiple way to handle a certain feature, rarely are there a definite 
@@ -1134,7 +1157,7 @@ same formalisation can be achieved using Structures Operational Semantics, the
 Hoare Triple provides a much more concise notation. 
 
 
-\subsection{Defining Dependent Types with Variable}
+\subsection{The Ambiguity of Dependent Types}
 Consider the ambiguity of using variables to define dependent types. For 
 instance: 
 
@@ -1202,7 +1225,7 @@ can not already be defined. Logically it is equivalent to the semantics for
 \textbf{let in}.
 
 
-\subsubsection{Complete Immutability}
+\subsection{Total Immutability}
 The main issue one encounters when associating dependent types with imperative 
 languages is the presence of mutability and assignments. The obvious way to 
 work around this problem is to remove the ability to make changes to the state 
@@ -1231,7 +1254,7 @@ Using this approach does definitely resolves the uncertainty the usability of
 the language is poor. Imperative programming relies on state changes, forbidding 
 that go against the paradigm. 
 
-\subsubsection{Immutability For Dependent Variables}
+\subsection{Immutability For Dependent Variables}
 We observe that only variables associated with dependent typing needs to be 
 immutable to prevent any uncertain behaviours. To improve the flexibility of our 
 language, we could loosen the restrictions by having only the depenent variables 
@@ -1353,7 +1376,7 @@ The limitation of this approach is of course the fact that our dependent values
 must be available at compile time, eliminating some flexibility. Our next 
 appraoch will look to improve on this limitation. 
 
-\subsubsection{Passing by Value}
+\subsection{Passing by Value}
 
 If we further analyse our design, we notice that if our dependent type is 
 constructed using a value then we would not have the problem of variable change. 
@@ -1504,7 +1527,7 @@ C++ templates it is still has certain limitations. The most obvious is the fact
 that the programmer might sometimes be looking for dependent types 
 whose definitions changes with the value of the variable. 
 
-\subsubsection{Dynamic Dependent Types}
+\subsection{Dynamic Dependent Types}
 In this subsection we will be presenting an approach to handling dependent types 
 in imperative languages called \textit{Dynamic Dependent Types}. It is a type 
 that will allow the definition of dependent types to change during runtime and 
@@ -1573,9 +1596,7 @@ quantifier.
   \begin{center}
    \begin {tabular} {c} 
      \inference {x \in \sigma
-     \\ \forall \alpha : \Pi x. P(x) \in\textbf{rng}(\sigma)\text{ }s.t.\text{ }\alpha : \Pi v. P(v)
-     \\ \sigma' = \sigma[\beta \mapsto \alpha : \Pi v. P(v)\text{ }|\text{ }\beta \in \textbf{dom}(\sigma) \wedge \sigma(\beta) = \alpha : \Pi x. P(x)]
-     \\ \tau' = \tau[\beta \mapsto \Pi v. P(v)\text{ }|\text{ }\beta \in \textbf{dom}(\tau) \wedge \tau(\beta) = \Pi x. P(x)]} 
+     \\ \forall \alpha : \Pi x. P(x) \in\textbf{rng}(\sigma)\text{ }s.t.\text{ }\alpha : \Pi v. P(v)} 
           {\langle x := v, \sigma, \tau \rangle \longrightarrow \langle v, \sigma', \tau' \rangle}
     \end{tabular}
   \end{center}
@@ -1600,34 +1621,41 @@ The axiom simply states that, in some predicate $P$ holds after the assignment,
 it holds before the assignment.
 
 \par
-We define $\phi$ as a local function $T \longrightarrow \{vars\}$, defined as 
+We define $\phi$ as a local function $T \longrightarrow \{vals\}$, defined as 
 
 \begin{center}
-  $\phi(T) = \{x\text{ }|\text{ }x \in \sigma \wedge \sigma(x) = \alpha : T\}$  
+  $\phi(A) = \{v\text{ }|\text{ }x \in \sigma \wedge \sigma(x) = v : A\}$  
 \end{center}
 
 \par
-Given a type $T$, the function $\phi$ returns the set of all variables in the 
-state $\sigma$ that has type $T$.
-
-
-
+Given a type $A$, the function $\phi$ returns the set of all values in the 
+state $\sigma$ that has type $A$.
 
 \begin{figure}[H]
   \begin{center}
-    \footnotesize$\forall \gamma \in \mathcal{P}(\sigma)\{\gamma = \phi(\Pi x : A.P(x)) \wedge P[e/x]\}x:= e\{P \wedge 
-    \forall x \in \gamma\text{ }s.t.\text{ }\sigma(x) = \alpha : \Pi e : A. P(e)\}$ 
-    \normalsize
+    $\forall \gamma \in \mathcal{P}(\sigma)\{\forall v \in \phi(\Pi x : A.P(x)) 
+    \text{ }s.t.\text{ }v : \Pi e : A. P(e) \wedge P[e/x]\}
+    x:= e\{P\}$ 
   \end{center}
   \caption{Dynamic Dependedent Type Reassignment Rule}
 \end{figure}
 
 
 \par
-The Hoare Logic above reiterates this behaviour by stating that all values $\alpha$ with 
-type $\Pi x : A.P(x)$ in the state will have their typing updated with the new value 
-of $x$.
+The Hoare Logic above reiterates this behaviour by stating that in order for the 
+assignment to be evaluated, all values $v$ with type $\Pi x : A.P(x)$ in the state 
+will have to be well typed with regards to the new value of $x$.
 
+\par
+The Dynamic Dependent Types approach presented here gives the highest degree of 
+flexibility, it allows the expression of complex logic which is able to alter 
+the types of values at runtime. However, it comes at the cost of potentially 
+expensive type checking. Checking the type compatability of all values of a 
+certain type during assignment introduces major overhead. Implementing a 
+language of this flexibility might be unobtainable for language with performance 
+requirements. 
+
+\subsection{Summary}
 This section presented multiple solution to achieving reassignment in a 
 dependently typed language. All approaches has their own advantages and 
 disadvantages. The dynamic dependent types approach while flexible and useful, 
