@@ -306,6 +306,43 @@ error handling code. This example demonstrated using an object-oriented style
 language by Vasconcelos \cite{objOritentedDependentType}.
 
 
+\section{Motivation}
+Dependent types appears to be one of the niche fields in programming language 
+theory and type theory research. I argue that this is the result of the 
+difficult barrier of entry. Research in dependent types presented are usually 
+highly complex and requires substantial prerequisite. Type systems presented in 
+these paper often assumes full knowledge of \textit{The Lambda Calculus} 
+\cite{lambdaCalculus} or uses the concept of \textit{Monads} \cite{monads}. 
+While these are established framework commonly used to express and reason about 
+computation, with the addition of normal types and dependent types, the 
+underlying logic becomes hard to follow. 
+
+\par
+Similarly, research in the area that branch away from the convention of building 
+a dependent type system on the lambda calculus often showed highly complex 
+language features such as object orientation and dynamic memory allocation. The 
+purpose of these research often are to demonstrate the feasibility of 
+incorporating dependenet types in complex languages rather than providing an 
+overview of the concept. 
+
+\par
+Our project is motivated by the apparent lack of accesible literature on the 
+theory of dependent types. We aim to present a simple, restricted framework that 
+captures the essence of dependent types. The said framework will be presented as 
+an extension to \textit{WHILE language} \cite{whileLanguage}. Created as a tool 
+to aid the study of programming language theory, we believe it strongly satisfy our 
+requirement of accessibility with its simple syntax and semantics. 
+
+\par
+At the end of the project we aim to achieve the following, i) Survey the state 
+of dependently typed languages and their differences, ii) Describe a dependently 
+typed language based on the WHILE language, iii) Explore the ambiguity of 
+dependent types in an imperative environments, iv) Demonstrate the use of 
+dependent types to build further language features, v) Discuss how our work 
+compliments the literature. 
+
+
+
 \chapter{Background: State of Dependently Typed in Language} 
 In this chapter we will be reviewing the current knowledge of dependent types 
 in different programming languages. It will cover languages with full dependent 
