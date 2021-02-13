@@ -805,7 +805,7 @@ language in details.
       \textit{Operators} & $ops$ & $:$ $+$ $|$ $-$ $|$ $\wedge$ $|$ $\vee$ \\
       \textit{Expressions} & $e$ & $:$ $vals$ $|$ $x$ $|$ $e_1$ $ops$ $e_2$ 
       $|$ $f(e_1...e_n)$ $|$  \\
-      & & \; \textbf{let var } $x = e_1$ \textbf{in} $C_1;e_2$ \textbf{end} \\
+      & & \; \textbf{let var } $x : T = e_1$ \textbf{in} $C_1;e_2$ \textbf{end} \\
       \textit{Commands} & $C$ & $:$ $C_1;C_2$ $|$ \textbf{skip} $|$ $x\text{ }:= e_1$ $|$ \\ 
         & & \; \textbf{while} $e_1$ \textbf{do} $C_1$ $|$ \textbf{if} $e_1$ \textbf{then} $C_1$ \textbf{else} $C_2$ \\
       \textit{Variables} & $vars$& $:$ $x \in {a,b,c...z}$\\
@@ -965,7 +965,7 @@ type checker.
         {\Gamma \vdash C_1;C_2 : T_2} [(concatenation $;$ $C$)] \text{ }
       & \\
       \inference {\Gamma \vdash e_1: T_1 & \Gamma,x : T_1 \vdash C_1 : void & \Gamma, x : T_1 \vdash e_2: T_2} 
-        {\Gamma \vdash \textbf{let var } x = e_1 \textbf{ in } C_1;e_2 \textbf{ end }: T_2} [(\textbf{let in})] \text{ }      
+        {\Gamma \vdash \textbf{let var } x : T_1 = e_1 \textbf{ in } C_1;e_2 \textbf{ end }: T_2} [(\textbf{let in})] \text{ }      
     \end{tabular}
   \end{center}
 \caption{Basic Typing Rules for Simple-$\Pi$}
@@ -993,18 +993,28 @@ Finally we define typing rules for a refinement types. A refinement type
 $\{\upsilon : T\text{ }|\text{ }P(\upsilon)\}$ is constructed by a base type $T$ 
 and a refinement predicate $P(\upsilon)$ on $T$ which is 
 simply represented as a boolean expression. However, in order for the type to 
-hold, the said expression has to hold. 
+hold, the said expression has to evaluate to true. 
 
 \par
 We define the typing rule for refinement types using the idea of 
 \textit{universes} \cite{martinLof} in type theory, using the notation 
 $\Gamma \vdash A : Type$ we say that $A$ is a type. 
 
+
+\par
+We begin by defining the formation rule for a refinement type. Additionally we 
+defining the typing rule for a subtypes. A refinement type $A$ is a subtype of 
+another refinement type $B$ if the set of values in $A$ is a subset of the 
+values in $B$, we express $A$ is a subtype of $B$ as $A \preceq B$.
+
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\Gamma \vdash \upsilon : T_1 & \Gamma \vdash P(\upsilon) : bool & \Gamma, \upsilon : T_1 \vdash P(\upsilon) = true}
-        {\Gamma \vdash \{\upsilon : T_1\text{ }|\text{ }P(\upsilon)\}: Type}[(\textit{functions})]
+      \inference {\Gamma \vdash \upsilon : T_1 & \Gamma \vdash P(\upsilon) : bool}
+        {\Gamma \vdash \{\upsilon : T_1\text{ }|\text{ }P(\upsilon)\}: Type}[(Refinment Type formation)]
+      & \\
+      \inference {\Gamma \vdash T_2 & \Gamma \vdash T_1 \preceq T_2 & \Gamma \vdash x : T_1} 
+      {\Gamma \vdash x : T_2} [(Refinement Subtype)]
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Refinement Types in Simple-$R$}
@@ -1130,20 +1140,22 @@ below.
       \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \sigma 
       \\ \langle C_1, \sigma' \rangle \longrightarrow \sigma''
       & \langle e_1, \sigma'' \rangle \Longrightarrow^{*} \langle v_1, \sigma'' \rangle} 
-      {\langle\textbf{let var }x = v_0 \text{\textbf{ in }} C_1;e_1 \text{\textbf{ end}}, \sigma \rangle 
+      {\langle\textbf{let var }x : T = v_0 \text{\textbf{ in }} C_1;e_1 \text{\textbf{ end}}, \sigma \rangle 
       \Longrightarrow \langle v_1, \sigma'' \setminus \{x\} \rangle} [(\textbf{let in} values)] 
       & \\
+      \footnotesize
       \inference {\langle e_1, \sigma \rangle \Longrightarrow \langle e_1', \sigma\rangle} 
-      {\langle \textbf{let var }x = e_1 \text{\textbf{ in }} C_1;e_2 \text{\textbf{ end}}, \sigma \rangle 
-      \Longrightarrow \langle\textbf{let var }x = e_1' \text{\textbf{ in }} C_1;e_2\text{\textbf{ end}}, \sigma \rangle} 
+      {\langle \textbf{let var }x : T = e_1 \text{\textbf{ in }} C_1;e_2 \text{\textbf{ end}}, \sigma \rangle 
+      \Longrightarrow \langle\textbf{let var }x : T = e_1' \text{\textbf{ in }} C_1;e_2\text{\textbf{ end}}, \sigma \rangle} 
       [(\textbf{let in} $expr$)]
+      \normalsize
     \end{tabular}
   \end{center}
-  \caption{Scoping Rules for Simple-$\Pi$}
+  \caption{Scoping Rules for Simple-$R$}
 \end{figure}
 
 \par
-Figure 4.2 above defines the scoping rules for Simple-$\Pi$.
+Figure 4.2 above defines the scoping rules for Simple-$R$.
 
 \par
 The \textbf{let in} statement opens a new scope $\sigma'$ which 
@@ -1199,7 +1211,7 @@ We can then evalute the function body which using the multi-step evaluation.
       {\langle f(v_0...v_{k - 1},e_k...e_n), \sigma \rangle \Longrightarrow \langle f(v_0...v_{k - 1}, e_{k}'...e_n), \sigma \rangle} [(function call expr)]
     \end{tabular}
   \end{center}
-  \caption{Functions Semantics for Simple-$\Pi$}
+  \caption{Functions Semantics for Simple-$R$}
 \end{figure}
 
 \par
@@ -1215,6 +1227,34 @@ It cannot change the caller's state.
 The second rule (function call $expr$) evaluates the expression passed into the 
 function as arguments. Our language defines a strict behaviour that all 
 arguments are evaluated in the order they are passed in, i.e. from left to right. 
+
+\subsection{Refinement Type Declaration}
+Refinement Type declaration requires specific evaluation rule. When one declare 
+a variable of a refinement type, the language has to ensure the evaluation 
+holds. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{c}
+      \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \sigma 
+      \\ \langle P(v_1), \sigma, \tau \rangle \Longrightarrow^{*} \langle true, 
+      \sigma', \tau' \rangle
+      \\ \langle C_1, \sigma' \rangle \longrightarrow \sigma''
+      & \langle e_1, \sigma'' \rangle \Longrightarrow^{*} \langle v_1, \sigma'' \rangle} 
+      {\langle\textbf{let var }x : \{\upsilon : T\text{ }|\text{ }P(\upsilon)\} = v_0 \text{\textbf{ in }} C_1;e_1 \text{\textbf{ end}}, \sigma \rangle 
+      \Longrightarrow \langle v_1, \sigma'' \setminus \{x\} \rangle}
+    \end{tabular}
+  \end{center}
+  \caption{Variable Declaration for Refinement Type}
+\end{figure}
+
+\par
+The evaluation rule above simply states that in order a variable of a 
+refinement type $T$ is to be declared with value $v$, 
+then refinement predicate has to hold for $P(v)$. The operational semantics 
+defined in figure 3.10 captures this behaviour, however as one can imagine, this 
+current definition leaves room for error. In the next section we will address 
+certain ambiguities with the design.
 
 \section{Refinement Types and Variables}
 Programming languages often have a wide range of features, often the team behind 
@@ -1345,6 +1385,21 @@ already been defined as a value variable n $\sigma$ and a type of the same name
 can not already be defined. Logically it is equivalent to the semantics for 
 \textbf{let in}.
 
+\par
+We complete our evaluation to specify how a variable is declared using a type 
+name. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {y \in \textbf{dom}(\tau) & A = \tau(y)} 
+      {\langle\textbf{let var }x : y = e_0 \text{\textbf{ in }} C_1;e_1 \text{\textbf{ end}}, \sigma, \tau \rangle 
+      \Longrightarrow \langle\textbf{let var }x : A = e_0 \text{\textbf{ in }} C_1;e_1 \text{\textbf{ end}}, \sigma, \tau \rangle }
+    \end{tabular}
+  \end{center}
+\end{figure}
+
+
 
 \subsection{Total Immutability}
 The main issue one encounters when associating refinement types with imperative 
@@ -1391,7 +1446,7 @@ $is\_immutable(x)$ holds if and only if $x$ is immutable.
   \begin{center}
     \begin{tabular} {l l l}
       \textit{Expressions} & $e$& $:$ $...\text{ }|\text{ }
-        \textbf{let const }x = e_1 \textbf{ in }e_2\textbf{ end}$
+        \textbf{let const }x = e_1 \textbf{ in }C_1;e_2\textbf{ end}$
     \end{tabular}
   \end{center}
   \caption{Immutable Variable Context for Simple-$\Pi$}
@@ -1420,7 +1475,7 @@ immutable.
       {\langle x := v, \sigma \rangle \longrightarrow \sigma[x \mapsto v]} [(assignment $vals$)] \text{ }
     \end{tabular}
   \end{center}
-  \caption{Immutable Variables Rules for Simple-$\Pi$}
+  \caption{Immutable Variables Rules for Simple-$R$}
 \end{figure}
 
 \par
@@ -1492,7 +1547,7 @@ constructed using a value then we would not have the problem of variable change.
 In languages such as C/C++, \textit{pass by value} \cite{pbv} is a way of 
 passing a parameter into a function in a way that any modification to the 
 parameter in the function does not reflect changes outside and vice versa. The 
-same cocept is used for functions in Simple-$\Pi$.
+same concept is used for functions in Simple-$R$.
 
 \par
 The similar approach can be taken in our definitions for refinement types. For 
@@ -1502,19 +1557,26 @@ changes to the variable $y$ will not affect the type definition and the program
 will stay well typed.
 
 \par
-Our appraoch is to have the predicate to evaluate in a different environment. 
-Similar to how functions are defined in section 3.3.2. 
+Our appraoch is to have the predicate to evaluate in a different environment, we 
+denote that every refinement predicate has their own evaluation context, this 
+will be the program context at the time of the type definition. We define a new 
+mapping $\mathcal{R}: x \mapsto (\sigma, \tau, \mathcal{R})$ to store the context for each refinement 
+type. At the time of a refinement type definition, the name of the type is added 
+to the map. We formalise this behaviour in the evaluation rules below.
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
+      \footnotesize
       \inference {
-      \sigma_1 = \sigma & \tau_1 = \tau
-      \\ \langle P(\upsilon), \sigma_1, \tau_1 \rangle \Longrightarrow \langle e, \sigma_1', \tau_1' \rangle
-      \\ \langle C_1, \sigma, \tau + \{y \mapsto \{\upsilon : A\text{ }|\text{ }e\}\} \rangle \longrightarrow \langle \sigma', \tau' \rangle
-      \\ \langle e_1, \sigma', \tau' \rangle \Longrightarrow \langle v, \sigma', \tau' \rangle}
+      \langle e_1, \sigma', \tau' \rangle \Longrightarrow \langle v, \sigma'', \tau'', \mathcal{R}''' \rangle
+      \\ \langle C_1, \sigma, \tau + \{y \mapsto \{\upsilon : A\text{ }|\text{ 
+      }P(\upsilon)\}\}, \mathcal{R}'
+      \rangle \longrightarrow \langle \sigma', \tau', \mathcal{R}''\rangle      
+      \\ \sigma_1 = \sigma & \tau_1 = \tau & \mathcal{R}_1 & \mathcal{R}' = \mathcal{R} + \{y \mapsto (\sigma_1, \tau_1, \mathcal{R}_1)\}}
       {\langle\textbf{let typedef } y = \{\upsilon : A\text{ }|\text{ }P(\upsilon)\} \textbf{ in }C_1;e_1\textbf{ end}, 
-      \sigma, \tau \rangle \Longrightarrow \langle v, \sigma', \tau' \setminus \{y\} \rangle} 
+      \sigma, \tau, \mathcal{R} \rangle \Longrightarrow \langle v, \sigma'', \tau'' \setminus \{y\}, \mathcal{R}''' \setminus \{y\} \rangle} 
+      \normalsize
     \end{tabular}
   \end{center}
   \caption{Evaluation of Refinement Type Functions}
@@ -1522,7 +1584,29 @@ Similar to how functions are defined in section 3.3.2.
 
 \par
 We define $\sigma_1$ and $\tau_1$ as a copy of the program state $\sigma$ and 
-$\tau$. The refinement predicate $P(\upsilon)$ is evaluated using the copied 
+$\tau$ and attached this to the type variable $y$. 
+When one declare a variable that is a refinement type, we retrieve the state to 
+be evaluated and apply the rule defined in figure 3.19.
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{c}
+      \inference {y \in \textbf{dom}(\tau) & y \in \textbf{dom}(\mathcal{R}) & x \notin \sigma 
+      \\  \sigma' = \sigma + \{x \mapsto v_0\} & (\sigma_1, \tau_1, \mathcal{R}_1) = \mathcal{R}(y) 
+      \\ \langle P(v_0), \sigma_1, \tau_1, \mathcal{R}_1 \rangle \Longrightarrow^{*} \langle true, 
+      \sigma_1', \tau_1', \mathcal{R}_1' \rangle
+      \\ \langle C_1, \sigma', \tau, \mathcal{R} \rangle \longrightarrow \langle 
+      \sigma'', \tau', \mathcal{R}' \rangle
+      & \langle e_1, \sigma'', \tau', \mathcal{R}' \rangle \Longrightarrow^{*} \langle v_1, \sigma''', \tau'', \mathcal{R}''  \rangle} 
+      {\langle\textbf{let var }x : y = v_0 \text{\textbf{ in }} C_1;e_1 \text{\textbf{ end}}, \sigma, \tau, \mathcal{R} \rangle 
+      \Longrightarrow \langle v_1, \sigma''' \setminus \{x\}, \tau'', \mathcal{R}'' \rangle} [(\textbf{let in} values)] 
+    \end{tabular}
+  \end{center}
+\end{figure}
+
+
+\par
+The refinement predicate $P(\upsilon)$ is evaluated using the copied 
 states. The result of this extra step ensures that any mutation outside the 
 refinement predicate does not change the predicate. It address our proposed 
 ambiguity by specifying a concrete behaviour. Figure 3.9 has the result of type 
