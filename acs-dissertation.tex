@@ -767,12 +767,12 @@ language in details.
       \textit{Types} & $T$ & $:\text{ }int\text{ }|\text{ }bool\text{ }|
       \text{ }\{x: A\text{ }|\text{ }P(x)\}\text{ }|\text{ }void$\\
       \textit{Functions Type} &  & $:\text{ }T_1, T_2,T_3...T_n\longrightarrow T_0$\\
-      \textit{Functions} & $f$ & $f(x_1,x_2,...x_n)$\\
+      \textit{Functions} & $f$ & $f(x_1,x_2,...x_n) = C;e$\\
       \textit{Operators} & $ops$ & $:$ $+$ $|$ $-$ $|$ $\wedge$ $|$ $\vee$ \\
-      \textit{Expressions} & $e$ & $:$ $vals$ $|$ $x$ $|$ $e_1$ $ops$ $e_2$ $|$ 
-      $e_1;e_2$ $|$ $f(e_1...e_n)$ $|$  \\
-      & & \; $C_1;e_1$ $|$ \textbf{let var } $x = e_1$ \textbf{in} $C$ \textbf{end} \\
-      \textit{Commands} & $C$ & $:$ $C_1;C_2$ $|$ \textbf{skip} $|$ $x\text{ }:= e_1$ $|$ \textbf{return} $e_1$ $|$ \\ 
+      \textit{Expressions} & $e$ & $:$ $vals$ $|$ $x$ $|$ $e_1$ $ops$ $e_2$ 
+      $|$ $f(e_1...e_n)$ $|$  \\
+      & & \; \textbf{let var } $x = e_1$ \textbf{in} $C_1;e_2$ \textbf{end} \\
+      \textit{Commands} & $C$ & $:$ $C_1;C_2$ $|$ \textbf{skip} $|$ $x\text{ }:= e_1$ $|$ \\ 
         & & \; \textbf{while} $e_1$ \textbf{do} $C_1$ $|$ \textbf{if} $e_1$ \textbf{then} $C_1$ \textbf{else} $C_2$ \\
       \textit{Variables} & $vars$& $:$ $x \in {a,b,c...z}$\\
       \textit{Values} & $vals$& $:$ $\forall v \in \mathbb{Z}$ $|$ $\forall v \in \mathbb{B}$ 
@@ -800,7 +800,7 @@ types, the language is kept at a minimum with only the necessary construct.
 \begin{itemize}
   \item The basic integer type \textit{int}
   \item The basic boolean type \textit{bool}
-  \item The refinement type, written as $\{x: A.P(x)\}$, is used to 
+  \item The refinement type, written as $\{x: A\text{ }|\text{ }P(x)\}$, is used to 
   define a type $T$ that depends on the variable $x$ of type 
   $A$ that satisfy the predicate $P(x)$.
   \item The \textit{void} type to represent empty or null. Commands are modelled 
@@ -813,7 +813,8 @@ taking a up to $n$ types and returning a type. Note that functions are
 not first-class in this language, unlike a higher order 
 language, functions are not types in this case, functions cannot be passed to 
 other functions, nor can it return a function as a result. One can compare 
-functions in Simple-$R$ as functions in C or Java. 
+functions in Simple-$R$ as functions in C or Java. The function body is a 
+command followed by an expression returned. 
 
 \paragraph{Operators}
 The language supports the following built in operators.
@@ -853,8 +854,6 @@ actions. Simple-$R$ supports the following.
   end of scope. It returns an expression to the previous scope. 
 \end{itemize}
 
-
-
 \paragraph{Variables and Values} In Simple-$\Pi$, all variable are reference 
 variables, as one would expect in imperative programming. We use $x$ to denote a 
 variable. Variables can take values as suggested by the types, all the integer 
@@ -876,7 +875,7 @@ the context. This context will be used to type check the program using the
 typing judgement in the next section.
 
 \section{Typing Rules}
-This section defines the typing rules for the Simple-$\Pi$ language.
+This section defines the typing rules for the Simple-$R$ language.
 
 \par
 We begin by defining the typing judgement. The typing judgement used in 
@@ -928,20 +927,17 @@ type checker.
         {\Gamma \vdash \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1 : void} [(\textbf{while do})] & \\
       \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
         {\Gamma \vdash x := e_1 : void} [($:=$)] \text{ }
-      \inference {\Gamma \vdash e_1: T_1 & \Gamma, x : T_1 \vdash e_2: T_2} 
-        {\Gamma \vdash \textbf{let var } x = e_1 \textbf{ in } e_2 \textbf{ end }: T_2} [(\textbf{let in})] \text{ }
-      & \\
-      \inference {\Gamma \vdash C_1: void & \Gamma \vdash e_2: T_2} 
-        {\Gamma \vdash C_1;e_2 : T_2} [(concatenation $;$)]
-      & \\
       \inference {\Gamma \vdash C_1: void & \Gamma \vdash C_2: void} 
         {\Gamma \vdash C_1;C_2 : T_2} [(concatenation $;$ $C$)] \text{ }
+      & \\
+      \inference {\Gamma \vdash e_1: T_1 & \Gamma,x : T_1 \vdash C_1 : void & \Gamma, x : T_1 \vdash e_2: T_2} 
+        {\Gamma \vdash \textbf{let var } x = e_1 \textbf{ in } C_1;e_2 \textbf{ end }: T_2} [(\textbf{let in})] \text{ }      
     \end{tabular}
   \end{center}
 \caption{Basic Typing Rules for Simple-$\Pi$}
 \end{figure}
 
-\par
+\subsubsection{Functions}
 For a function call, we use the type judgement above. We use  
 first order logic to write $f(e_1...e_n)$ as an n-nary function of 
 type $T_1$ to $T_n$, then the arguments $e_1$ to $e_n$ must be of same type. 
@@ -950,9 +946,6 @@ Evaluation of the function will then satisfy the return type $T_0$.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\Gamma \vdash e: T} 
-        {\Gamma \vdash \textbf{return } e: T} [(\textbf{return})] \text{ }
-      & \\
       \inference {f : T_1,T_2...T_n \longrightarrow T_0 \\ 
       \Gamma \vdash e_1 : T_1 & \Gamma \vdash e_2 : T_2 &...& \Gamma \vdash e_n : T_n}
         {\Gamma \vdash f(e_1...e_n): T_2}[(\textit{functions})]
@@ -961,19 +954,35 @@ Evaluation of the function will then satisfy the return type $T_0$.
   \caption{Typing Rules for Functions in Simple-$\Pi$}
 \end{figure}
 
+\subsubsection{Refinement Types}
+Finally we define typing rules for a refinement types. A refinement type 
+$\{\upsilon : T\text{ }|\text{ }P(\upsilon)\}$ is constructed by a base type $T$ 
+and a refinement predicate $P(\upsilon)$ on $T$. A refinement predicate is 
+simply a boolean expression.
 
 \par
-In this section we covered the typing rules for Simple-$\Pi$, typing rules are a 
+We define the typing rule for refinement types using the idea of 
+\textit{universes} \cite{martinLof} in type theory, using the notation 
+$\Gamma \vdash A : Type$ we say that $A$ is a type. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {\Gamma \vdash \upsilon : T_1 & \Gamma \vdash P(\upsilon) : bool & \Gamma, \upsilon : T_1 \vdash P(\upsilon) = true}
+        {\Gamma \vdash \{\upsilon : T_1\text{ }|\text{ }P(\upsilon)\}: Type}[(\textit{functions})]
+    \end{tabular}
+  \end{center}
+  \caption{Typing Rules for Refinement Types in Simple-$R$}
+\end{figure}
+
+\par
+In this section we covered the typing rules for Simple-$R$, typing rules are a 
 way of allowing us to statically check the correctness of our program with 
 regards to typing rules. However, we are not able to analyse their dynamic 
 behaviour. 
 
 \section{Operational Semantics}
-In order to express the behaviour of the language we will have to define its semantics. 
-We will build up the semantics gradually, starting from the basic 
-operational semantics and eventaully formalising the behavour of certain 
-non-trivial behaviour involving dependent types such as reassignments and 
-pointers. In this section we will define the \textit{Operational Semantics} 
+In this section we will define the \textit{Operational Semantics} 
 \cite{operationalSemantics} for the Simple-$\Pi$ language 
 using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rules.
 
@@ -994,35 +1003,51 @@ definitions.
     \begin{itemize}
       \item $\sigma + \{x \mapsto v\}$ adds $\{x \mapsto v\}$ to $\sigma$ provided initially $x \notin\textbf{dom}(\sigma)$. 
       \item $\sigma[x \mapsto v]$ or $\sigma \uplus \{x \mapsto v\}$ updates $\sigma$ such that now $\sigma(x) = v$.
-      \item $\sigma - \{x\}$ to remove $x$ from $sigma$, provided that $x \in \textbf{dom}(\sigma)$.
+      \item $\sigma \setminus \{x\}$ to remove $x$ from $sigma$, provided that $x \in \textbf{dom}(\sigma)$.
     \end{itemize}
+  \item $\Longrightarrow$ as the transition relation for expression.
+  \item $\longrightarrow$ as the transition relation for commands.
 \end{itemize}
-    
+
+
+\par
+We begin by defining the evaluation rules for basic expressions. 
+
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\langle C_1, \sigma \rangle \longrightarrow \sigma'}{\langle C_1;e_1, \sigma \rangle \Longrightarrow \langle e_1, \sigma' \rangle}[concat $C_1;e_1$]  
-      \text{ }
-      \inference {x \in \textbf{dom}(\sigma)}{\langle x, \sigma \rangle \Longrightarrow \sigma(x)}[($vars$) evaluation] 
+      \inference {v = v_1 + v_2}{\langle v_1 + v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(op $+$)] \text{ }
+      \inference {v = v_1 - v_2}{\langle v_1 - v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(op $-$)]
       & \\
-      \inference {v = v_1 + v_2}{\langle v_1 + v_2, \sigma \rangle \Longrightarrow  v}[(op $+$)] \text{ }
-      \inference {v = v_1 - v_2}{\langle v_1 - v_2, \sigma \rangle \Longrightarrow  v}[(op $-$)]
+      \inference {v = v_1 \wedge v_2}{\langle v_1 \wedge v_2, \sigma \rangle \Longrightarrow \langle v, \sigma \rangle}[(op $\wedge$)] \text{ }
+      \inference {v = v_1 \vee v_2}{\langle v_1 \vee v_2, \sigma \rangle \Longrightarrow \langle v, \sigma \rangle}[(op $\vee$)]
       & \\
-      \inference {v = v_1 \wedge v_2}{\langle v_1 \wedge v_2, \sigma \rangle \Longrightarrow v}[(op $\wedge$)] \text{ }
-      \inference {v = v_1 \vee v_2}{\langle v_1 \vee v_2, \sigma \rangle \Longrightarrow v}[(op $\vee$)]
-      & \\
-      \inference {\langle e_1, \sigma\rangle \Longrightarrow \langle e_1', \sigma\rangle}
+      \inference {\langle e_1, \sigma\rangle \Longrightarrow \langle e_1', \sigma \rangle}
         {\langle e_1\text{ }op\text{ }e_2, \sigma  
-        \rangle \Longrightarrow \langle e_1'\text{ }op\text{ }e_2, \sigma' \rangle}[($op$ $expr$)]
-      & \\
-      \inference {\langle e_2, \sigma\rangle \Longrightarrow \langle e_2', \sigma\rangle}
+        \rangle \Longrightarrow \langle e_1'\text{ }op\text{ }e_2, \sigma \rangle}[($op$ $expr$)]
+      \text{ }
+      \inference {\langle e_2, \sigma\rangle \Longrightarrow \langle e_2', \sigma \rangle}
         {\langle v\text{ }op\text{ }e_2, \sigma  
-        \rangle \Longrightarrow \langle v\text{ }op\text{ }e_2', \sigma' \rangle}[($op$ $expr$ 2)]
+        \rangle \Longrightarrow \langle v\text{ }op\text{ }e_2', \sigma \rangle}[($op$ $expr$ 2)]
       & \\
+      $\langle v, \sigma \rangle \Longrightarrow \sigma$ ($vals$) evaluation
+      \text{ }
+      \inference {x \in \textbf{dom}(\sigma)}{\langle x, \sigma \rangle \Longrightarrow \langle \sigma(x), \sigma \rangle}[($vars$) evaluation] 
+    \end{tabular}
+  \end{center}
+  \caption{Basic Evaluation Rules for Simple-$R$ Expression}
+\end{figure}
+
+\par
+We finish off by defining the evaluation rules for the commands in figure 3.7.
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      $\langle \text{\textbf{skip}}, \sigma \rangle \longrightarrow \sigma$ (\textbf{skip})
+      \text{ }
       \inference {\langle C_1, \sigma \rangle \longrightarrow\sigma'}
         {\langle C_1;C_2, \sigma \rangle \longrightarrow \langle C_2, \sigma' \rangle}[($C_1;C_2$)]
-      & \\
-      $\langle \text{\textbf{skip}}, \sigma \rangle \longrightarrow \sigma$ (\textbf{skip})
       & \\
       $\langle \text{\textbf{if }\textit{true}} \text{\textbf{ then }} C_1 \text{\textbf{ else }} 
         C_2, \sigma \rangle \longrightarrow \langle C_1, \sigma\rangle$ (\textbf{if} true)
@@ -1030,23 +1055,22 @@ definitions.
       $\langle \text{\textbf{if }\textit{false}} \text{\textbf{ then }} C_1 \text{\textbf{ else }} 
         C_2, \sigma \rangle \longrightarrow \langle C_2, \sigma\rangle$ (\textbf{if} false)
       & \\
-      \inference {\langle e_1, \sigma \rangle\Longrightarrow\langle e_1', \sigma \rangle}
+      \inference {\langle e_1, \sigma \rangle\Longrightarrow\langle e_1', \sigma' \rangle}
         {\langle \text{\textbf{if }} e_1 \text{\textbf{ then }} C_1 \text{\textbf{ else }} 
         C_2, \sigma \rangle \longrightarrow \langle \textbf{if } e_1' \text{\textbf{ then }} C_1 \text{\textbf{ else }} 
-        C_2, \sigma \rangle}[(\textbf{if} $expr$)] 
+        C_2, \sigma' \rangle}[(\textbf{if} $expr$)] 
       & \\
       $\langle \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1, \sigma \rangle \longrightarrow \langle 
         \text{\textbf{if }} e_1 \text{\textbf{ then }} C_1;
         (\text{\textbf{while }} e_1 \text{\textbf{ do }} C_1) \text{\textbf{ else }} \textbf{skip}, \sigma \rangle$ (\textbf{while do})
       & \\
       \inference {x \in \textbf{dom}(\sigma)} 
-      {\langle x := v, \sigma \rangle \longrightarrow \sigma[x \mapsto v]} [(assignment $vals$)] \text{ }
-      & \\
+      {\langle x := v, \sigma \rangle \longrightarrow \sigma[x \mapsto v]} [(assign 1)] \text{ }
       \inference {\langle e, \sigma \rangle \Longrightarrow \langle e', \sigma \rangle} 
-      {\langle x := e, \sigma \rangle \longrightarrow \langle x := e', \sigma\rangle} [(assignment $expr$)] \text{ }
+      {\langle x := e, \sigma \rangle \longrightarrow \langle x := e', \sigma\rangle} [(assign 2)]
      \end{tabular}
   \end{center}
-  \caption{Operational Semantics for Simple-$\Pi$}
+  \caption{Operational Semantics for Simple-$R$ Commands}
 \end{figure}
 
 \subsection{Scoping}
@@ -1057,7 +1081,7 @@ variables and reference variables. For simplicity, we will focus initially on lo
 variables. 
 \par
 In order to help us formalise the notion of scopes we define a new notation, 
-$\longrightarrow^{*}$ as a multi-step evaluation. The evaluation rule 
+$\Longrightarrow^{*}$ as a multi-step evaluation. The evaluation rule 
 $\langle e, \sigma \rangle \Longrightarrow^{*}  \langle v, \sigma' \rangle$ simply 
 evaluate the expression $e$ one or more times until it evaluates to a value $v$. 
 
@@ -1069,13 +1093,14 @@ below.
   \begin{center}
     \begin{tabular}{c}
       \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \sigma 
-      \\ \langle e_1, \sigma' \rangle \Longrightarrow^{*} \langle v_1, \sigma'' \rangle} 
-      {\langle\textbf{let var }x = v_0 \text{\textbf{ in }} e_1 \text{\textbf{ end}}, \sigma \rangle 
-      \Longrightarrow \langle v_1, '' - \{x\} \rangle} [(\textbf{let in} values)] 
+      \\ \langle C_1, \sigma' \rangle \longrightarrow \sigma''
+      & \langle e_1, \sigma'' \rangle \Longrightarrow^{*} \langle v_1, \sigma'' \rangle} 
+      {\langle\textbf{let var }x = v_0 \text{\textbf{ in }} C_1;e_1 \text{\textbf{ end}}, \sigma \rangle 
+      \Longrightarrow \langle v_1, \sigma'' \setminus \{x\} \rangle} [(\textbf{let in} values)] 
       & \\
-      \inference {\langle e_1, \sigma \rangle \Longrightarrow \langle e_1', \sigma'\rangle} 
-      {\langle \textbf{let var }x = e_1 \text{\textbf{ in }} e_2 \text{\textbf{ end}}, \sigma \rangle 
-      \Longrightarrow \langle\textbf{let var }x = e_1' \text{\textbf{ in }} e_2\text{\textbf{ end}}, \sigma' \rangle} 
+      \inference {\langle e_1, \sigma \rangle \Longrightarrow \langle e_1', \sigma\rangle} 
+      {\langle \textbf{let var }x = e_1 \text{\textbf{ in }} C_1;e_2 \text{\textbf{ end}}, \sigma \rangle 
+      \Longrightarrow \langle\textbf{let var }x = e_1' \text{\textbf{ in }} C_1;e_2\text{\textbf{ end}}, \sigma \rangle} 
       [(\textbf{let in} $expr$)]
     \end{tabular}
   \end{center}
@@ -1087,14 +1112,15 @@ Figure 4.2 above defines the scoping rules for Simple-$\Pi$.
 
 \par
 The \textbf{let in} statement opens a new scope $\sigma'$ which 
-assigns $x$ the value $v$, the in expression, $e_1$ is then evaluated with the 
-new context using the multi-step evaluation until it no longer can be evaluted, 
-the resulting expression is passed back to the original context.
+assigns $x$ the value $v$, the in expression, $C_1;e_2$ is then evaluated with the 
+new context. First, evaluate the command, then using the multi-step 
+evaluation until it no longer can be evaluted, the resulting expression is 
+passed back to the original context.
 
 \par 
 Notice that in the first rule above (\textbf{let in } values), the resulting state 
-uses the notation $-$, recall that the operator removes all the variables in the set 
-$\{x\}$ from the domain of $\sigma$. 
+uses the notation $\setminus$, recall that the operator removes all the variables 
+in the set $\{x\}$ from the domain of $\sigma$. 
 
 \par
 This is necessary as in a scope it is possible to change the state of the 
@@ -1117,27 +1143,11 @@ evaluate functions in their own scope.
 
 \par
 In order to define the operational semantics of a function we will need to 
-specify the function body. We define a mapping \textit{fns} $: f \mapsto ((x_1, x_2...x_n), e)$, 
+specify the function body. We define a mapping 
+\textit{fns} $: f \mapsto ((x_1, x_2...x_n), C_1;e)$, 
 using this mapping allows us to retrieve the body of a function. Since functions 
 definition cannot be changed at runtime, this does not need to be part of the 
 configuration and can be consider as a static context.
-
-\par
-We begin defining the evaluation rules for functions, first we define the 
-operational semantics for the \textbf{return } statement which simply evaluates 
-to the value returned. 
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {c}
-      $\langle \textbf{return } v, \sigma \rangle \Longrightarrow \langle v, \sigma \rangle$ (\textbf{return} value)
-      &\\
-      \inference {\langle e_1, \sigma \rangle \Longrightarrow \langle e_1', \sigma' \rangle} {\langle \textbf{return } e_1, 
-      \sigma \rangle \Longrightarrow \langle e_1', \sigma' \rangle} [(\textbf{return} nil)]
-    \end{tabular}
-  \end{center}
-  \caption{Evaluation Rules for Return Statement}
-\end{figure}
 
 \par
 We can then evalute the function body which using the multi-step evaluation.
@@ -1145,12 +1155,13 @@ We can then evalute the function body which using the multi-step evaluation.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {((x_1..x_n), e_{body}) = \textit{fns}(f) 
-        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \langle e_{body}, \sigma' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
+      \inference {\textit{fns}(f) = ((x_1..x_n), C_1;e_1) & \langle C_1, \sigma' 
+      \rangle \longrightarrow \sigma''
+        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \langle e_1, \sigma'' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
       {\langle f(v_1...v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(function call vals)]
       & \\
-      \inference {\langle e_k, \sigma \rangle \Longrightarrow \langle e_k', \sigma' \rangle}
-      {\langle f(v_0...v_{k - 1},e_k...e_n), \sigma \rangle \Longrightarrow \langle f(v_0...v_{k - 1}, e_{k}'...e_n), \sigma' \rangle} [(function call expr)]
+      \inference {\langle e_k, \sigma \rangle \Longrightarrow \langle e_k', \sigma \rangle}
+      {\langle f(v_0...v_{k - 1},e_k...e_n), \sigma \rangle \Longrightarrow \langle f(v_0...v_{k - 1}, e_{k}'...e_n), \sigma \rangle} [(function call expr)]
     \end{tabular}
   \end{center}
   \caption{Functions Semantics for Simple-$\Pi$}
@@ -1162,14 +1173,15 @@ The first rule (function call vals) resembles the evaluation rule for
 function call, none of the variabels from the previous scope transfer over, only 
 those of the argument are copied. We then evaluates the function body until it 
 evaluates to a value which is then returned to the caller's context. Unlike 
-scopes, functions cannot alter the program's state. 
+scopes, functions only update its local state which is dellalocated upon return. 
+It cannot change the caller's state. 
 
 \par
 The second rule (function call $expr$) evaluates the expression passed into the 
 function as arguments. Our language defines a strict behaviour that all 
 arguments are evaluated in the order they are passed in, i.e. from left to right. 
 
-\section{Dependent Types and Variables}
+\section{Refinement Types and Variables}
 Programming languages often have a wide range of features, often the team behind 
 the language have to put extensive thought into the design decisions. As there 
 are often multiple way to handle a certain feature, rarely are there a definite 
@@ -1208,8 +1220,8 @@ same formalisation can be achieved using Structures Operational Semantics, the
 Hoare Triple provides a much more concise notation. 
 
 
-\subsection{The Ambiguity of Dependent Types}
-Consider the ambiguity of using variables to define dependent types. For 
+\subsection{The Ambiguity of Refinement Types}
+Consider these few ambiguity of using variables to define dependent types. For 
 instance: 
 
 \begin{figure} [H]
@@ -1224,6 +1236,26 @@ instance:
 \end{figure}
 
 \par
+The first problem arises when a free variable used in the refinement predicate 
+changes in the program scope, should the refinement type definition change? 
+This is demonstrated in figure 3.10, Problem 2 shown in figure 3.11 
+arises when the refinement predicate alter the program state? Would the program 
+variable change?
+
+
+\begin{figure} [H]
+  \begin{tabs}{1cm,2cm}
+    \textbf{let var }$y\text{ }:\text{ } int = 10$ \textbf{ in } \\
+    \tab\textbf{let typedef }$BoundedIntY$ = $\{i : Int\text{ }|\text{ } y := 100;i < y\}$ \textbf{ in } \\ 
+    \tab\tab\textbf{let var }$x\text{ }:\text{ }BoundedIntY = 16$ \textbf{ in }$y := 5$\textbf { end} \\
+    \tab\textbf {end} \\
+    \textbf{end}
+  \end{tabs}  
+  \caption{Mutation to State in Predicate}
+\end{figure}
+
+
+\par
 How would this behaviour work in practice? Recall from chapter 2 we proposed the 
 question of what should happen when the value bound to the variable change. In 
 this subsection we will define different methods to handle this behaviour and 
@@ -1231,14 +1263,14 @@ formalise their specification.
 
 \par
 First we need to introduce a new expression for type definition, in the example 
-above we used the expression (\textbf{let typedef} $x = T$ \textbf{ in }$e_1$ \textbf {end}) 
+above we used the expression (\textbf{let typedef} $x = T$ \textbf{ in }$C;e$ \textbf {end}) 
 to denote a new type $T$ with the name $x$ that exists in the scope of $e_1$. 
 This definition is similar to the \textbf{let in} expression defined previously. 
 
 In our example, we mean 
 that a new type named $BoundedIntY$ is created. We need to add this construct 
-into our syntax. In our current syntax, we have a context for variables and 
-values, We would also need a similar mapping for types, We use $\tau$ to 
+into our syntax. In our current syntax, we have a context mapping $vars$ to 
+$vals$, We would also need a similar mapping for types, We use $\tau$ to 
 represent the type name map. 
 
 \par
@@ -1246,7 +1278,7 @@ The syntax is extended by adding the following:
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {l l l}
-      \textit{Expression} & $e$ & $:$ ... $|$ \textbf{let typedef }$x = T\textbf{ in } e_1$ \textbf{ end} \\
+      \textit{Expression} & $e$ & $:$ ... $|$ \textbf{let typedef }$x = T\textbf{ in } C;e$ \textbf{ end} \\
       \textit{Type Name Context} & $\tau$& $:$ $vars \mapsto T$ \\
     \end{tabular}
   \end{center}
@@ -1254,16 +1286,19 @@ The syntax is extended by adding the following:
 \end{figure}
 
 \par
-We then define the operational semantics: 
+In our operational semantics, our signature is updated from $\langle C, \sigma \rangle$ 
+to $\langle C, \sigma, \tau \rangle$ in order to incorporate this new feature. 
+All previous operational semantics should be updated consistently.
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\langle e_1, \sigma, \tau' \rangle \Longrightarrow^{*} \langle v, \sigma', \tau'' \rangle 
-      \\ x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) & \tau' = \tau + \{x \mapsto T\}}
-      {\langle \textbf{let typedef }x = A \textbf{ in }e_1\textbf{ end}, 
+      \inference { 
+      x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) & \tau' = \tau + \{x \mapsto T\}
+      \\ \langle C_1, \sigma, \tau' \rangle \longrightarrow \langle \sigma', \tau'' \rangle & \langle e_1, \sigma', \tau'' \rangle \Longrightarrow^{*} \langle v, \sigma', \tau'' \rangle}
+      {\langle \textbf{let typedef }x = A \textbf{ in }C_1;e_1\textbf{ end}, 
       \sigma, \tau \rangle \Longrightarrow 
-        \langle v, \sigma', \tau'' - \{x\}\rangle}[(\textbf{typedef})] \text{ }    
+        \langle v, \sigma', \tau'' \setminus \{x\}\rangle}[(\textbf{typedef})] \text{ }    
     \end{tabular}
   \end{center}
 \end{figure}
@@ -1277,7 +1312,7 @@ can not already be defined. Logically it is equivalent to the semantics for
 
 
 \subsection{Total Immutability}
-The main issue one encounters when associating dependent types with imperative 
+The main issue one encounters when associating refinement types with imperative 
 languages is the presence of mutability and assignments. The obvious way to 
 work around this problem is to remove the ability to make changes to the state 
 of the program. In other words, all defined variables are constant. 
@@ -1285,7 +1320,7 @@ of the program. In other words, all defined variables are constant.
 \par
 While this approach does allow for a type system that depends on values, it is 
 only partial dependent typing as the values depended on has to be available at 
-compile time whereas a fully dependently typed language is able to depend on 
+compile time whereas a refinement type languag is able to depend on 
 value at runtime.
 
 \par
@@ -1297,7 +1332,7 @@ a building block for our language.
 To achieve complete immutability immutability we can simply ``disable'' the 
 reassignment feature. We could remove the assignment operator $(:=)$ from our 
 syntax and will achieve immutability. This will avoid any complications 
-regarding dependent types as 
+regarding refinement types as 
 if they are well typed during definition it will stay well typed. 
 
 \par
@@ -1305,12 +1340,11 @@ Using this approach does definitely resolves the uncertainty the usability of
 the language is poor. Imperative programming relies on state changes, forbidding 
 that go against the paradigm. 
 
-\subsection{Immutability For Dependent Variables}
-We observe that only variables associated with dependent typing needs to be 
+\subsection{Immutability For Refinement Variables}
+We observe that only variables associated with refinement typing needs to be 
 immutable to prevent any uncertain behaviours. To improve the flexibility of our 
 language, we could loosen the restrictions by having only the depenent variables 
 be immutable. 
-
 
 \par
 In order to capture the notation of immutable types, the set of variables $vars$ 
@@ -1336,17 +1370,19 @@ immutable.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
-      \inference {\langle e_1, \sigma' \rangle \longrightarrow^{*} \langle v, \sigma'' \rangle \\ \sigma' = \sigma + \{x \mapsto v\}} 
-      {\langle \text{\textbf{let const }}x = v \text{\textbf{ in }} e_1 \text{\textbf{ end}}, \sigma \rangle 
-      \longrightarrow \langle v, \sigma'' - \{x\} \rangle} [(\textbf{let in} values)] 
+      \inference {
+      \langle C_1, \sigma', \tau \rangle \longrightarrow \langle \sigma'', \tau' \rangle & \langle e_1, \sigma'', \tau' \rangle \Longrightarrow^{*} \langle v, \sigma'', \tau' \rangle 
+      \\ \sigma' = \sigma + \{x \mapsto v\}} 
+      {\langle \text{\textbf{let const }}x = v \text{\textbf{ in }} C_1;e_1 \text{\textbf{ end}}, \sigma \rangle 
+      \Longrightarrow \langle v, \sigma'', \tau' \setminus \{x\} \rangle} [(\textbf{let in} values)] 
       & \\
-      \inference {\langle e_1, \sigma \rangle \longrightarrow \langle e_1', \sigma' \rangle} 
-      {\langle \text{\textbf{const }}x = e_1 \text{\textbf{ in }} e_2 \text{\textbf{ end}}, \sigma \rangle 
-      \longrightarrow \langle \text{\textbf{const }}x = e_1' \text{\textbf{ in }} e_2\text{\textbf{ end}}, \sigma' \rangle} 
+      \inference {\langle e_1, \sigma, \tau \rangle \Longrightarrow \langle e_1', \sigma, \tau \rangle} 
+      {\langle \text{\textbf{const }}x = e_1 \text{\textbf{ in }} C_1;e_2 \text{\textbf{ end}}, \sigma \rangle 
+      \Longrightarrow \langle \text{\textbf{const }}x = e_1' \text{\textbf{ in }} C_1;e_2\text{\textbf{ end}}, \sigma \rangle} 
       [(\textbf{const in} $expr$)]
       & \\
       \inference {x \in \textbf{dom}(\sigma) & \neg is\_immutable(x)} 
-      {\langle x := v, \sigma \rangle \longrightarrow \langle \text{\textbf{skip}}, \sigma[x \mapsto v] \rangle} [(assignment $vals$)] \text{ }
+      {\langle x := v, \sigma \rangle \longrightarrow \sigma[x \mapsto v]} [(assignment $vals$)] \text{ }
     \end{tabular}
   \end{center}
   \caption{Immutable Variables Rules for Simple-$\Pi$}
@@ -1357,64 +1393,40 @@ Once we defined the ability to define immutable variables, we can utilise it in
 our type definition. First we refine our specification for \textbf{typedef} 
 with regards to dependent types using the evaluation rules.
 
+\par
+We require a new notation to capture all the variables that appear in an 
+expression $e$, we use the function $free\_vars(e)$ to return the set of all 
+variables that appear in an expression $e$.
+
+\par
+The function above will also include any new variables declared in the expression. 
+If a variable is declared and mutated within the expression itself then we would 
+not pose any problem, so the set of variables that needs to be immutable would 
+be $\sigma \cap free\_vars(P(x))$. This gives us the set of free variables in $P(x)$ 
+that is defined in the previous scope. 
+
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
       \inference {
-      a \notin \text{\textbf{dom}}(\sigma) & is\_immutable(x) & a \notin \textbf{dom}(\tau) 
-      \\ \langle e_1, \sigma, \tau + \{a \mapsto \Pi x : A.P(x)\} \rangle 
-      \longrightarrow^{*} \langle v, \sigma', \tau' \rangle}
-      {\langle \textbf{typedef } a = \Pi x :A .P(x) \textbf{ in }e_1\textbf{ end}, 
-      \sigma, \tau \rangle \longrightarrow 
-        \langle v, \sigma', \tau' - \{a\}\rangle}[(\textbf{typedef}) $\Pi$]
+      a \notin \text{\textbf{dom}}(\sigma) & a \notin \textbf{dom}(\tau) \\
+      \forall \alpha \in \sigma \cap free\_vars(P(\upsilon))\text{ }s.t.\text{ }is\_immutable(\alpha)
+      \\ \langle C_1, \sigma, \tau + \{a \mapsto \{\upsilon :A\text{ }|\text{ }P(\upsilon)\} 
+      \rangle \longrightarrow \langle \sigma', \tau' \rangle
+      \\ \langle e_1, \sigma', \tau' \rangle \Longrightarrow^{*} \langle v, \sigma', \tau' \rangle}
+      {\langle \textbf{typedef } a = \{\upsilon :A\text{ }|\text{ }P(\upsilon)\} \textbf{ in }C_1;e_1\textbf{ end}, 
+      \sigma, \tau \rangle \Longrightarrow 
+        \langle v, \sigma', \tau' \setminus \{a\}\rangle}[(\textbf{typedef}) $\Pi$]
     \end{tabular}
   \end{center}
-  \caption{Operational Semantics Dependent Type Definition}
+  \caption{Operational Semantics Refinement Type Definition with Immutable Variable}
 \end{figure}
 
-
 \par
-We can capture the behaviour of the statement using Hoare Logic 
-by using the following formuli, 
-in order to be more consise with our notation we declare some variables local to 
-the rule.
-
-\par
-We construct our Hoare Triple as follows, first we declare 
-the expression that we would like to evaluate, we do this in two parts.
-
-Let $\{S\}e_1\{T\}$ be a Hoare triple and we have a type declaration incorporating 
-$e_1$ which will be evaluted in our Hoare Logic as $E$
-
-\begin{center}
-  $E = \textbf{let typedef }a = \Pi x. P(x) \textbf{ in } e_1 \textbf{ end }$
-\end{center}
-\par
-
-In order to prevent confusion between our postcondition and our dependent type 
-function, we delcare precondition as $Q$ on our type declaration $E$
-\begin{center}
-  $Q = a \notin \textbf{dom}(\tau) \wedge a \notin \textbf{dom}(\sigma) \wedge is\_immutable(x)$
-\end{center}
-
-\par
-The Hoare logic can then be written as
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular}{c}      
-      \inference{\{\tau(a) = \Pi x. P(x) \wedge S\}e_1\{T\}}{\{Q\}E\{T\}}
-    \end{tabular}
-  \end{center}
-\end{figure}
-
-
-\par
-The precodition $Q$ ensures that a type declaration is possible in the context, 
-and we can evaluate the expression $e_1$ and satisfy the postcondition. Notice 
-that we did not require the $S$ to hold with the precondition $Q$ as it 
-potentially could relies on the type declaration to have had happend before it 
-holds.
+Both problems proposed in 3.9 and 3.10 are addressed with this semantic. The 
+former is no longer valid, as $y$ is immutable it cannot be reassigned out of 
+the type definition and change the type definition. The latter is not possible 
+for the same reason.
 
 \par
 The approach laid out here is a simple approach to dealing with the ambiguity of 
@@ -1423,9 +1435,20 @@ strategy templates, where a value passed into a template must be a constant
 expression. 
 
 \par
-The limitation of this approach is of course the fact that our dependent values 
-must be available at compile time, eliminating some flexibility. Our next 
-appraoch will look to improve on this limitation. 
+We could potentially adapt a clever approach used by the Java programming 
+language to overcome variable mutation in Anonymous classes. Java requires that 
+any variables accessed by an anonymous class that is part of 
+its enclosing scope to be final or \textit{effectively final} 
+\cite{effectFinal}. An effectively final variable is a variable that is not 
+declared immutable but its value is not changed after declaration. While this 
+does improves some flexibity as one do not need to use the \textbf{let const} 
+expression, it behave the same for all intents and purposes. For this reason we 
+consider this additional feature out of scope. 
+
+\par
+The limitation of this approach is of course the fact that one has to strategically 
+declare the variables needed, in some cases one might not be able to declare 
+immutable variable but still want the ability to define a refinement type.
 
 \subsection{Passing by Value}
 
@@ -1437,134 +1460,42 @@ parameter in the function does not reflect changes outside and vice versa. The
 same cocept is used for functions in Simple-$\Pi$.
 
 \par
-The similar approach can be taken in our definitions for dependent types. For 
-instance, taking the example in figure 4.2, if the variable $y$ in the dependent 
-type function is different from the variable $y$ in the program state, then any 
-changes to the variable $y$ will not effect the type definition and the program 
+The similar approach can be taken in our definitions for refinement types. For 
+instance, taking the example in figure 3.9, if the variable $y$ in the refinement  
+predicate is different from the variable $y$ in the program state, then any 
+changes to the variable $y$ will not affect the type definition and the program 
 will stay well typed.
+
+\par
+Our appraoch is to have the predicate to evaluate in a different environment. 
+Similar to how functions are defined in section 3.3.2. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {
+      \sigma_1 = \sigma & \tau_1 = \tau
+      \\ \langle P(\upsilon), \sigma_1, \tau_1 \rangle \Longrightarrow \langle e, \sigma_1', \tau_1' \rangle
+      \\ \langle C_1, \sigma, \tau + \{y \mapsto \{\upsilon : A\text{ }|\text{ }e\}\} \rangle \longrightarrow \langle \sigma', \tau' \rangle
+      \\ \langle e_1, \sigma', \tau' \rangle \Longrightarrow \langle v, \sigma', \tau' \rangle}
+      {\langle\textbf{let typedef } y = \{\upsilon : A\text{ }|\text{ }P(\upsilon)\} \textbf{ in }C_1;e_1\textbf{ end}, 
+      \sigma, \tau \rangle \Longrightarrow \langle v, \sigma', \tau' \setminus \{y\} \rangle} 
+    \end{tabular}
+  \end{center}
+  \caption{Evaluation of Refinement Type Functions}
+\end{figure}
+
+\par
+We define $\sigma_1$ and $\tau_1$ as a copy of the program state $\sigma$ and 
+$\tau$. The refinement predicate $P(\upsilon)$ is evaluated using the copied 
+states. The result of this extra step ensures that any mutation outside the 
+refinement predicate does not change the predicate. It address our proposed 
+ambiguity by specifying a concrete behaviour. Figure 3.9 has the result of type 
+$BoundedIntY$ being bounded to $10$ throughout, even when the free variable $y$ 
+is reassigned to another value. Similarly, the second problem now has no 
+indefiniteness, the mutation of $y$ in the refinement predicate does not affect 
+the program states. 
  
-\par
-In subsection 4.1.2 we defined the functions' evaluation rules using scopes. 
-We will be adapating a similar approach for our dependent type functions. If 
-$\Pi x : A. P(x)$ is a dependent type that depends on $x$ of type $A$ then we have  
-$\Pi x : A.P(x) \in $ \textit{dfns}, \textit{dfns} behaves like \textit{fns}, 
-holding the definitions of all dependent type functions. The only difference 
-here is that a dependent type only takes a singular parameter. 
-
-\par
-We first require modification to our \textbf{return} statement, which at the 
-moment only returns expressions, as dependent type functions return types, we 
-need to accomodate that. We define a special return statement, \textbf{return } 
-$T$, this statement is only to be used with dependent type function. 
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {l l l}
-      \textit{Expressions} & $e$& $:$ $\textbf{return }T$ \\
-    \end{tabular}
-  \end{center}
-  \caption{Return statement for Types in Simple-$\Pi$}
-\end{figure}
-
-We define the typing rule for this return statement using the idea of 
-\textit{universes} \cite{martinLof} 
-in type theory, using the notation $\Gamma \vdash A : Type$ we say that $A$ is a 
-type. 
-
-We define the formation rule for a dependent type as so: 
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {c}
-      \inference {\Gamma \vdash A : Type \\ \Gamma, x : A \vdash P(x) : Type} 
-        {\Gamma \vdash \Pi x. P(x) : Type}[($\Pi$ F)] \text{ }
-    \end{tabular}
-  \end{center}
-  \caption{Typing Rules for the Dependent Product Type}
-\end{figure}
-
-\par
-The dependent product type formation rule ($\Pi$ F) defines the rules in order 
-for a dependent product type to be formed. Similarly, we define the 
-type judgement for a \textbf{return }$T$ statement, it 
-returns a type. 
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {c}
-      \inference{\Gamma \vdash A : Type}{\Gamma \vdash \textbf{return } A : Type} [(\textbf{return }T)]
-    \end{tabular}
-  \end{center}
-  \caption{Typing Rules for Base Values}
-\end{figure}
-
-
-\par
-Using the return statement above, when one define a dependent type, our 
-semantics will evaluate the function until a type is returned. 
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {c}
-      
-     \scriptsize
-     \inference {\langle e_1, \sigma, \tau \rangle \longrightarrow \langle e_1', \sigma', \tau' \rangle}
-      {\langle\textbf{let typedef } x = \Pi e_1 : A.P(e_1) \textbf{ in }e_2\textbf{ end}, 
-      \sigma, \tau \rangle \longrightarrow 
-        \langle \textbf{let typedef } x = \Pi e_1' : A.P(e_1') \textbf{ in }e_2\textbf{ end}, \sigma, \tau \rangle} 
-      & \\
-     \footnotesize
-     \inference {((x_1), e_{body}) = \textit{dfns}(\Pi v : A.P(v)) 
-      \\ \sigma' = \{x_1 \mapsto v\} &  \langle e_{body} , \sigma, \tau \rangle \longrightarrow^{*} \langle \textbf{return }T, \sigma, \tau \rangle}
-      {\langle\textbf{let typedef } x = \Pi v : A.P(v) \textbf{ in }e_1\textbf{ end}, 
-      \sigma, \tau \rangle \longrightarrow 
-        \langle \textbf{let typedef } x = T \textbf{ in }e_1\textbf{ end}, \sigma, \tau \rangle}
-    \normalsize
-    \end{tabular}
-  \end{center}
-  \caption{Evaluation of Dependent Type Functions}
-\end{figure}
-
-\par 
-The rule above formalise the semantics for dependent type definitions in 
-Simple-$\Pi$. The dependent type function is evaluated in its own scope. Note 
-that in our evalutation the \textbf{typedef} statement is being written 
-repeatedly such that we are able to pass back \textbf{return} $T$ to 
-\textbf{typedef}. If we were to use the same evaluation as our previous return 
-statement then $T$ would have to be an expression and could potentitally results 
-in further complications. 
-
-\par
-As with the previous example, we caputure the behaviour with Hoare Logic as 
-follows. To improve readability, we use local variables to represent certain 
-expressions. 
-
-\par
-We use $E$ to represent the main expression under evaluation, in this example we 
-is defined as
-
-\begin{center}
-  $E = \textbf{let typedef }y = \Pi x : A.P(x) \textbf{ in }e_1\textbf{ end}$  
-\end{center}
-
-\par
-As we did previously, we define a triple $\{S\}e_1\{T\}$ as an arbitrary hoare 
-logic over expression $e_1$. Our triple can then be defined as 
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular}{c}
-      \inference{\{\tau(y) = \Pi \alpha : A.P(\alpha) \wedge S\}e_1\{T\}}{\forall \alpha : A\{\alpha = x\}E\{T\}}
-    \end{tabular}
-  \end{center}
-\end{figure}
-
-\par
-In the above formula, we are using a local variable $\alpha$ to represent 
-passing by value, we are formalising that the variable program varaible $x$ is 
-distinct from $\alpha$ and mutation of $x$ does to reflect on $\alpha$. The 
-dependent type bound to $y$ depends on $\alpha$ and not $x$.
-
 \par
 Unlike C++, this form of sematics allows one to utilise non-constant expression 
 in type definition. This is achieved by taking the \textit{rvalue} \cite{cpplrvalues} 
