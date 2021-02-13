@@ -112,15 +112,11 @@ reduces the lines of code a programmer needs to write. An in depth
 definition of dependent types is provided in the next section.
 
 \par
-A further restriction on dependent types can be found in \textit{Refinement 
-Types}.
-
-\par
-The expressive nature of dependent types allow one to define complex 
-mathematical assertations and hence lends itself to theorem proving systems. 
-Mutliple functional languages such as \textit{Epigram} 
+The expressive nature of dependent types allow one to 
+define complex mathematical assertations and hence lends itself to 
+theorem proving systems. Mutliple functional languages such as \textit{Epigram} 
 \cite{epigram} and \textit{Agda} \cite{agda} has 
-built in support for dependent typing. However they remain niche and more 
+built in support for dependent typin.  However they remain niche and more 
 mainstream languages like Java and C++ does not get the luxury. In chapter 2 of 
 this dissertation we will be providing an in depth analysis of the current state 
 of dependent types in programming languages and answer why dependent types are 
@@ -138,33 +134,47 @@ features, we propose that a more simple and barebone definiton will allow easier
 access to the literature and motivate more studies into dependenty types. 
 
 \par
-This dissertation serves as a document for our findings and is organised as 
-follows. This first chapter serves as an introduction to dependent types and the 
-motivation behind our work.
+A further restriction on dependent types can be found in \textit{Refinement 
+Types} \cite{refinementTypes}. Refinement types allows one to specify subtypes 
+of existing types, dependent types on the other hand allow one to create 
+arbitrary types. A refinement types is constrained by a decidable predicte, 
+bringing a better ease of programming. While dependent types are significantly 
+more powerful than refinement types, the latter provides a good balance between 
+expressiveness and ease of use. We propose to create a simple framework with 
+refinement typing that resembles mainstream programming language in order to 
+study the subject further. 
 
 \par
-Chapter 2 if a survey on the current state of dependent types 
-in programming languages. Different languages with varying paradigm are explored 
+This dissertation serves as a document for our findings and is organised as 
+follows. This first chapter serves as an introduction to dependent types, 
+refinement types and the motivation behind our work.
+
+\par
+Chapter 2 if a survey on the current state of dependent types and refinement 
+types in existing programming languages. Different languages with varying 
+paradigm are explored 
 and summarised in order to better understand the extend of their support 
 for dependent types. Functional lanaguages and theorem provers are studied to 
-understand how dependent types behave in their natural environment. We 
-extensively studied C++ as its templating engine bears strong resemblence to 
-dependent types and we observe its limitation. 
+understand how dependent types behave in their natural environment. As 
+refinement types proves to be more niche and there is no production language 
+with refinement support, we studied past research that attempts to bring the 
+language mainstream. Finally, we extensively studied C++ as its templating 
+engine bears strong resemblence to refinement types and we observe its limitation. 
 We conclude the chapter by proposing how our project will address these limitations. 
 
 \par
-In chapter 3 we will be introducing a dependently typed imperative language. 
-Our language, named Simple-$\Pi$ is a First-Order Programming Language which 
+In chapter 3 we will be introducing an imperative language with refinement type support. 
+Our language, named Simple-$R$ is a First-Order Programming Language which 
 highly resembles the C programming language. Our aim with the language is to 
-capture the core behaviour of dependent types and thus for the pursuit 
+capture the core behaviour of refinement types and thus for the pursuit 
 of simplicity is kept at a minimal with 
 only the fundamental features. In this chapter, we will be 
 defining the syntax, typing rules and semantics 
-of a basic language with dependent types support which serves as a basis 
+of a basic language with refinement types support which serves as a basis 
 which will be studied throughout the chapter. 
 We then present the semantics of Simple-$\Pi$, in addition 
 to the basic operational semantics, we will raise
-multiple scenarios that dependent types cause ambiguity in imperative programming. 
+multiple scenarios that refinement types cause ambiguity in imperative programming. 
 We start by discussing the impact of mutability has on dependent types and 
 answer the problem by proposing different solutions to resolve the 
 ambiguity and observes how these approaches differs. 
@@ -253,6 +263,31 @@ the construction a programming language and does not provide any additional
 value. The dependent product type is largely adequate for our goal.
 
 \section{Refinement Types vs Dependent Types}
+Refinement Types is a type system where a certain base type is refined by a 
+predicate. A refinement type $A$ is written in the form 
+$\{\upsilon : B\text{ }|\text{ }P(\upsilon)\}$. $\upsilon$ is a special variable 
+not in the program, $B$ is a base type and $P(\upsilon)$ is the 
+\textit{refinement predicate}, a boolean expression 
+involving $\upsilon$ and any free variables in the program. Formally, a value 
+$i$ is well typed with regards to a refinement type if $P(i)$ evaluates to 
+\textit{true}.
+
+\par
+The key differentiating factor between refinement types and dependent types is 
+that the latter is unrestricted. A refinement type is restricted predicate 
+$P(\upsilon)$ whereas a dependent types is able to rely on a function $P(x)$ 
+where there is no algorithm to prove its correctness. One has to manually 
+provide the proof for a dependent types. Furthermore, a refinement type $A$ 
+that is a refinement on a base type $B$ has a the property $A \preceq B$ 
+specifying $A$ is a subtype of $B$, this is not true in a dependent type 
+language.
+
+\par
+The decidability of refinement types allow one high level of automation and 
+provide a simpler understanding. While in many cases dependent types prove to be 
+more powerful, refinement types for all intent and purposes does the job in 
+providing the improved expressivity for general programming. For this reason, we 
+will be basing our project on refinement types. 
 
 \section{Overview of a Dependently Typed Language}
 In this section we will discuss at a very high level the behaviour one would 
@@ -348,8 +383,7 @@ dependent types to build further language features, v) Discuss how our work
 compliments the literature. 
 
 
-
-\chapter{Background: State of Dependently Typed in Language} 
+\chapter{Background Research} 
 In this chapter we will be reviewing the current knowledge of dependent types 
 in different programming languages. It will cover languages with full dependent 
 types support as well as some languages with similar concepts and point out how 
@@ -767,7 +801,7 @@ language in details.
       \textit{Types} & $T$ & $:\text{ }int\text{ }|\text{ }bool\text{ }|
       \text{ }\{x: A\text{ }|\text{ }P(x)\}\text{ }|\text{ }void$\\
       \textit{Functions Type} &  & $:\text{ }T_1, T_2,T_3...T_n\longrightarrow T_0$\\
-      \textit{Functions} & $f$ & $f(x_1,x_2,...x_n) = C;e$\\
+      \textit{Functions} & $f$ & $:$ $C;e$\\
       \textit{Operators} & $ops$ & $:$ $+$ $|$ $-$ $|$ $\wedge$ $|$ $\vee$ \\
       \textit{Expressions} & $e$ & $:$ $vals$ $|$ $x$ $|$ $e_1$ $ops$ $e_2$ 
       $|$ $f(e_1...e_n)$ $|$  \\
@@ -957,8 +991,9 @@ Evaluation of the function will then satisfy the return type $T_0$.
 \subsubsection{Refinement Types}
 Finally we define typing rules for a refinement types. A refinement type 
 $\{\upsilon : T\text{ }|\text{ }P(\upsilon)\}$ is constructed by a base type $T$ 
-and a refinement predicate $P(\upsilon)$ on $T$. A refinement predicate is 
-simply a boolean expression.
+and a refinement predicate $P(\upsilon)$ on $T$ which is 
+simply represented as a boolean expression. However, in order for the type to 
+hold, the said expression has to hold. 
 
 \par
 We define the typing rule for refinement types using the idea of 
