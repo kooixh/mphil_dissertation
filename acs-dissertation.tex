@@ -1067,13 +1067,13 @@ We begin by defining the evaluation rules for basic expressions.
       \inference {v = v_1 \wedge v_2}{\langle v_1 \wedge v_2, \sigma \rangle \Longrightarrow \langle v, \sigma \rangle}[(op $\wedge$)] \text{ }
       \inference {v = v_1 \vee v_2}{\langle v_1 \vee v_2, \sigma \rangle \Longrightarrow \langle v, \sigma \rangle}[(op $\vee$)]
       & \\
-      \inference {\langle e_1, \sigma\rangle \Longrightarrow \langle e_1', \sigma \rangle}
+      \inference {\langle e_1, \sigma\rangle \Longrightarrow \langle e_1', \sigma' \rangle}
         {\langle e_1\text{ }op\text{ }e_2, \sigma  
-        \rangle \Longrightarrow \langle e_1'\text{ }op\text{ }e_2, \sigma \rangle}[($op$ $expr$)]
+        \rangle \Longrightarrow \langle e_1'\text{ }op\text{ }e_2, \sigma' \rangle}[($op$ $expr$)]
       \text{ }
-      \inference {\langle e_2, \sigma\rangle \Longrightarrow \langle e_2', \sigma \rangle}
+      \inference {\langle e_2, \sigma\rangle \Longrightarrow \langle e_2', \sigma' \rangle}
         {\langle v\text{ }op\text{ }e_2, \sigma  
-        \rangle \Longrightarrow \langle v\text{ }op\text{ }e_2', \sigma \rangle}[($op$ $expr$ 2)]
+        \rangle \Longrightarrow \langle v\text{ }op\text{ }e_2', \sigma' \rangle}[($op$ $expr$ 2)]
       & \\
       $\langle v, \sigma \rangle \Longrightarrow \sigma$ ($vals$) evaluation
       \text{ }
@@ -1111,8 +1111,8 @@ We finish off by defining the evaluation rules for the commands in figure 3.7.
       & \\
       \inference {x \in \textbf{dom}(\sigma)} 
       {\langle x := v, \sigma \rangle \longrightarrow \sigma[x \mapsto v]} [(assign 1)] \text{ }
-      \inference {\langle e, \sigma \rangle \Longrightarrow \langle e', \sigma \rangle} 
-      {\langle x := e, \sigma \rangle \longrightarrow \langle x := e', \sigma\rangle} [(assign 2)]
+      \inference {\langle e, \sigma \rangle \Longrightarrow \langle e', \sigma' \rangle} 
+      {\langle x := e, \sigma \rangle \longrightarrow \langle x := e', \sigma' \rangle} [(assign 2)]
      \end{tabular}
   \end{center}
   \caption{Operational Semantics for Simple-$R$ Commands}
@@ -1137,16 +1137,16 @@ below.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
-      \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \sigma 
+      \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) 
       \\ \langle C_1, \sigma' \rangle \longrightarrow \sigma''
-      & \langle e_1, \sigma'' \rangle \Longrightarrow^{*} \langle v_1, \sigma'' \rangle} 
+      & \langle e_1, \sigma'' \rangle \Longrightarrow^{*} \langle v_1, \sigma''' \rangle} 
       {\langle\textbf{let var }x : T = v_0 \text{\textbf{ in }} C_1;e_1 \text{\textbf{ end}}, \sigma \rangle 
-      \Longrightarrow \langle v_1, \sigma'' \setminus \{x\} \rangle} [(\textbf{let in} values)] 
+      \Longrightarrow \langle v_1, \sigma''' \setminus \{x\} \rangle} [(\textbf{let in} values)] 
       & \\
       \footnotesize
-      \inference {\langle e_1, \sigma \rangle \Longrightarrow \langle e_1', \sigma\rangle} 
+      \inference {\langle e_1, \sigma \rangle \Longrightarrow \langle e_1', \sigma' \rangle} 
       {\langle \textbf{let var }x : T = e_1 \text{\textbf{ in }} C_1;e_2 \text{\textbf{ end}}, \sigma \rangle 
-      \Longrightarrow \langle\textbf{let var }x : T = e_1' \text{\textbf{ in }} C_1;e_2\text{\textbf{ end}}, \sigma \rangle} 
+      \Longrightarrow \langle\textbf{let var }x : T = e_1' \text{\textbf{ in }} C_1;e_2\text{\textbf{ end}}, \sigma' \rangle} 
       [(\textbf{let in} $expr$)]
       \normalsize
     \end{tabular}
@@ -1204,10 +1204,10 @@ We can then evalute the function body which using the multi-step evaluation.
     \begin{tabular} {c}
       \inference {\textit{fns}(f) = ((x_1..x_n), C_1;e_1) & \langle C_1, \sigma' 
       \rangle \longrightarrow \sigma''
-        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \langle e_1, \sigma'' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
+        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \langle e_1, \sigma''' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
       {\langle f(v_1...v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(function call vals)]
       & \\
-      \inference {\langle e_k, \sigma \rangle \Longrightarrow \langle e_k', \sigma \rangle}
+      \inference {\langle e_k, \sigma \rangle \Longrightarrow \langle e_k', \sigma' \rangle}
       {\langle f(v_0...v_{k - 1},e_k...e_n), \sigma \rangle \Longrightarrow \langle f(v_0...v_{k - 1}, e_{k}'...e_n), \sigma \rangle} [(function call expr)]
     \end{tabular}
   \end{center}
@@ -1236,13 +1236,13 @@ holds.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
-      \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \sigma 
+      \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) 
       \\ \langle P(v_1), \sigma, \tau \rangle \Longrightarrow^{*} \langle true, 
       \sigma', \tau' \rangle
       \\ \langle C_1, \sigma' \rangle \longrightarrow \sigma''
-      & \langle e_1, \sigma'' \rangle \Longrightarrow^{*} \langle v_1, \sigma'' \rangle} 
+      & \langle e_1, \sigma'' \rangle \Longrightarrow^{*} \langle v_1, \sigma''' \rangle} 
       {\langle\textbf{let var }x : \{\upsilon : T\text{ }|\text{ }P(\upsilon)\} = v_0 \text{\textbf{ in }} C_1;e_1 \text{\textbf{ end}}, \sigma \rangle 
-      \Longrightarrow \langle v_1, \sigma'' \setminus \{x\} \rangle}
+      \Longrightarrow \langle v_1, \sigma''' \setminus \{x\} \rangle}
     \end{tabular}
   \end{center}
   \caption{Variable Declaration for Refinement Type}
@@ -1270,30 +1270,6 @@ dependent types, which is a feature itself. For instance, the inclusion of depen
 would modify the behaviour of assignments and vice versa. This section 
 will cover the different ways of handling dependent types and they interact with 
 other features.
-
-\subsection{Hoare Logic}
-In order to formalise the specification of our language we opted to use 
-\textit{Hoare Logic} \cite{hoare}. The \textit{Hoare Triple} is defined as follows: 
-
-\begin{figure}[H]
-  \begin{center}
-    $\{P\}C\{Q\}$
-  \end{center}
-  \caption{Hoare Triple}
-\end{figure}
-The Hoare triple simply expresses that given precondition $P$ holds then after executing $C$ 
-and $C$ terminates, the postcondition $Q$ will hold.
-
-\par
-We chose Hoare Logic as our preferred system because of its simple to understand 
-notation. While Hoare Logic is a powerful tool that can become complex when 
-reasoning about the correctness of a program we are mainly interested in using 
-the Hoare notation as a tool for specifications. We will be using the 
-precondition to specify in which state the programmer is allowed to perform 
-certain commands and what must be the resulting state after execution. While the 
-same formalisation can be achieved using Structures Operational Semantics, the 
-Hoare Triple provides a much more concise notation. 
-
 
 \subsection{The Ambiguity of Refinement Types}
 Consider these few ambiguity of using variables to define dependent types. For 
@@ -1370,10 +1346,11 @@ All previous operational semantics should be updated consistently.
     \begin{tabular} {c}
       \inference { 
       x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) & \tau' = \tau + \{x \mapsto T\}
-      \\ \langle C_1, \sigma, \tau' \rangle \longrightarrow \langle \sigma', \tau'' \rangle & \langle e_1, \sigma', \tau'' \rangle \Longrightarrow^{*} \langle v, \sigma', \tau'' \rangle}
+      \\ \langle C_1, \sigma, \tau' \rangle \longrightarrow \langle \sigma', \tau'' \rangle 
+      & \langle e_1, \sigma', \tau'' \rangle \Longrightarrow^{*} \langle v, \sigma'', \tau''' \rangle}
       {\langle \textbf{let typedef }x = A \textbf{ in }C_1;e_1\textbf{ end}, 
       \sigma, \tau \rangle \Longrightarrow 
-        \langle v, \sigma', \tau'' \setminus \{x\}\rangle}[(\textbf{typedef})] \text{ }    
+        \langle v, \sigma'', \tau''' \setminus \{x\}\rangle}[(\textbf{typedef})] \text{ }    
     \end{tabular}
   \end{center}
 \end{figure}
@@ -1398,8 +1375,6 @@ name.
     \end{tabular}
   \end{center}
 \end{figure}
-
-
 
 \subsection{Total Immutability}
 The main issue one encounters when associating refinement types with imperative 
@@ -1461,18 +1436,19 @@ immutable.
   \begin{center}
     \begin{tabular}{c}
       \inference {
-      \langle C_1, \sigma', \tau \rangle \longrightarrow \langle \sigma'', \tau' \rangle & \langle e_1, \sigma'', \tau' \rangle \Longrightarrow^{*} \langle v, \sigma'', \tau' \rangle 
+      \langle C_1, \sigma', \tau \rangle \longrightarrow \langle \sigma'', \tau' \rangle 
+      & \langle e_1, \sigma'', \tau' \rangle \Longrightarrow^{*} \langle v, \sigma''', \tau'' \rangle 
       \\ \sigma' = \sigma + \{x \mapsto v\}} 
       {\langle \text{\textbf{let const }}x = v \text{\textbf{ in }} C_1;e_1 \text{\textbf{ end}}, \sigma \rangle 
-      \Longrightarrow \langle v, \sigma'', \tau' \setminus \{x\} \rangle} [(\textbf{let in} values)] 
+      \Longrightarrow \langle v, \sigma''', \tau'' \setminus \{x\} \rangle} [(\textbf{let in} values)] 
       & \\
-      \inference {\langle e_1, \sigma, \tau \rangle \Longrightarrow \langle e_1', \sigma, \tau \rangle} 
+      \inference {\langle e_1, \sigma, \tau \rangle \Longrightarrow \langle e_1', \sigma', \tau' \rangle} 
       {\langle \text{\textbf{const }}x = e_1 \text{\textbf{ in }} C_1;e_2 \text{\textbf{ end}}, \sigma \rangle 
-      \Longrightarrow \langle \text{\textbf{const }}x = e_1' \text{\textbf{ in }} C_1;e_2\text{\textbf{ end}}, \sigma \rangle} 
+      \Longrightarrow \langle \text{\textbf{const }}x = e_1' \text{\textbf{ in }} C_1;e_2\text{\textbf{ end}}, \sigma', \tau' \rangle} 
       [(\textbf{const in} $expr$)]
       & \\
       \inference {x \in \textbf{dom}(\sigma) & \neg is\_immutable(x)} 
-      {\langle x := v, \sigma \rangle \longrightarrow \sigma[x \mapsto v]} [(assignment $vals$)] \text{ }
+      {\langle x := v, \sigma, \tau \rangle \longrightarrow \sigma[x \mapsto v]} [(assignment $vals$)] \text{ }
     \end{tabular}
   \end{center}
   \caption{Immutable Variables Rules for Simple-$R$}
@@ -1503,10 +1479,10 @@ that is defined in the previous scope.
       \forall \alpha \in \sigma \cap free\_vars(P(\upsilon))\text{ }s.t.\text{ }is\_immutable(\alpha)
       \\ \langle C_1, \sigma, \tau + \{a \mapsto \{\upsilon :A\text{ }|\text{ }P(\upsilon)\} 
       \rangle \longrightarrow \langle \sigma', \tau' \rangle
-      \\ \langle e_1, \sigma', \tau' \rangle \Longrightarrow^{*} \langle v, \sigma', \tau' \rangle}
+      \\ \langle e_1, \sigma', \tau' \rangle \Longrightarrow^{*} \langle v, \sigma'', \tau'' \rangle}
       {\langle \textbf{typedef } a = \{\upsilon :A\text{ }|\text{ }P(\upsilon)\} \textbf{ in }C_1;e_1\textbf{ end}, 
       \sigma, \tau \rangle \Longrightarrow 
-        \langle v, \sigma', \tau' \setminus \{a\}\rangle}[(\textbf{typedef}) $\Pi$]
+        \langle v, \sigma'', \tau'' \setminus \{a\}\rangle}[(\textbf{typedef}) $\Pi$]
     \end{tabular}
   \end{center}
   \caption{Operational Semantics Refinement Type Definition with Immutable Variable}
@@ -1591,7 +1567,7 @@ be evaluated and apply the rule defined in figure 3.19.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
-      \inference {y \in \textbf{dom}(\tau) & y \in \textbf{dom}(\mathcal{R}) & x \notin \sigma 
+      \inference {y \in \textbf{dom}(\tau) & y \in \textbf{dom}(\mathcal{R}) & x \notin \textbf{dom}(\sigma) 
       \\  \sigma' = \sigma + \{x \mapsto v_0\} & (\sigma_1, \tau_1, \mathcal{R}_1) = \mathcal{R}(y) 
       \\ \langle P(v_0), \sigma_1, \tau_1, \mathcal{R}_1 \rangle \Longrightarrow^{*} \langle true, 
       \sigma_1', \tau_1', \mathcal{R}_1' \rangle
@@ -1627,134 +1603,6 @@ Whit this approach does provide more flexibility in comparison to
 C++ templates it is still has certain limitations. The most obvious is the fact 
 that the programmer might sometimes be looking for dependent types 
 whose definitions changes with the value of the variable. 
-
-\subsection{Dynamic Dependent Types}
-In this subsection we will be presenting an approach to handling dependent types 
-in imperative languages called \textit{Dynamic Dependent Types}. It is a type 
-that will allow the definition of dependent types to change during runtime and 
-still guarantees a well-typed program. 
-
-\par
-Notice that in figure 4.5, the variable $x$ is 
-of type $BoundedIntY$ and has the value 4 which is well typed. In the next line, 
-the value of $y$ is reassigned the value 5. In this approach, rather than having 
-no effect on the type definition, the type of $BoundedIntY$ changes with the 
-value $y$, being now bounded to $5$. In our example, $x$ is still well typed so 
-everything is valid. 
-
-
-\par
-However, consider the following examples with certain values replaced. 
-
-\begin{figure} [H]
-  \begin{tabs}{1cm,2cm}
-    \textbf{let }$y\text{ }:\text{ } int = 10$ \textbf{ in } \\
-    \tab\textbf{typedef }$BoundedIntY$ = $\Pi y. \{i : Int\text{ }|\text{ }i < y\}$; \\ 
-    \tab\textbf{let }$x\text{ }:\text{ }BoundedIntY = 6$ \textbf{ in }$y := 5$\textbf { end }\textit{// Error}\\
-    \textbf {end}
-  \end{tabs}  
-  \caption{Ill-Typed Dynamically Changing Dependent Types}
-\end{figure}
-
-\par
-If the reassignment of $y$ causes $x$ to be ill-type as demonstrated in the 
-example above, then the type checker should flag it at compile time. 
-
-\par
-In order to do this we need will need to type check all variables against its 
-type after an assignment. We can use the typing judgement to perform the 
-type checking by only allowing assignment if the all variables of a dependent 
-type that depnds on $x$ holds after reassignment of $x$.
-
-\par
-Notice that our current value variable context does not 
-provide the type that a variable possess, we only have the value. 
-In order to formalise the behaviour in Hoare Logic, we will need to typing 
-information of a variable. We are able to retrive this information from the 
-Variable Type Context $\Gamma$, however we for a better and more concise 
-notation we decided to use the syntax defined below.
-
-\par
-First we modified the value variable context as shown below:
- 
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {l l l}
-      \textit{Variables Values Context} & $\sigma$& $:$ $vars \mapsto vals : T$ 
-    \end{tabular}
-  \end{center}
-  \caption{Extended Value Variable Context with Type}
-\end{figure}
-
-This means that a varible now maps to a value with type $T$. The notation of 
-$\sigma(x)$ to retrieve a value used in previous semantics still hold, now we 
-can write $\sigma(x) = \alpha : \beta$ which gets $\alpha$ the value of $x$ 
-and $\beta$ the type of $x$. This notation allows us to apply the universal 
-quantifier.
-
-
-\begin{figure}[H]
-  \begin{center}
-   \begin {tabular} {c} 
-     \inference {x \in \sigma
-     \\ \forall \alpha : \Pi x. P(x) \in\textbf{rng}(\sigma)\text{ }s.t.\text{ }\alpha : \Pi v. P(v)} 
-          {\langle x := v, \sigma, \tau \rangle \longrightarrow \langle v, \sigma', \tau' \rangle}
-    \end{tabular}
-  \end{center}
-  \caption{Dynamic Dependedent Type Reassignment Rule}
-\end{figure}
-
-
-The rule above states that for all $\alpha$ of a type $\Pi x.P(x)$ it will be 
-well typed for $\Pi v.P(v)$, the new value of $x$. Our logic here works simply 
-by using the concept of type membership, which similar to the the 
-concept of set membership in set theory \cite{RussellMathematicalLA}. 
-The above statement can simply be rewritten in logic as 
-$\forall \alpha \in A\text{ }s.t.\text{ }\alpha \in B$.
-
-\par
-We capture the behaviour of dynamic dependent types in hoare logic by  
-extending the definition of the Hoare Logic for assignment, recall the axiom
-\begin{center}
-  $\{P[e/x]\}x := e\{P\}$
-\end{center}
-The axiom simply states that, in some predicate $P$ holds after the assignment, 
-it holds before the assignment.
-
-\par
-We define $\phi$ as a local function $T \longrightarrow \{vals\}$, defined as 
-
-\begin{center}
-  $\phi(A) = \{v\text{ }|\text{ }x \in \sigma \wedge \sigma(x) = v : A\}$  
-\end{center}
-
-\par
-Given a type $A$, the function $\phi$ returns the set of all values in the 
-state $\sigma$ that has type $A$.
-
-\begin{figure}[H]
-  \begin{center}
-    $\forall \gamma \in \mathcal{P}(\sigma)\{\forall v \in \phi(\Pi x : A.P(x)) 
-    \text{ }s.t.\text{ }v : \Pi e : A. P(e) \wedge P[e/x]\}
-    x:= e\{P\}$ 
-  \end{center}
-  \caption{Dynamic Dependedent Type Reassignment Rule}
-\end{figure}
-
-
-\par
-The Hoare Logic above reiterates this behaviour by stating that in order for the 
-assignment to be evaluated, all values $v$ with type $\Pi x : A.P(x)$ in the state 
-will have to be well typed with regards to the new value of $x$.
-
-\par
-The Dynamic Dependent Types approach presented here gives the highest degree of 
-flexibility, it allows the expression of complex logic which is able to alter 
-the types of values at runtime. However, it comes at the cost of potentially 
-expensive type checking. Checking the type compatability of all values of a 
-certain type during assignment introduces major overhead. Implementing a 
-language of this flexibility might be unobtainable for language with performance 
-requirements. 
 
 \subsection{Summary}
 This section presented multiple solution to achieving reassignment in a 
