@@ -1581,7 +1581,7 @@ be evaluated and apply the rule defined .
       \inference {y \in \textbf{dom}(\tau) & y \in \textbf{dom}(\mathcal{R}) & x \notin \textbf{dom}(\sigma) 
       \\ (\sigma_1, \tau_1) = \mathcal{R}(y) 
       & \langle P(v_0), \sigma_1, \tau_1 \rangle \Longrightarrow^{*} \langle true, 
-      \sigma_1', \tau_1', \mathcal{R}_1' \rangle
+      \sigma_1, \tau_1 \rangle
       \\ \langle C_1, \sigma', \tau, \mathcal{R} \rangle \longrightarrow \langle 
       \sigma'', \tau, \mathcal{R} \rangle & \sigma' = \sigma + \{x \mapsto v_0\}} 
       {\langle\textbf{begin var }x : y = v_0;C_1\textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
