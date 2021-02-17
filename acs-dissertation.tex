@@ -1281,7 +1281,9 @@ language in this work \cite{dynamicCheckStaticLanguage} which inspired our idea.
 
 \par
 The refinement predicate proves to be hard to decide at compile time, one might 
-require complex theorem provers to type check a refinement type statically. 
+require to access program state for values of variables in order 
+to evaluate the refinement predicate. In many cases, 
+only constants and constant expressions are available at compile time. 
 Alternatively, one can type check refinement type dynamically at runtime. We 
 define a special form of typing judgement to do that. Interestingly, 
 Cormac Flanagan proposed a similar idea dubbed Hybrid Type Checking to verify 
