@@ -576,3 +576,39 @@ url="https://doi.org/10.1007/978-1-4302-2432-7_4"
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
 
+@inproceedings{dynamicCheckStaticLanguage,
+    author = {Abadi, M. and Cardelli, L. and Pierce, B. and Plotkin, G.},
+    title = {Dynamic Typing in a Statically-Typed Language},
+    year = {1989},
+    isbn = {0897912942},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/75277.75296},
+    doi = {10.1145/75277.75296},
+    abstract = {Statically-typed programming languages allow earlier error checking, better enforcement of disciplined programming styles, and generation of more efficient object code than languages where all type-consistency checks are performed at runtime. However, even in statically-type languages, there is often the need to deal with data whose type cannot be known at compile time. To handle such situations safely, we propose to add a type Dynamic whose values are pairs of a value v and a type tag T where v has the type denoted by T. Instances of Dynamic are built with an explicit tagging construct and inspected with a type-safe typecase construct.This paper is an exploration of the syntax, operational semantics, and denotational semantics of a simple language with the type Dynamic. We give examples of how dynamically-typed values might be used in programming. Then we discuss an operational semantics for our language and obtain a soundness theorem. We present two formulations of the denotational semantics of this language and relate them to the operational semantics. Finally, we consider the implications of polymorphism and some implementation issues.},
+    booktitle = {Proceedings of the 16th ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+    pages = {213–227},
+    numpages = {15},
+    location = {Austin, Texas, USA},
+    series = {POPL '89}
+}
+
+@article{hybridTypeChecking,
+    author = {Knowles, Kenneth and Flanagan, Cormac},
+    title = {Hybrid Type Checking},
+    year = {2010},
+    issue_date = {January 2010},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    volume = {32},
+    number = {2},
+    issn = {0164-0925},
+    url = {https://doi.org/10.1145/1667048.1667051},
+    doi = {10.1145/1667048.1667051},
+    abstract = {Traditional static type systems are effective for verifying basic interface specifications. Dynamically checked contracts support more precise specifications, but these are not checked until runtime, resulting in incomplete detection of defects. Hybrid type checking is a synthesis of these two approaches that enforces precise interface specifications, via static analysis where possible, but also via dynamic checks where necessary. This article explores the key ideas and implications of hybrid type checking, in the context of the λ-calculus extended with contract types, that is, with dependent function types and with arbitrary refinements of base types.},
+    journal = {ACM Trans. Program. Lang. Syst.},
+    month = feb,
+    articleno = {6},
+    numpages = {34},
+    keywords = {dynamic checking, static checking, Type systems, contracts}
+}

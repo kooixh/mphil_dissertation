@@ -19,7 +19,7 @@
 \def\authorname{Xiu Hong\ Kooi\xspace}
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
-\def\dissertationtitle{Investigating the Behaviour of Refinement Types in an Imperative Programming Language}
+\def\dissertationtitle{Investigating the Behaviour of Refinement Types in a Mutable Environment}
 \def\wordcount{0}
 
 
@@ -797,10 +797,10 @@ types. In this chapter we will describe the mechanics of the language in details
   \begin{center}
     \begin{tabular}{l l l}
       \textit{Types} & $T$ & $:\text{ }int\text{ }|\text{ }bool\text{ }|
-      \text{ }\{x: A\text{ }|\text{ }P(x)\}\text{ }|\text{ }void$\\
+      \text{ }\{x: T\text{ }|\text{ }e\}\text{ }|\text{ }void$\\
       \textit{Functions Type} &  & $:\text{ }T_1, T_2,T_3...T_n\longrightarrow T_0$\\
-      \textit{Functions} & $f$ & $:$ $C;e$\\
-      \textit{Operators} & $ops$ & $:$ $+$ $|$ $-$ $|$ $\wedge$ $|$ $\vee$ \\
+      \textit{Functions Definition} & $f$ & $:$ $(x_0,x_1,...x_n) \longrightarrow C;e$\\
+      \textit{Operators} & $ops$ & $:$ $+$ $|$ $-$ $|$ $\wedge$ $|$ $\vee$ $|$ $<$ $|$ $>$ \\
       \textit{Expressions} & $e$ & $:$ $vals$ $|$ $x$ $|$ $e_1$ $ops$ $e_2$ 
       $|$ $f(e_1...e_n)$ \\
       \textit{Commands} & $C$ & $:$ $C_1;C_2$ $|$ \textbf{skip} $|$ $x\text{ }:= e_1$ 
@@ -815,16 +815,17 @@ types. In this chapter we will describe the mechanics of the language in details
       \textit{Variable Values Context} & $\sigma$& $:$ $vars \mapsto vals$
     \end{tabular}
   \end{center}
-  \caption{Language Syntax for Simple-$\Pi$}
+  \caption{Language Syntax for Simple-$R$}
 \end{figure}
 
 \par
 Figure 3.1 shown above is the syntax of Simple-$R$, the paragraphs below 
 explains the language in details. In constrast to other literatures in this area, 
 Simple-$R$ is a \textit{First Order Programming Language} \cite{FOL} modelled 
-after the WHILE \cite{whileLanguage} programming language 
-rather than building it on the $\lambda$-calculus as one would in 
-a Higher Order Language. 
+after the WHILE \cite{whileLanguage} programming language but with functions.
+Rather than building it on the $\lambda$-calculus as one would in 
+a Higher Order Language, we opted for a ``C-like'' syntax, with concepts such as 
+expressions, commands and top-level functions.
 
 \par
 In order to achieve simplicity and observe the core behaviour of dependent 
@@ -837,21 +838,21 @@ types, the language is kept at a minimum with only the necessary construct.
   \item The refinement type, written as $\{x: A\text{ }|\text{ }P(x)\}$. This defines 
   a type that is a refinement of type $A$ that satisfies a boolean expression $P(x)$.
   \item The \textit{void} type to represent empty or null. Commands are modelled 
-  as $void$.
+  as having the $void$ type.
 \end{itemize}
 
 \paragraph{Functions}
-Functions are defined in Simple-$R$ as $(T_1, T_2,T_3...T_n \longrightarrow T_0)$, 
-taking a up to $n$ types and returning a type. Note that functions are 
+Functions Type are defined in Simple-$R$ as $(T_1, T_2,T_3...T_n \longrightarrow T_0)$, 
+it takes a up to $n$ types and returning a type. Note that functions are 
 not first-class in this language, unlike a higher order 
 language, functions types are its own entity and are distinct from the regular 
 types. This distinction ensures that functions cannot be passed to 
 other functions, nor can it return a function as a result. One can compare 
 functions in Simple-$R$ to functions in C or Java. The function body is a 
 command however it must end in an expression as the return value. Note that the 
-return keyword is ommited. Functional can be difficult to represent, to achieve 
+return keyword is ommited. Functions return can be difficult to represent, to achieve 
 a simply model for functions, we came to the decision to disallow return in the 
-middle of the function, values can only be return at the very end of the 
+middle of the function, values can only be returned at the very end of the 
 function.
 
 \paragraph{Operators}
@@ -859,9 +860,11 @@ The language supports the following built in operators.
 \begin{itemize}
   \item Integer addition using the $+$ operator writte in an infix notation.
   \item Integer subtraction using the $-$ operator written in an infix notation.
+  \item Integer inequality $<$ as the less than operator.
+  \item Integer inequality $>$ as the greater than operator.
   \item Logical conjunction using the $\wedge$ operator written in an infix 
   notation.
-  \item Logical disjunction using the $\wedge$ operator written in an infix 
+  \item Logical disjunction using the $\vee$ operator written in an infix 
   notation.
 \end{itemize}
 
@@ -893,20 +896,16 @@ actions. Simple-$R$ supports the following commands,
 \paragraph{Declaration} Declarations are the method one use declare new construct 
 in the program. We start the language off having the most basic variable declaration 
 $\textbf{var }x : T = e$ which declare a new variable $x$ of type $T$ and 
-assigns it the resulting value of expression $e$.
+initialise it the resulting value of expression $e$.
 
-\paragraph{Variables and Values} In Simple-$R$, all variable are allocated 
+\paragraph{Variables and Values} In Simple-$R$, all variables are allocated 
 locally, we use $x$ to denote a variable. Variables can take values as suggested by the types, all the integer 
 literals $\mathbb{Z}$, booleans $\mathbb{B}$ and $nil$ which is $void$ type. 
-While values have a 1-on-1 correspondance with a type, it is obvious that a 
-refinement type in the language will be a subset of either 
-$\mathbb{Z}$ or $\mathbb{B}$ and as such will have already been a member of 
-values.
 
 \paragraph{Variable Values Context} Variables are mapped to values in the program 
-context $\sigma$. Each reference variable is allowed to only appear once in 
+context $\sigma$. Each variable is allowed to only appear once in 
 the context. We use \textbf{dom}($\sigma$) to retrive the domain which represent 
-the set of declared variables. We will use the notation $\sigma(x)$ 
+the set of declared variables. We use the notation $\sigma(x)$ 
 to retrieve the value bound to variable $x$.
 
 \paragraph{Variable Types Context} Variables are also mapped to their types 
@@ -918,13 +917,16 @@ typing judgement in the next section.
 This section defines the typing rules for the Simple-$R$ language.
 
 \par
-We begin by defining the typing judgement. The typing judgement used in 
+We begin by defining the typing judgements. The typing judgements used in 
 Simple-$R$ takes the form of the standard notation. 
 \begin{center}
-  $\Gamma \vdash e : T$
+  $\Gamma \vdash e : T$\\
+  $\Gamma \vdash_{C} C : void$\\
+  $\Gamma \vdash_{D} D \dashv \Gamma'$\\
 \end{center}
-This judgement represents that expression $e$ under the context $\Gamma$ has the 
-type $T$.
+This first and second judgement represents that expression $e$ 
+under the context $\Gamma$ has the type $T$. The third states that a declaration 
+produces the output context $\Gamma'$.
 
 \par
 Using the judgement rule we can easily define the fist few typing rules for base 
@@ -962,20 +964,20 @@ type checker.
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool} 
         {\Gamma \vdash e_1 \vee e_2 : bool}[(\textbf{op} $\vee$)] & \\
       \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash C_1: void & \Gamma \vdash C_2: void}
-        {\Gamma \vdash \text{\textbf{if }} e_1 \text{\textbf{ then }} 
+        {\Gamma \vdash_{C} \text{\textbf{if }} e_1 \text{\textbf{ then }} 
         C_1 \text{\textbf{ else }} C_2: void}[(\textbf{if else})]
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash C_1: void}
-        {\Gamma \vdash \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1 : void} [(\textbf{while do})] & \\
+        {\Gamma \vdash_{C} \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1 : void} [(\textbf{while do})] & \\
       \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
-        {\Gamma \vdash x := e_1 : void} [($:=$)] \text{ }
+        {\Gamma \vdash_{C} x := e_1 : void} [($:=$)] \text{ }
       \inference {\Gamma \vdash C_1: void & \Gamma \vdash C_2: void} 
-        {\Gamma \vdash C_1;C_2 : T_2} [(concatenation $;$ $C$)] \text{ }
+        {\Gamma \vdash_{C} C_1;C_2 : T_2} [(concatenation $;$ $C$)] \text{ }
       & \\
       \inference {\Gamma \vdash e_1: T_1} 
-        {\Gamma \vdash \textbf{var } x : T_1 = e_1 : void} [($vars$ Declaration)]
+        {\Gamma \vdash_{D} \textbf{var } x : T_1 = e_1 \dashv \Gamma'} [($vars$ Declaration)]
       & \\
-      \inference {\Gamma \vdash D_1: void & \Gamma \vdash C_1 : void} 
-        {\Gamma \vdash \textbf{begin }D_1;C_1\textbf{ end}} [(Begin scope)]     
+      \inference {\Gamma \vdash D_1 \dashv \Gamma' & \Gamma' \vdash_{C} C_1 : void} 
+        {\Gamma \vdash_{C} \textbf{begin }D_1;C_1\textbf{ end}} [(Begin scope)]     
     \end{tabular}
   \end{center}
 \caption{Basic Typing Rules for Simple-$\Pi$}
@@ -1000,24 +1002,23 @@ Evaluation of the function will then satisfy the return type $T_0$.
 
 \subsubsection{Refinement Types}
 Finally we define typing rules for a refinement types. A refinement type 
-$\{\upsilon : T\text{ }|\text{ }P(\upsilon)\}$ is constructed by a base type $T$ 
-and a refinement predicate $P(\upsilon)$ on $T$ which is 
-simply represented as a boolean expression. However, in order for the type to 
-hold, the said expression has to evaluate to true. 
+is represented in our system as $\{\upsilon : T\text{ }|\text{ }e\}$ and is 
+constructed by a base type $T$ and a refinement predicate $e$ which may contain 
+the free variable $\upsilon$ and any free variables in the program. A refinement 
+type represent all values of $T$ where the expression $e[u/\upsilon]$ holds. 
 
 \par
 We define the typing rule for refinement types using the idea of 
-\textit{universes} \cite{martinLof} in type theory, using the notation 
-$\Gamma \vdash A : Type$ we say that $A$ is a type. 
-
+\textit{universes} \cite{martinLof} in type theory, using the 4th judgement form 
+$\Gamma \vdash A : Type$ to represent that $A$ is a type. 
 
 \par
 We begin by defining the formation rule for a refinement type. 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\Gamma \vdash \upsilon : T_1 & \Gamma \vdash P(\upsilon) : bool}
-        {\Gamma \vdash \{\upsilon : T_1\text{ }|\text{ }P(\upsilon)\}: Type}[(Refinment Type formation)]
+      \inference {\Gamma \vdash \upsilon : T & \Gamma \vdash e : bool}
+        {\Gamma \vdash \{\upsilon : T\text{ }|\text{ }e\}: Type}[(Refinment Type formation)]
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Refinement Types in Simple-$R$}
@@ -1027,14 +1028,13 @@ We begin by defining the formation rule for a refinement type.
 Additionally, we defining the typing rule for a subtypes. A refinement type 
 $A$ is a subtype of another refinement type $B$ if 
 the set of values in $A$ is a subset of or equal the values in $B$, 
-we express $A$ is a subtype of $B$ as $A \preceq B$. We define the following 
-properties on subtyping to allow basic polymorphism. 
+we express $A$ is a subtype of $B$ as $A \preceq B$. 
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\Gamma \vdash T_1 \preceq T_2 & \Gamma \vdash x : T_1} 
-      {\Gamma \vdash x : T_2} [(Subtype)]
+      \inference {\Gamma \vdash \forall \upsilon_1 : T\text{ }s.t.\text{ }e_1 \Rightarrow e_2[\upsilon_1/\upsilon_2]}
+      {\Gamma \vdash \{\upsilon_1 : T_1\text{ }|\text{ }e_1\} \preceq \{\upsilon_2 : T_1\text{ }|\text{ }e_2\}} [(Subtype Base)]
       & \\ 
       \inference {\Gamma \vdash T_1 \preceq T_2 & \Gamma \vdash T_1 \preceq T_3} 
       {\Gamma \vdash T_1 \preceq T_2} [(Subtype Trans)]
@@ -1044,16 +1044,31 @@ properties on subtyping to allow basic polymorphism.
   \end{center}
 \end{figure}
 
+\par
+The three subtype judgement defined above allows us to perform perform basic 
+polymorphism. One should be able to use a value of type $T_1$ in a context 
+expecting type $T_2$ provided $T_1$ is a subtype of $T_2$. We enable this 
+behaviour using the judgement below.
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+       \inference {\Gamma \vdash T_1 \preceq T_2 & \Gamma \vdash e : T_1} 
+      {\Gamma \vdash e : T_2} [(Subtype)]
+    \end{tabular}
+  \end{center}
+\end{figure}
 
 \par
 In this section we covered the typing rules for Simple-$R$, typing rules are a 
 way of allowing us to statically check the correctness of our program with 
-regards to typing rules. However, we are not able to analyse their dynamic 
-behaviour. 
+regards to typing rules. Refinement types are hard to verify statically because 
+of the dynamic behaviour when evaluating the refinement predicate. In the next 
+section we will analyse the dynamic behaviour of the language. 
 
 \section{Operational Semantics}
 In this section we will define the \textit{Operational Semantics} 
-\cite{operationalSemantics} for the Simple-$\Pi$ language 
+\cite{operationalSemantics} for the Simple-$R$ language 
 using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rules.
 
 \par
@@ -1075,8 +1090,8 @@ definitions.
       \item $\sigma[x \mapsto v]$ or $\sigma \uplus \{x \mapsto v\}$ updates $\sigma$ such that now $\sigma(x) = v$.
       \item $\sigma \setminus \{x\}$ to remove $x$ from $sigma$, provided that $x \in \textbf{dom}(\sigma)$.
     \end{itemize}
-  \item $\Longrightarrow$ as the transition relation for expression.
-  \item $\longrightarrow$ as the transition relation for commands.
+  \item $\langle e, \sigma \rangle \Longrightarrow \langle e', \sigma \rangle$ as the transition relation for expression.
+  \item $\langle C, \sigma \rangle \longrightarrow \langle C', \sigma' \rangle$ and $\langle C, \sigma \rangle \longrightarrow \sigma'$ as the transition relation for commands.
 \end{itemize}
 
 \begin{figure}[H]
@@ -1102,10 +1117,11 @@ definitions.
     \end{tabular}
   \end{center}
   \caption{Basic Evaluation Rules for Simple-$R$ Expression}
+  \label{fig:sos_expr}
 \end{figure}
 
 \par
-Figure 3.6 defines the reduction rules for expression, importantly, expressions 
+Figure \ref{fig:sos_expr} defines the reduction rules for expression, importantly, expressions 
 are not able to modify the state of the program. If one defines a singular value 
 it performs no meaningful action. We next define the evaluation rules for 
 commands. 
@@ -1140,24 +1156,33 @@ commands.
      \end{tabular}
   \end{center}
   \caption{Operational Semantics for Simple-$R$ Commands}
+  \label{fig:sos_commands}
 \end{figure}
 
+\par
+Figure \ref{fig:sos_commands} defines the operational semantics for the basic commands 
+in the language. The semantics for $\textbf{begin }D;C \textbf{end}$ will be 
+covered in the next section.
+
 \subsection{Scoping}
-Scoping has an important role in imperative languages, variables can be defined 
+Scoping has an important role in programming languages, variables can be defined 
 in scopes and are unavailable once outside. While there are many different 
-variables that does not follow this rule, such as static variables, global 
-variables and reference variables. For simplicity, we will focus initially on local 
-variables. 
+variables that does not follow this rule, such as static variables and global 
+variables. For simplicity, we will focus initially on local variables. 
+
 \par
 In order to help us formalise the notion of scopes we define a new notation, 
 $\Longrightarrow^{*}$ and $\longrightarrow^{*}$ as a multi-step evaluation. 
-The evaluation rule $\langle e, \sigma \rangle \Longrightarrow^{*}  \langle v, \sigma' \rangle$ simply 
+The evaluation rule $\langle e, \sigma \rangle \Longrightarrow^{*} 
+\langle v, \sigma' \rangle$ simply 
 evaluate the expression $e$ one or more times until it evaluates to a value $v$. 
-The same applies for a multistep evaluation for commands. 
+The same applies for a multistep evaluation for commands, 
+$\langle C, \sigma \rangle \longrightarrow^{*} \sigma'$ execute the command $C$ 
+until there is no evaluation rules to apply. 
 
 \par
 Using a multi step evaluation, We can easily define the scoping rules as shown 
-in figure 3.8.
+in \ref{fig:scoping_rules}.
   
 \begin{figure}[H]
   \begin{center}
@@ -1176,19 +1201,20 @@ in figure 3.8.
     \end{tabular}
   \end{center}
   \caption{Scoping Rules for Simple-$R$}
+  \label{fig:scoping_rules}
 \end{figure}
 
 \par
 The \textbf{begin in} statement opens a new scope $\sigma'$ which 
 assigns $x$ the value $v$, this scope allows the command $C_1$ to be evaluated 
 using a multi step evaluation. Notice that the resulting state 
-uses the notation $\setminus$, recall that the operator removes all the variables 
+uses the $\setminus$ operator which removes all the variables 
 in the set $\{x\}$ from the domain of $\sigma$. 
 
 \par
-This is necessary as in a scope it is possible to change the state of the 
-program. More importantly, upon exiting a scope the alteration to the program 
-will still hold, the only difference is that the variable $x$ is no longer in 
+This is necessary as it is possible to modify the range of $\sigma$ through 
+assignments but not the domain. Upon exiting a scope the alteration to the program 
+should still be visible, the only difference is that the variable $x$ is no longer in 
 the state, i.e. has ran out of scope.
 
 \par
@@ -1232,9 +1258,9 @@ We can then evalute the function body which using the multi-step evaluation.
 
 \par
 The first rule (function call vals) resembles the evaluation rule for 
-\textbf{let in} but it differs in a crucial way, in the new context for a 
-function call, none of the variabels from the previous scope transfer over, only 
-those of the argument are copied. We then evaluates the function body until it 
+variable declaration but it differs in a crucial way, in the new context for a 
+function call, none of the variables from the previous scope transfer over, only 
+the argument values are copied. We then evaluates the function body until it 
 evaluates to a value which is then returned to the caller's context. Unlike 
 scopes, functions only update its local state which is dellalocated upon return. 
 It cannot change the caller's state. 
@@ -1242,52 +1268,81 @@ It cannot change the caller's state.
 \par
 The second rule (function call $expr$) evaluates the expression passed into the 
 function as arguments. Our language defines a strict behaviour that all 
-arguments are evaluated in the order they are passed in, i.e. from left to right. 
+arguments are evaluated in the order they are passed in, i.e. from left to right 
+and arguments are call-by-value.
 
-\subsection{Refinement Type Declaration}
+\subsection{Refinement Type Checking}
 Refinement Type declaration requires specific evaluation rule. When one declare 
 a variable of a refinement type, the language has to ensure the evaluation 
-holds. 
+holds. While we have defined a statically typed language, even in a statically 
+typed language, there are cases when the type of some data cannot be determined 
+statically. Gordon Plotkin discussed the idea of dynamically checking a static 
+language in this work \cite{dynamicCheckStaticLanguage} which inspired our idea.
+
+\par
+The refinement predicate proves to be hard to decide at compile time, one might 
+require complex theorem provers to type check a refinement type statically. 
+Alternatively, one can type check refinement type dynamically at runtime. We 
+define a special form of typing judgement to do that. Interestingly, 
+Cormac Flanagan proposed a similar idea dubbed Hybrid Type Checking to verify 
+the correctness of Dependent Types and Refinement Types in a $\lambda$-calculus 
+\cite{hybridTypeChecking}.
+
 
 \begin{figure}[H]
   \begin{center}
-    \begin{tabular}{c}
-      \inference {
-      \langle C_1, \sigma' \rangle \longrightarrow^{*} \sigma'' \\
-      \langle P(v_1), \sigma, \tau \rangle \Longrightarrow^{*} \langle true, \sigma, \tau \rangle
-      \\
-      \sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma)} 
-      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }P(\upsilon)\} = v_0;C_1\textbf{ end}, \sigma \rangle 
-      \longrightarrow \langle v_1, \sigma'' \setminus \{x\} \rangle}
+    \begin{tabular} {c}
+      $\sigma, \Gamma \vdash_{R} e : \{\upsilon : T \text{ }|\text{ }e\}$
     \end{tabular}
   \end{center}
-  \caption{Variable Declaration for Refinement Type}
+  \caption{Typing Judgement for Refinement Types}
+  \label{fig:refine_judgement}
 \end{figure}
 
 \par
-The evaluation rule above simply states that in order a variable of a 
-refinement type $T$ is to be declared with value $v$, 
-then refinement predicate has to hold for $P(v)$. The operational semantics 
-defined in figure 3.10 captures this behaviour, however as one can imagine, this 
-current definition leaves room for error. In the next section we will address 
-certain ambiguities with the design.
+Figure \ref{fig:refine_judgement} shows a typing judgement for refinement 
+types, which has to ability to access the runtime state $\sigma$. We can then 
+perform a type check on refinement type using the rule defined below. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference{\Gamma \vdash e_1 : T_1 & \langle e[e_1/\upsilon], \sigma \rangle \Longrightarrow^{*} \langle \textit{true}, \sigma \rangle}
+      {\sigma, \Gamma \vdash_{R} e_1 : \{\upsilon : T_1\text{ }|\text{ }e\}} [(Refinement type checking)]
+    \end{tabular}
+  \end{center}
+  \caption{Type Checking Refinement Types}
+  \label{fig:refine_typecheck}
+\end{figure}
+
+\par
+The typing judgement in figure \ref{fig:refine_typecheck} asserts that an expression 
+$e_1$ is a valid refinement type if it evaluates to the base type $T_1$ and 
+the refinement predicate $e[e_1/\upsilon]$ evaluates to true under state 
+$\sigma$.
+
+\par
+Our type check rule looks to capture the behaviour of refinement type however it 
+turns out the current definition is underspecified. In the next section we 
+will put forward certain ambiguities with the design and discuss different choices 
+one can make to address them.
 
 \section{Refinement Types and Variables}
 Programming languages often have a wide range of features, often the team behind 
 the language have to put extensive thought into the design decisions. As there 
-are often multiple way to handle a certain feature, rarely are there a definite 
+are often multiple way to handle a certain feature, rarely is there a definite 
 answer to which is the most optimal.
 
 \par
-This seemingly undecideable problem is known as \textit{feature interaction} 
+This seemingly undecideable problem is known as \textit{feature interactions} 
 \cite{featInteract}, it describes the problem in some situations multiple 
 features would modify the behaviours of each others. The same applies to 
-dependent types, which is a feature itself. For instance, the inclusion of dependent types 
-would modify the behaviour of assignments and vice versa. This section 
-will cover the different ways of handling dependent types and they interact with 
-other features.
+refinement types, which can be seen as a feature. For instance, the inclusion 
+of refinement types would modify the behaviour of assignments and vice versa. 
+This section will cover the different ways of handling refinement types and how 
+they interact with other features.
 
-\subsection{The Ambiguity of Refinement Types}
+\subsection{The Ambiguity of Refinement Types with Mutation}
 Consider these few ambiguity of using variables to define dependent types. For 
 instance: 
 
@@ -1300,13 +1355,14 @@ instance:
     \textbf{end}
   \end{tabs}  
   \caption{Mutation to Free Variables in Refinement Predicate}
+  \label{fig:amb_refinement_vars}
 \end{figure}
 
 \par
-The simple program demonstrated in 3.11 declares a bounded integer type 
-$BoundedIntY$ whose value cannot be greater than another integer $y$, 
+The simple program demonstrated in \ref{fig:amb_refinement_vars} declares a 
+bounded integer type $BoundedIntY$ whose value cannot be greater than another integer $y$, 
 a free variable in the program. A variable $x$ is declared to be of type 
-$BoundedIntY$ with the appropriate value. Futher in the program, the value of $y$ 
+$BoundedIntY$ with the appropriate value. Later in the program, the value of $y$ 
 changes. resulting to $x$ now being ill-typed. The behaviour is now undefined, 
 should $x$ still be well-typed, or is the behaviour invalid? This section will 
 discuss this problem in detail. 
@@ -1314,9 +1370,15 @@ discuss this problem in detail.
 \par
 First we need to introduce a new declaration statement for type declaration, 
 in the example above we used the statement (\textbf{typedef} $x = T$) to denote a 
-new type $T$ with the name $x$, this declaration statement should behave like 
-a variable declaration. 
+new type $T$ with the name $x$, this declaration statement resembles variable 
+declaration and has the following typing judgement. 
 
+\begin{center}
+  \begin{tabular} {c}
+    \inference{\Gamma \vdash T : Type} {\Gamma \vdash_{D} \textbf{typedef } x = T \dashv \Gamma'}  
+  \end{tabular}
+\end{center}
+  
 \par
 We need to add this construct into our syntax. In our current syntax, 
 we have a context mapping $vars$ to $vals$, We now need to add a similar mapping \
@@ -1361,7 +1423,7 @@ out of scope, hence the new type context will simply be our initial one.
 \par
 The operational semantic above simply adds a new type definition with name $x$ 
 into the Type Name context $\tau$. Importantly, the variable $x$ cannot have 
-already been defined as a value variable n $\sigma$ and a type of the same name 
+already been defined as a value variable in $\sigma$ and a type of the same name 
 can not already be defined. Logically it is equivalent to the semantics for 
 variable declaration.
 
@@ -1409,11 +1471,11 @@ the language is poor. Imperative programming relies on state changes, forbidding
 that go against the paradigm. 
 
 \subsection{Immutability For Refinement Variables}
-We observe that only variables associated with refinement typing needs to be 
-immutable to prevent any uncertain behaviours. To improve the flexibility of our 
-language, we could loosen the restrictions by having only the free variables 
-in refinement types to be immutable rather than requiring all variables to be 
-immutable.
+In order to avoid feature interaction between refinement types and assignments, we 
+observe that it is suffice to require free varibles appearing in a refinement 
+predicate to be immutable. This approach improves flexibility of our language as 
+one will still be able to have mutability in context irrelevant to refinement 
+types. 
 
 \par
 In order to capture the notation of immutable types, the set of variables $vars$ 
@@ -1427,12 +1489,27 @@ $is\_immutable(x)$ holds if and only if $x$ is immutable.
       \textit{Declaration} & $D$ & $:$ $...\text{ }|\text{ }\textbf{const }x : T = e_1$
     \end{tabular}
   \end{center}
-  \caption{Immutable Variable Context for Simple-$\Pi$}
+  \caption{Immutable Variable Context for Simple-$R$}
 \end{figure}
  
-One can declare an immutable variable as though they are defining a mutable 
+One can declare an immutable variable similar to defining a mutable 
 variable, using the \textbf{const} $x : T = e$ statement. We establish the following 
 rules for immutable variables. 
+
+\par
+The typing judgement which appears identical to that of variable declaration. 
+
+\begin{center}
+  \begin{tabular} {c}
+    \inference {\Gamma \vdash e_1: T_1} 
+        {\Gamma \vdash_{D} \textbf{const } x : T_1 = e_1 \dashv \Gamma'} [($vars$ Declaration)]
+  \end{tabular}
+\end{center}
+
+\par
+The operational semantics describing the process of creating a immutable 
+variable is similar to the one for regular mutable variables. The only oddity 
+here is extending the assignment statement to only accept the latter. 
 
 \begin{figure}[H]
   \begin{center}
@@ -1464,39 +1541,42 @@ with regards to refinement types using the evaluation rules.
 
 \par
 We require a new notation to capture all the variables that appear in an 
-expression $e$, we use the function $free\_vars(e)$ to return the set of all 
+expression $e$, we use the notation \textit{free\_vars}$(e)$ to give the set of all 
 variables that appear in an expression $e$.
 
 \par
-We define that the function above will also include any new variables 
-declared in the expression. 
-If a variable is declared and mutated within the expression itself then it would 
-not pose any problem, so the set of variables that needs to be immutable would 
-be $\textbf{dom}(\sigma) \cap free\_vars(P(x))$, this gives us the set of 
-free variables in $P(x)$ that is declared in the previous scope which appears in 
-the expression.
+Notice that in our syntax the refinement predicate is simply a boolean 
+expression, this means that it is not possible for the refinement predicate to 
+declare any new variables within it. So it is easy to see that for a refinement 
+predicate $e$, $\textit{free\_vars}(e) \subseteq \textbf{dom}(\sigma)$, note that 
+$\upsilon$ is not a free variable. 
 
+\par
+Using the new notation we can easily verify that all free variables in a 
+refinement predicate is immutable using the evaluation defined below.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
       \inference {
       a \notin \text{\textbf{dom}}(\sigma) & a \notin \textbf{dom}(\tau) \\
-      \forall \alpha \in \textbf{dom}(\sigma) \cap free\_vars(P(\upsilon))\text{ }s.t.\text{ }is\_immutable(\alpha)
-      \\ \langle C_1, \sigma, \tau + \{a \mapsto \{\upsilon :A\text{ }|\text{ }P(\upsilon)\} 
+      \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_immutable(\alpha)
+      \\ \langle C_1, \sigma, \tau + \{a \mapsto \{\upsilon :A\text{ }|\text{ }e\} 
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
-      {\langle \textbf{begin typedef } a = \{\upsilon :A\text{ }|\text{ }P(\upsilon)\};C_1\textbf{ end}, 
+      {\langle \textbf{begin typedef } a = \{\upsilon :A\text{ }|\text{ }e\};C_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow 
         \langle \sigma', \tau \rangle}[(Refine def)]
     \end{tabular}
   \end{center}
-  \caption{Operational Semantics Refinement Type Definition with Immutable Variable}
 \end{figure}
 
 \par
 We address the ambiguity brought up using this semantic. The program in figure 
-3.11 is no longer a valid program as the reassignment of $y$ is forbidden. It is 
-easy to see by restricting free variables in the refinement predicate we ensures 
-that the expression stays the same throughout its existence, hence avoiding any 
+\ref{fig:amb_refinement_vars} is no longer a valid program as 
+$y$ is a mutable variable and is forbidden from appearing in a refinement type. 
+One would have to rewrite the declaratio of $y$ using \textbf{const} which 
+forbids it from being assigned to after initialisation. 
+It is easy to see by restricting free variables in the refinement predicate we ensure 
+that the expression stays the same throughout its existence, avoiding any 
 complications regarding mutation.
 
 \par
@@ -1514,14 +1594,15 @@ its enclosing scope to be final or \textit{effectively final}
 declared immutable but its value is not changed after declaration. While this 
 does improves some flexibity as one do not need to use the \textbf{const} 
 statement for declaration, it behave the same for all intents and purposes. 
-For this reason we consider this additional feature out of scope. 
+For this reason we consider this additional feature as future consideration and 
+out of scope for this current project. 
 
 \par
 The limitation of this approach is of course the fact that one has to strategically 
 declare the variables needed, in some cases one might not be able to declare 
 immutable variable but still want the ability to define a refinement type.
 
-\subsection{Passing by Value}
+\subsection{Refinement Predicate Closure}
 If we further analyse our design, we notice that our main concern is for the 
 refinement predicate to stay static, any changes in the program context should 
 not change its definition. In languages such as C/C++, \textit{pass by value} 
@@ -1631,7 +1712,7 @@ section.
 \subsection{Heap Memory}
 In programming languages, there are three different types of memory allocation, 
 static, stack and heaps \cite{heapVsStack}. While we have not explicitly 
-discussed our memory management model, it is rather obvious that Simple-$\Pi$ 
+discussed our memory management model, it is rather obvious that Simple-$R$ 
 operates on a stack based model. It is apparent in the behaviour of locals 
 variable which are inaccesible once out of scope as discussed in subsection 
 4.1.1. While arrays can be allocated on the stack, since we are dealing 
