@@ -1836,15 +1836,15 @@ focus on the value itself.
   \begin{center}
     \begin{tabular} {c}
       \inference {h_1 \in \textbf{dom}(\Delta) & v = \Delta(h_1) & h_1 \neq nil}
-      {\langle !h_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v, 
+      {\langle !h_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle v, 
       \sigma, \tau, \Delta \rangle} [(Pointer deref 1)]
       & \\
       \inference {h_1 \in \textbf{dom}(\Delta) & h_1 \neq nil & \Delta' = \Delta[h_1 \mapsto v_1]}
-        {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v_1, 
+        {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle v_1, 
         \sigma, \tau, \Delta' \rangle} [(Pointer deref 2)]
       & \\
       \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta + \{h \mapsto v\}}
-        {\langle \textbf{new}(T, v), \sigma, \tau, \Delta \rangle \longrightarrow \langle h, 
+        {\langle \textbf{new}(T, v), \sigma, \tau, \Delta \rangle \Longrightarrow \langle h, 
         \sigma, \tau, \Delta' \rangle} [(Pointer allocation)]
     \end{tabular}
   \end{center}
