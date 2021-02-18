@@ -834,8 +834,8 @@ types, the language is kept at a minimum with only the necessary construct.
 \begin{itemize}
   \item The basic integer type \textit{int}
   \item The basic boolean type \textit{bool}
-  \item The refinement type, written as $\{x: A\text{ }|\text{ }P(x)\}$. This defines 
-  a type that is a refinement of type $A$ that satisfies a boolean expression $P(x)$.
+  \item The refinement type, written as $\{x: A\text{ }|\text{ }e\}$. This defines 
+  a type that is a refinement of type $A$ that satisfies a boolean expression $e$.
   \item The \textit{void} type to represent empty or null. Commands are modelled 
   as having the $void$ type.
 \end{itemize}
@@ -949,7 +949,7 @@ values \textit{int}, \textit{bool}, $nil$ and variables.
 \par
 The remaining typing rules for the operators, statements and function  
 calls are presented below. First we define the 
-basic rules in figure 3.3, 
+basic rules in figure \ref{fig:basic_typecheck}, 
 most of the typing rule are straightforward and what one would expect from the 
 type checker. 
 
@@ -960,6 +960,10 @@ type checker.
         {\Gamma \vdash e_1 + e_2 : int}[(\textbf{op} $+$)] \text{ }
       \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int} 
         {\Gamma \vdash e_1 - e_2 : int}[(\textbf{op} $-$)] & \\
+      \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int}
+        {\Gamma \vdash e_1 < e_2 : bool}[(\textbf{op} $<$)] \text{ }
+      \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int} 
+        {\Gamma \vdash e_1 > e_2 : bool}[(\textbf{op} $-$)] & \\
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool}
         {\Gamma \vdash e_1 \wedge e_2 : bool}[(\textbf{op} $\wedge$)] \text{ }
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool} 
@@ -982,6 +986,7 @@ type checker.
     \end{tabular}
   \end{center}
 \caption{Basic Typing Rules for Simple-$\Pi$}
+\label{fig:basic_typecheck}
 \end{figure}
 
 \subsubsection{Functions}
@@ -1101,6 +1106,9 @@ definitions.
       \inference {v = v_1 + v_2}{\langle v_1 + v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(op $+$)] \text{ }
       \inference {v = v_1 - v_2}{\langle v_1 - v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(op $-$)]
       & \\
+      \inference {v = v_1 < v_2}{\langle v_1 < v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(op $<$)] \text{ }
+      \inference {v = v_1 > v_2}{\langle v_1 > v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(op $>$)]
+      & \\
       \inference {v = v_1 \wedge v_2}{\langle v_1 \wedge v_2, \sigma \rangle \Longrightarrow \langle v, \sigma \rangle}[(op $\wedge$)] \text{ }
       \inference {v = v_1 \vee v_2}{\langle v_1 \vee v_2, \sigma \rangle \Longrightarrow \langle v, \sigma \rangle}[(op $\vee$)]
       & \\
@@ -1183,7 +1191,7 @@ until there is no evaluation rules to apply.
 
 \par
 Using a multi step evaluation, We can easily define the scoping rules as shown 
-in \ref{fig:scoping_rules}.
+in figure \ref{fig:scoping_rules}.
   
 \begin{figure}[H]
   \begin{center}
