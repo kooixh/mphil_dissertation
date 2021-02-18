@@ -1780,8 +1780,6 @@ where one is allowed to retrieve the address of a local variable, in our
 system one may only create a pointer through the use of \textbf{new}.
 \begin{itemize}
   \item $!e_1$ to dereference the heap address held by expression $e_1$.
-  \item \textbf{new}($T$) to allocate and return a $T$ \textit{ref} 
-  without specifying the value which will be assigned $nil$.
   \item \textbf{new}($T, v$) to allocate and return a $T$ \textit{ref} with the 
   value $v$.
 \end{itemize}
@@ -1820,10 +1818,8 @@ allocating a new heap address with type $T$ gets a reference of the same type.
   \begin{center}
     \begin{tabular} {c}
       \inference {\Gamma \vdash e_1 : T\textit{ ref}}{\Gamma \vdash !e_1 : T}[(dereferencing)]
-      & \\
-      $\Gamma \vdash \textbf{new}(T) : T\textit{ ref}$ (\textbf{new} ref 1)
       \text{ }
-      \inference {\Gamma \vdash v : T}{\Gamma \vdash \textbf{new}(T, v) : T\textit{ ref}}[(\textbf{new} ref 2)]
+      \inference {\Gamma \vdash v : T}{\Gamma \vdash \textbf{new}(T, v) : T\textit{ ref}}[(\textbf{new} ref)]
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Ref Type}
@@ -1841,30 +1837,27 @@ focus on the value itself.
     \begin{tabular} {c}
       \inference {h_1 \in \textbf{dom}(\Delta) & v = \Delta(h_1) & h_1 \neq nil}
       {\langle !h_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v, 
-      \sigma, \tau, \Delta \rangle} [(Pointer dereferencing)]
+      \sigma, \tau, \Delta \rangle} [(Pointer deref 1)]
       & \\
       \inference {h_1 \in \textbf{dom}(\Delta) & h_1 \neq nil & \Delta' = \Delta[h_1 \mapsto v_1]}
         {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v_1, 
-        \sigma, \tau, \Delta' \rangle} [(Pointer assignment)]
+        \sigma, \tau, \Delta' \rangle} [(Pointer deref 2)]
       & \\
       \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta + \{h \mapsto v\}}
         {\langle \textbf{new}(T, v), \sigma, \tau, \Delta \rangle \longrightarrow \langle h, 
         \sigma, \tau, \Delta' \rangle} [(Pointer allocation)]
-      & \\
-        $\langle \textbf{new}(T), \sigma, \tau, \Delta \rangle \longrightarrow \langle nil, 
-        \sigma, \tau, \Delta' \rangle$ ($nil$ pointer allocation)
     \end{tabular}
   \end{center}
   \caption{Operational Semantics for Pointers}
 \end{figure}
 
 \par
-Pointers are allocated in two ways, with and without a value. The first rule for 
-pointer allocation allocates a new heap address and assigns it the value passed 
-in. Calling \textbf{new} without specifying a value, follows the second 
-pointer allocation rule ($nil$ pointer allocation) 
-which evaluates to a $nil$ reference. A $nil$ reference is not allocated 
-in the state $\Delta$ and cannot be deference. 
+Pointers are allocated using the \textbf{new} expression which takes a type $T$ 
+and a value $v$. The evaluation rules allocated a new heap address $h$ that is 
+not currently present, assigns it the value $v$ and return the address. The 
+value can be retrieve and modify through dereferencing, shwon in the first two 
+rules. A $nil$ reference is not allocated in the state $\Delta$ 
+and cannot be deference. 
 
 \subsection{Aliases in Dependent Types}
 Previously we explored the behaviour of variables in dependent types and 
