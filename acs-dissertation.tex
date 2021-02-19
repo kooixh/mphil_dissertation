@@ -1339,6 +1339,9 @@ will put forward certain ambiguities with the design and discuss different choic
 one can make to address them.
 
 \section{Refinement Types and Variables}
+
+\subsection{Ambiguity of Refinement Types with Mutation}
+
 Programming languages often have a wide range of features, often the team behind 
 the language have to put extensive thought into the design decisions. As there 
 are often multiple way to handle a certain feature, rarely is there a definite 
@@ -1352,8 +1355,6 @@ refinement types, which can be seen as a feature. For instance, the inclusion
 of refinement types would modify the behaviour of assignments and vice versa. 
 This section will cover the different ways of handling refinement types and how 
 they interact with other features.
-
-\subsection{The Ambiguity of Refinement Types with Mutation}
 Consider these few ambiguity of using variables to define dependent types. For 
 instance: 
 
@@ -1378,7 +1379,7 @@ changes. resulting to $x$ now being ill-typed. The behaviour is now undefined,
 should $x$ still be well-typed, or is the behaviour invalid? This section will 
 discuss this problem in detail. 
 
-\par
+\subsection{Type Declaration}
 First we need to introduce a new declaration statement for type declaration, 
 in the example above we used the statement (\textbf{typedef} $x = T$) to denote a 
 new type $T$ with the name $x$, this declaration statement resembles variable 
@@ -1452,7 +1453,7 @@ name.
   \end{center}
 \end{figure}
 
-\subsection{Immutability}
+\subsection{Complete Immutability}
 The main issue one encounters when associating refinement types with imperative 
 languages is the presence of mutability and assignments. The obvious way to 
 work around this problem is to remove the ability to make changes to the state 
@@ -1467,7 +1468,7 @@ language. In the next few sections we will discuss two approaches that
 improve the specification of our type checker through restricting changes to 
 variables. 
 
-\subsection{Immutability For Refinement Variables}
+\subsection{Immutability in Refinement Types}
 In order to avoid feature interaction between refinement types and assignments, we 
 observe that it is suffice to require free varibles appearing in a refinement 
 predicate to be immutable. This approach improves flexibility of our language as 
@@ -1741,7 +1742,7 @@ variables. As the language starts incorporating more features, our current
 design becomes underspecified yet again. In the next section, we will analyse 
 the behaviour of our system in the presence of dynamic memory allocation.
 
-\section{Pointers and Reference Variables}
+\section{Refinement Types and Pointers}
 We previously proposed a set of rules that specify behaviour of refinement 
 types with regards to local variables and we learn that we can keep behaviour 
 consistent if we restrict changes to the variable. However, our solution does 
@@ -1754,7 +1755,7 @@ In this section we will first extend our syntax with the notion of dynamically
 allocated memory. Later we will study the feature interaction between 
 pointers and refinement types in order to specify a consistent behaviour. 
 
-\subsection{Heap Memory}
+\subsection{Introducing Heap Allocated Memory}
 In programming languages, there are three different types of memory allocation, 
 static, stack and heaps \cite{heapVsStack}. While we have not explicitly 
 discussed our memory management model, it is rather obvious that Simple-$R$ 
@@ -1879,7 +1880,7 @@ value can be retrieve and modify through dereferencing, shown in the first two
 rules. A $nil$ reference is not allocated in the state $\Delta$ and cannot be 
 deference. 
 
-\subsection{Aliases in Dependent Types}
+\subsection{Ambiguity of Refinement Types and Pointers}
 The introduction of pointers provides the programmer with multiple new tools. 
 Features such as pass-by-reference and aliasing are now at their disposal. 
 However with the introduction of new features, the feature interaction problem 
@@ -2072,9 +2073,10 @@ the appraoch discussed here, we have left the specification out of the text. The
 semantics of using closures with pointers is included in the appendencies. 
 
 \section{Summary}
-\chapter{Related Work}
 
 \chapter{Further Work}
+
+\chapter{Related Work}
 
 \chapter{Summary and Conclusions} 
 
