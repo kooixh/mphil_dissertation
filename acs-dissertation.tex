@@ -85,6 +85,7 @@
 \chapter{Introduction}
 \pagenumbering{arabic} 
 \setcounter{page}{1} 
+
 \textit{Type systems} \cite{typesystem} have been one of the most extensively researched field in 
 Programming Languages. They act as a way from improving the reliability of a 
 language by enforcing rules, preventing operations being applied on 
@@ -98,20 +99,50 @@ Over the years, programming languages have included more powerful and flexible
 type systems, languages like \textit{C\#} \cite{cSharp} and \textit{Go} \cite{goInferenceType} allow 
 \textit{type inference} \cite{inferenceType}, using a feature called \textit{Reflection} 
 Java and Python can even achieve \textit{Duck Typing} \cite{javaDuckType}.
-\par
-However, as much as we have studied about type systems, \textit{Dependent Types} 
-\cite{depenTypeAtWork} remains uncommon in the industry. While the theory of dependent types has been 
-established several decades ago, only a small number of languages has 
-integrate full dependent type support, most of them being functional languages. 
-Dependent types allows the programmer to create types whose definition depends 
-on a value. A type system that provides such refined control over the values it 
-can take unlocks possibility that are previously unavailable such as 
-domain-specific type checking at compile time. Furthermore, it acts as a built 
-in ``error-handling'' code and could potentially 
-reduces the lines of code a programmer needs to write. An in depth 
-definition of dependent types is provided in the next section.
 
 \par
+Types are a fundamental way of showing a program's correctness, the use of types 
+restricts and therefore eliminates illegal program at compile time. However, a 
+even a well-typed program still leaves room for various errors such as 
+\begin{enumerate}
+  \item {\textbf{Out of index access}} In the case of arrays or buffers, the type checker 
+  can guarantee that the programmer is using an integer to index elements. 
+  However it makes no guarantee that the index is indeed within the valid range. 
+  \item {\textbf{Arithmetic errors}} An arithmetic operation can type check that it is 
+  indeed operating on numerical values however it is unable to verify the 
+  legality. Forbidden arithmetic operations such as as zero divisors or square 
+  root of a negative number cannot be type checked. 
+  \item {\textbf{Logical error}} Finally, a type checker cannot verify any logical 
+  mistakes made by the programmer. Mistakes are inevitable, while the programmer 
+  can ensures that the arugments passed to a function are two integers, there is 
+  no way for the type checker to ensure that the result is the sum of the two. 
+\end{enumerate}
+
+\par
+\textit{Dependent Types} \cite{depenTypeAtWork} looks to be a potential solution 
+to the problem. Dependent types allows the programmer to create types whose 
+definition depends on a value. A type system that provides such refined 
+control over the values it can take unlocks possibility that are previously 
+unavailable such as domain-specific type checking at compile time.
+
+\par
+A further restriction on dependent types can be found in \textit{Refinement 
+Types} \cite{refinementTypes} where one is allowed to specify subtypes 
+of existing types. A refinement types is constrained by a decidable predicte, 
+bringing a better ease of programming. While dependent types are significantly 
+more powerful than refinement types, the latter provides a good balance between 
+expressiveness and ease of use.
+
+\par
+As much as we have studied about type systems, dependent types remains 
+uncommon in the industry. While the theory of dependent types has been 
+established several decades ago, only a small number of languages has 
+integrate full dependent type support, most of them being functional languages. 
+Similarly, refinement types remains mostly a research problem, while several 
+programmers have attempted to bring refinement types to the mainstream, their 
+work remains niche. 
+
+\section{Motivation}
 The expressive nature of dependent types allow one to 
 define complex mathematical assertations and hence lends itself to 
 theorem proving systems. Mutliple functional languages such as \textit{Epigram} 
@@ -133,16 +164,41 @@ semantics provided in these studies are very complex with advanced language
 features, we propose that a more simple and barebone definiton will allow easier 
 access to the literature and motivate more studies into dependenty types. 
 
+
 \par
-A further restriction on dependent types can be found in \textit{Refinement 
-Types} \cite{refinementTypes}. Refinement types allows one to specify subtypes 
-of existing types, dependent types on the other hand allow one to create 
-arbitrary types. A refinement types is constrained by a decidable predicte, 
-bringing a better ease of programming. While dependent types are significantly 
-more powerful than refinement types, the latter provides a good balance between 
-expressiveness and ease of use. We propose to create a simple framework with 
-refinement typing that resembles mainstream programming language in order to 
-study the subject further. 
+Dependent types appears to be one of the niche fields in programming language 
+theory and type theory research. I argue that this is the result of the 
+difficult barrier of entry. Research in dependent types presented are usually 
+highly complex and requires substantial prerequisite. Type systems presented in 
+these paper often assumes full knowledge of \textit{The Lambda Calculus} 
+\cite{lambdaCalculus} or uses the concept of \textit{Monads} \cite{monads}. 
+While these are established framework commonly used to express and reason about 
+computation, with the addition of normal types and dependent types, the 
+underlying logic becomes hard to follow. 
+
+\par
+Similarly, research in the area that branch away from the convention of building 
+a dependent type system on the lambda calculus often showed highly complex 
+language features such as object orientation and dynamic memory allocation. The 
+purpose of these research often are to demonstrate the feasibility of 
+incorporating dependenet types in complex languages rather than providing an 
+overview of the concept. 
+
+\par
+Our project is motivated by the apparent lack of accesible literature on the 
+theory of dependent types. We aim to present a simple, restricted framework that 
+captures the essence of dependent types. The said framework will be presented as 
+an extension to \textit{WHILE language} \cite{whileLanguage}. Created as a tool 
+to aid the study of programming language theory, we believe it strongly satisfy our 
+requirement of accessibility with its simple syntax and semantics. 
+
+\par
+At the end of the project we aim to achieve the following, i) Survey the state 
+of dependently typed languages and their differences, ii) Describe a dependently 
+typed language based on the WHILE language, iii) Explore the ambiguity of 
+dependent types in an imperative environments, iv) Demonstrate the use of 
+dependent types to build further language features, v) Discuss how our work 
+compliments the literature. 
 
 \par
 This dissertation serves as a document for our findings and is organised as 
@@ -347,40 +403,7 @@ error handling code. This example demonstrated using an object-oriented style
 language by Vasconcelos \cite{objOritentedDependentType}.
 
 
-\section{Motivation}
-Dependent types appears to be one of the niche fields in programming language 
-theory and type theory research. I argue that this is the result of the 
-difficult barrier of entry. Research in dependent types presented are usually 
-highly complex and requires substantial prerequisite. Type systems presented in 
-these paper often assumes full knowledge of \textit{The Lambda Calculus} 
-\cite{lambdaCalculus} or uses the concept of \textit{Monads} \cite{monads}. 
-While these are established framework commonly used to express and reason about 
-computation, with the addition of normal types and dependent types, the 
-underlying logic becomes hard to follow. 
 
-\par
-Similarly, research in the area that branch away from the convention of building 
-a dependent type system on the lambda calculus often showed highly complex 
-language features such as object orientation and dynamic memory allocation. The 
-purpose of these research often are to demonstrate the feasibility of 
-incorporating dependenet types in complex languages rather than providing an 
-overview of the concept. 
-
-\par
-Our project is motivated by the apparent lack of accesible literature on the 
-theory of dependent types. We aim to present a simple, restricted framework that 
-captures the essence of dependent types. The said framework will be presented as 
-an extension to \textit{WHILE language} \cite{whileLanguage}. Created as a tool 
-to aid the study of programming language theory, we believe it strongly satisfy our 
-requirement of accessibility with its simple syntax and semantics. 
-
-\par
-At the end of the project we aim to achieve the following, i) Survey the state 
-of dependently typed languages and their differences, ii) Describe a dependently 
-typed language based on the WHILE language, iii) Explore the ambiguity of 
-dependent types in an imperative environments, iv) Demonstrate the use of 
-dependent types to build further language features, v) Discuss how our work 
-compliments the literature. 
 
 
 \chapter{Background Research} 
@@ -2059,7 +2082,7 @@ becomes invalid, we can rewrite our program to be correct as shown in the exampl
     \textbf{end}
   \end{tabs}  
   \caption{Pointers in Refinement Types}
-  \label{valid_ptr_program}
+  \label{fig:valid_ptr_program}
 \end{figure}
 
 \par
