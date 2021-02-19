@@ -133,6 +133,65 @@ bringing a better ease of programming. While dependent types are significantly
 more powerful than refinement types, the latter provides a good balance between 
 expressiveness and ease of use.
 
+\section{Overview of Refinement Types}
+In this section we will discuss at a very high level the behaviour one would 
+expect from a dependently typed language, its benefits and use cases.
+
+\subsection{Language Behaviour}
+The key behaviour we are interested in is regarding compile time type checking. 
+For instance, using the example above, if a type is defined as an \textit{EvenInt} 
+then if at any point in the code it becomes odd then it should be caught at 
+compile time. 
+
+\par
+Consider the psedocode below: 
+\begin{figure}[H]
+  \begin{lstlisting}[mathescape=true] 
+  function f(int x) {
+    if (x \% 2 == 0) {
+      ...
+    }
+    throw error ``x has to be even''
+  }
+  
+  function dependent_f(EvenInt i) {
+    ...
+  }
+  \end{lstlisting}
+  \caption{Dependenty Typed Language Behaviour}
+\end{figure}
+
+\par
+The function \textit{f} above checks whether the argument $x$ is even, if it 
+isn't then it throws a runtime error. If dependent type is available, then if an 
+invalid argument is passed in it should signal an error at compile time, saving the 
+error handling code as shown in \textit{dependent\_f}. 
+
+\subsection{Benefits of Dependent Types}
+As we seen in the previous subsection, dependent types allows programmer to 
+define much richer and expressive types that can be checked at compile time. The 
+addition of dependent types allow for safer code as it is able to guarentee certain 
+properties. 
+
+\par
+Furthermore, using dependent types eliminates the need for many trivial error 
+handling code. Around 4\% of code in every program is dedicated to error 
+handling \cite{errorHandlingCode}, dependent types will be able to reduce the 
+numbers and allow the programmer more time to write the logical part of the 
+code, indirectly leading to more robust codebases.
+
+\par
+Consider a banking system where users are able to transfer and withdraw 
+money using a function, 
+in order to prevent overdraft one might be able to define a function that takes 
+a type \textit{Amount$<$T$>$}, a double type that is always 
+greater than 0 and less than \textit{T}, where \textit{T} is the current balance in the account. 
+This approach guarantees the amount is always valid without the need of writing 
+error handling code. This example demonstrated using an object-oriented style 
+language by Vasconcelos \cite{objOritentedDependentType}.
+
+
+\section{Motivation}
 \par
 As much as we have studied about type systems, dependent types remains 
 uncommon in the industry. While the theory of dependent types has been 
@@ -142,7 +201,8 @@ Similarly, refinement types remains mostly a research problem, while several
 programmers have attempted to bring refinement types to the mainstream, their 
 work remains niche. 
 
-\section{Motivation}
+
+\par
 The expressive nature of dependent types allow one to 
 define complex mathematical assertations and hence lends itself to 
 theorem proving systems. Mutliple functional languages such as \textit{Epigram} 
@@ -246,10 +306,18 @@ into our languages and how it can further complicate the language. We will also
 discuss some of the other considerations that need to be taken account when 
 thinking about incorporating dependent types into a real language. 
 
-\section{What Are Dependent Types}
+
+\chapter{Background Research} 
+In this chapter we will be reviewing the current knowledge of dependent types 
+in different programming languages. It will cover languages with full dependent 
+types support as well as some languages with similar concepts and point out how 
+it differs from dependent types. Lastly we will summarise all these languages 
+and point out some limitations and unknowns. 
+
+\section{Dependent Types and Refinement Types}
 In this section we will be providing the definitions of dependent types.
 
-\subsection{Basic Definition}
+\subsection{Basic Definition of Dependent Types}
 At a very high level dependent types are types that depends on the value of 
 another type. For example, we can define a type that captures only the even 
 integers using the definition 
@@ -318,7 +386,7 @@ the the notion of pair in dependent sum types prove to be redundant in
 the construction a programming language and does not provide any additional 
 value. The dependent product type is largely adequate for our goal.
 
-\section{Refinement Types vs Dependent Types}
+\section{Refinement Types}
 Refinement Types is a type system where a certain base type is refined by a 
 predicate. A refinement type $A$ is written in the form 
 $\{\upsilon : B\text{ }|\text{ }P(\upsilon)\}$. $\upsilon$ is a special variable 
@@ -328,7 +396,8 @@ involving $\upsilon$ and any free variables in the program. Formally, a value
 $i$ is well typed with regards to a refinement type if $P(i)$ evaluates to 
 \textit{true}.
 
-\par
+\section{Refinement Types vs Dependent Types}
+
 The key differentiating factor between refinement types and dependent types is 
 that the latter is unrestricted. A refinement type is restricted predicate 
 $P(\upsilon)$ whereas a dependent types is able to rely on a function $P(x)$ 
@@ -344,74 +413,6 @@ provide a simpler understanding. While in many cases dependent types prove to be
 more powerful, refinement types for all intent and purposes does the job in 
 providing the improved expressivity for general programming. For this reason, we 
 will be basing our project on refinement types. 
-
-\section{Overview of a Dependently Typed Language}
-In this section we will discuss at a very high level the behaviour one would 
-expect from a dependently typed language, its benefits and use cases.
-
-\subsection{Language Behaviour}
-The key behaviour we are interested in is regarding compile time type checking. 
-For instance, using the example above, if a type is defined as an \textit{EvenInt} 
-then if at any point in the code it becomes odd then it should be caught at 
-compile time. 
-
-\par
-Consider the psedocode below: 
-\begin{figure}[H]
-  \begin{lstlisting}[mathescape=true] 
-  function f(int x) {
-    if (x \% 2 == 0) {
-      ...
-    }
-    throw error ``x has to be even''
-  }
-  
-  function dependent_f(EvenInt i) {
-    ...
-  }
-  \end{lstlisting}
-  \caption{Dependenty Typed Language Behaviour}
-\end{figure}
-
-\par
-The function \textit{f} above checks whether the argument $x$ is even, if it 
-isn't then it throws a runtime error. If dependent type is available, then if an 
-invalid argument is passed in it should signal an error at compile time, saving the 
-error handling code as shown in \textit{dependent\_f}. 
-
-\subsection{Benefits of Dependent Types}
-As we seen in the previous subsection, dependent types allows programmer to 
-define much richer and expressive types that can be checked at compile time. The 
-addition of dependent types allow for safer code as it is able to guarentee certain 
-properties. 
-
-\par
-Furthermore, using dependent types eliminates the need for many trivial error 
-handling code. Around 4\% of code in every program is dedicated to error 
-handling \cite{errorHandlingCode}, dependent types will be able to reduce the 
-numbers and allow the programmer more time to write the logical part of the 
-code, indirectly leading to more robust codebases.
-
-\par
-Consider a banking system where users are able to transfer and withdraw 
-money using a function, 
-in order to prevent overdraft one might be able to define a function that takes 
-a type \textit{Amount$<$T$>$}, a double type that is always 
-greater than 0 and less than \textit{T}, where \textit{T} is the current balance in the account. 
-This approach guarantees the amount is always valid without the need of writing 
-error handling code. This example demonstrated using an object-oriented style 
-language by Vasconcelos \cite{objOritentedDependentType}.
-
-
-
-
-
-\chapter{Background Research} 
-In this chapter we will be reviewing the current knowledge of dependent types 
-in different programming languages. It will cover languages with full dependent 
-types support as well as some languages with similar concepts and point out how 
-it differs from dependent types. Lastly we will summarise all these languages 
-and point out some limitations and unknowns. 
 
 \section{Functional Languages}
 
