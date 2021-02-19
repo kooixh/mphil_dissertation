@@ -963,7 +963,7 @@ type checker.
       \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int}
         {\Gamma \vdash e_1 < e_2 : bool}[(\textbf{op} $<$)] \text{ }
       \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int} 
-        {\Gamma \vdash e_1 > e_2 : bool}[(\textbf{op} $-$)] & \\
+        {\Gamma \vdash e_1 > e_2 : bool}[(\textbf{op} $>$)] & \\
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool}
         {\Gamma \vdash e_1 \wedge e_2 : bool}[(\textbf{op} $\wedge$)] \text{ }
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool} 
@@ -1557,9 +1557,9 @@ refinement predicate is immutable using the evaluation defined below.
       \inference {
       a \notin \text{\textbf{dom}}(\sigma) & a \notin \textbf{dom}(\tau) \\
       \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_immutable(\alpha)
-      \\ \langle C_1, \sigma, \tau + \{a \mapsto \{\upsilon :A\text{ }|\text{ }e\} 
+      \\ \langle C_1, \sigma, \tau + \{a \mapsto \{\upsilon :T\text{ }|\text{ }e\} 
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
-      {\langle \textbf{begin typedef } a = \{\upsilon :A\text{ }|\text{ }e\};C_1\textbf{ end}, 
+      {\langle \textbf{begin typedef } a = \{\upsilon :T\text{ }|\text{ }e\};C_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow 
         \langle \sigma', \tau \rangle}[(Refine def)]
     \end{tabular}
@@ -1671,8 +1671,8 @@ semantics should be updated as such.
       & \langle C_1, \sigma', \tau, \mathcal{R} \rangle \longrightarrow^{*} \langle 
       \sigma'', \tau, \mathcal{R} \rangle
       \\ \sigma_1 = \sigma & \tau_1 = \tau & \mathcal{R}' = \mathcal{R} + \{\{\upsilon : T\text{ }|\text{ }e\} \mapsto (\sigma_1, \tau_1)\}} 
-      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v_0; C_1 \textbf{ end}, \sigma \rangle 
-      \longrightarrow \sigma'' \setminus \{x\}}
+      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v_0; C_1 \textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
+      \longrightarrow \langle \sigma'' \setminus \{x\}, \tau, \mathcal{R} \rangle}
     \end{tabular}
   \end{center}
   \caption{Evaluation of Refinement Type with Closures}
@@ -1742,7 +1742,7 @@ design becomes underspecified yet again. In the next section, we will analyse
 the behaviour of our system in the presence of dynamic memory allocation.
 
 \section{Pointers and Reference Variables}
-Previously we proposed a set of rules that specifies behaviour of refinement 
+We previously proposed a set of rules that specify behaviour of refinement 
 types with regards to local variables and we learn that we can keep behaviour 
 consistent if we restrict changes to the variable. However, our solution does 
 not accomodate for reference variables and pointers. If a refinement type 
@@ -1758,8 +1758,8 @@ pointers and refinement types in order to specify a consistent behaviour.
 In programming languages, there are three different types of memory allocation, 
 static, stack and heaps \cite{heapVsStack}. While we have not explicitly 
 discussed our memory management model, it is rather obvious that Simple-$R$ 
-operates on a stack based model. It is apparent in the behaviour of locals 
-variable which are inaccesible once out of scope as discussed in our scoping rules. 
+operates on a stack based model. It is apparent in the behaviour of local 
+variables which are inaccesible once out of scope as discussed in our scoping rules. 
 
 \subsubsection{Syntax Extension}
 First we will have to extend our syntax to accomodate these new features, we define 
@@ -1769,9 +1769,10 @@ the new syntax in figure \ref{fig:ptr_syntax}.
   \begin{center}
     \begin{tabular} {l l l}
       \textit{Types} & $T$ & $:$ $...\text{ }|\text{ }T\text{ \textit{ref }}$ \\
-      \textit{Expressions} & $e$ & $:$ $...\text{ }|\text{ }!e_1\text{ }|\textbf{ new}(T)|\textbf{ new}(T, v)$\\
-     \textit{Values} & $vals$& $:$ $...\text{ }|\text{ }h$ $|$ $nil$ \\
-     \textit{Heap} & $\Delta$& $:$ $h \in \{h_1,h_2, h_3...\} \mapsto vals$\\
+      \textit{Expressions} & $e$ & $:$ $...\text{ }|\text{ }!e_1\text{ }|\textbf{ new}(T, v)$\\
+      \textit{Commands} & $C$ & $:$ $...$ $|$ $!h := e$ \\
+      \textit{Values} & $vals$& $:$ $...\text{ }|\text{ }h \in \{h_1,h_2, h_3...\} $ $|$ $nil$ \\
+      \textit{Heap} & $\Delta$& $:$ $h \mapsto vals$\\
     \end{tabular}
   \end{center}
   \caption{Heap Memory Allocation in Simple-$R$}
@@ -1779,13 +1780,14 @@ the new syntax in figure \ref{fig:ptr_syntax}.
 \end{figure}
 
 \paragraph{Types}
-We introduced a new type, $T$ \textit{ref} is a reference type that behaves like 
+We introduce a new type, $T$ \textit{ref} as a reference type that behaves like 
 a pointer in C/C++, like pointers, references are typed and its value is a heap address. 
 
 \paragraph{Expressions}
-The following expressions are introduced into the language. Unlike C/C++ 
+The following expressions are introduced into the language, unlike C/C++ 
 where one is allowed to retrieve the address of a local variable, in our 
-system one may only create a pointer through the use of \textbf{new}.
+system one may only create a pointer through the use of \textbf{new} as 
+one would in a language like Java.
 \begin{itemize}
   \item $!e_1$ to dereference the heap address held by expression $e_1$.
   \item \textbf{new}($T, v$) to allocate and return a $T$ \textit{ref} with the 
@@ -1796,22 +1798,28 @@ For simplicity, we have ommited the need for manual memory management, we
 assumme that \textit{Automatic Garbage Collection} \cite{GC} 
 is present in the language. 
 
+\paragraph{Commands}
+We add a new command that dereference a heap address and modifies its underlying 
+value. The command $!h := e$ changes the value at heap address $h_1$ to the 
+value after evaluating $e$.
+
 \paragraph{Values}
-We added two new values to the language, $h$ is simply a heap address and $nil$ 
-as an empty reference. $nil$ is treated as a standalone 
-value and not a dedicated heap address as it is the case in C/C++.
+We added two new values to the language, $h$ is simply a heap address in the set 
+$\{h_0, h_1, h_2...\}$ and $nil$ as an empty reference. 
+A $nil$ reference is treated as a standalone 
+value and not a dedicated heap address as it is the case in C/C++ where a 
+special address is used for NULL pointers. 
 
 \paragraph{Heap}
-Finally, we define a heap context $\Delta$ as a set of 
-heap addresses $\{h_0, h_1, h_2...\}$, it represents the set of address currently in use, 
-realisticly $\Delta$ will be a finite mapping however, in our case we are assuming 
-$\Delta$ be an infinite set of heap addresses as we consider cases of 
-insufficient memory out of scope for our project. We use the notation, $\Delta(h)$ 
-to get the value held at a particular heap address. 
+Finally, we define a heap context $\Delta$ as a mapping from heap address to values.  
+It represents the set of heap addresses that are currently in use and we use 
+the notation, $\Delta(h)$ to get the value held at a particular heap address. 
 
 \subsubsection{Typing Rules}
-We first define the base types for heap address and array values. As it is the 
-case with many languages, the $nil$ value is a reference type.
+We first define the typing judgement for the base types for references. 
+As it is the case with many languages, the $nil$ value is a reference type and a 
+heap address is a reference type. 
+
 \begin{center}
    $\Gamma \vdash nil : T\textit{ ref}$ ($nil$ reference type) \\
    $\Gamma \vdash h : T\textit{ ref}$ (Heap address type)
@@ -1820,7 +1828,7 @@ case with many languages, the $nil$ value is a reference type.
 \par
 We define the rest of the typing judgement as shown below. 
 The typing judgements are straightforward, 
-dereferencing a heap address of type $T \textit{ref}$ yields type $T$ and 
+dereferencing a heap address of type $T \textit{ref}$ yields a value of type $T$ and 
 allocating a new heap address with type $T$ gets a reference of the same type.
 
 \begin{figure}[H]
@@ -1829,6 +1837,8 @@ allocating a new heap address with type $T$ gets a reference of the same type.
       \inference {\Gamma \vdash e_1 : T\textit{ ref}}{\Gamma \vdash !e_1 : T}[(dereferencing)]
       \text{ }
       \inference {\Gamma \vdash v : T}{\Gamma \vdash \textbf{new}(T, v) : T\textit{ ref}}[(\textbf{new} ref)]
+      & \\
+      \inference {\Gamma \vdash e : T & \Gamma \vdash h : T\textit{ ref}} {\Gamma \vdash_{C}\text{ }!h := e : void}
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Ref Type}
@@ -1836,10 +1846,10 @@ allocating a new heap address with type $T$ gets a reference of the same type.
 
 
 \subsubsection{Basic Operational Semantics}
-Lastly, we need to define the operational semantics for the new addition. We 
-begin by defining the SOS rules for pointers. As the reduction rules for 
-expressions are largely similar to before we will be ommiting them and only 
-focus on the value itself. 
+Lastly, we define the operational semantics for the new expressions in figure 
+\ref{fig:sos_pointers}. Note that in our semantics we ommited the reduction 
+rules to reduce an expression into a heap address value as the rules are 
+trivial. 
 
 \begin{figure}[H]
   \begin{center}
@@ -1858,71 +1868,81 @@ focus on the value itself.
     \end{tabular}
   \end{center}
   \caption{Operational Semantics for Pointers}
+  \label{fig:sos_pointers}
 \end{figure}
 
 \par
 Pointers are allocated using the \textbf{new} expression which takes a type $T$ 
-and a value $v$. The evaluation rules allocated a new heap address $h$ that is 
+and a value $v$, the evaluation rules allocated a new heap address $h$ that is 
 not currently present, assigns it the value $v$ and return the address. The 
-value can be retrieve and modify through dereferencing, shwon in the first two 
-rules. A $nil$ reference is not allocated in the state $\Delta$ 
-and cannot be deference. 
+value can be retrieve and modify through dereferencing, shown in the first two 
+rules. A $nil$ reference is not allocated in the state $\Delta$ and cannot be 
+deference. 
 
 \subsection{Aliases in Dependent Types}
-Previously we explored the behaviour of variables in dependent types and 
-proposed three different solutions to address the ambiguity when depending on 
-variables. It is important to note that we only considered 
-local variables, the notions of pointers and references will complicate matters. 
-In this subsection we will discuss the potential pitfalls when dependent types 
-involves pointers. 
- 
-\par
-First let us consider the following code snippet, assuming we are utilise 
-approach 1 defined previously to address variables in dependent types.
+The introduction of pointers provides the programmer with multiple new tools. 
+Features such as pass-by-reference and aliasing are now at their disposal. 
+However with the introduction of new features, the feature interaction problem 
+arises once again, the relation between pointers and refinement types is 
+unclear. Throughout the text we learnt that we can avoid ambiguous behaviour 
+between mutation and refinement by using immutability or closures. This appears 
+not to be the case with pointers, to show that consider the code snippet in figure
+\ref{fig:amb_refinement_pointers}. 
 
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
-    \textbf{let const }$y\text{ }:\text{ } int \textit{ ref} = \textbf{new}(int, 10)$\textbf{ in } \\
-    \textbf{let const }$x\text{ }:\text{ }int\textit{ ref} = y$\textbf{ in } \\
-    \tab\textbf{typedef }$BoundedIntY$ = $\Pi y : int\text{ ref}. \{i : Int\text{ }|\text{ }i < !y\}$ \textbf{ in } \\ 
-    \tab\tab\textbf{let var }$z\text{ }:\text{ }BoundedIntY = 6$ \textbf{ in }$!x := 5$\textbf { end }\\
-    \tab\textbf {end} \textbf{end} \\
+    \textbf{begin const }$y\text{ }:\text{ } int\textit{ ref} = \textbf{new}(int, 10);
+    $\textbf{begin var }$x\text{ }:\text{ } int\textit{ ref} = y;$\\
+    \tab\textbf{begin typedef }$BoundedIntY$ = $\{i : int\text{ }|\text{ }i <\text{ }!y\}$; \\ 
+    \tab\tab\textbf{begin var }$z\text{ }:\text{ }BoundedIntY = 6;!x := 5$\textbf { end} \\
+    \tab\textbf {end} \textbf {end} \\
     \textbf{end}
   \end{tabs}  
-  \caption{Changing Values of Aliases within Dependent Types}
+  \caption{Mutation to Free Variables in Refinement Predicate}
+  \label{fig:amb_refinement_pointers}
 \end{figure}
 
 \par
-In the above scenario, a pointer to an $int$ $y$ is declared, another variable $x$ 
-acts as its alias, i.e. both $x$ and $y$ points to the same memory address. The 
-expression $!x := 5$ indirectly modified the definition of the type 
-$BoundedIntY$, making $z$ ill-typed. Our defined semantics does not have a way 
-to prevent this,
+In this scenario, we declare a constant $y$ as a pointer to an int, 
+initialised with the value 10. We then define another variable $x$ that acts as 
+its alias, i.e. both $x$ and $y$ are different variables but points to the same 
+address. The expression $!x := 5$ indirectly modified the definition of the type 
+$BoundedIntY$, making $z$ ill-typed. 
 
 \par
-In order to address this case, some of our previous proposed solutions 
-to the problem will need to be extended. While it is perfectly reasonable to 
-restrict mutation simply by marking a local variable \textit{const}, 
-the same can't be done with pointers. A constant 
-pointer variable simply restrict the address held by the pointer to be change, 
-manipulating the underlying value is still very much possible.
+Our previously defined semantics proves to be underspecified and does not 
+provide a definite behaviour. The appraoch where we require all free variables in a 
+refinement predicate to be constant however this is not sufficient for pointers. 
+A constant pointer variable simply restrict the address held by the pointer to be 
+changed, manipulating the underlying value is still very much possible. 
+Moreover, using closures also fails to prevent the ambiguity as one can easily 
+modify the heap address and have he changes reflect within the closure.
 
 \par
-A possible approach would be to extend the previously defined semantics to 
-operate on memory location as well as local variables. In C/C++, one is able to 
-declare a pointer to a constant, we would require the same in Simple-$R$. It 
-is important to note the difference between an immutable pointer and a pointer 
+In order to address this case, our previously proposed semantics has to be 
+extended to address two different features. One is to prevent the pointer from 
+modifying the underlying heap address and no aliases should be able to modify 
+the address indirectly.
+
+\par
+In C/C++, one is able to declare a pointer to a constant, we would require 
+the same mechanism in Simple-$R$. It is important to note the 
+difference between an immutable pointer and a pointer 
 to an immutable. The latter allows the pointer variable to change. In order to 
 concrete differentiate the two in a definite manner, we introduce 
-a new predicate $is\_nonrewriteable(h)$ to specify if a 
-certain heap address can be modified. 
+a new predicate $is\_nonrewriteable(h)$ to specify if the value held at a 
+specific memory address is immutable. The $is\_nonrewriteable(h)$ predicate 
+holds if and only if the heap address $h$ is a constant and cannot be modified. 
 
 \par
-$is\_nonrewriteable(h)$ holds if and only if the heap address $h$ is a const and cannot 
-be rewritten. The predicate operates directly on heap address rather than 
-pointers itself as 
-it is possible to have a pointer to a pointer which will invalidate the 
-predicate. 
+While this predicate behaves exactly as the $is\_immutable(x)$ predicate defined 
+previously, we made the distinction between the two as the one operates on variables 
+and the other operates on heap addresses. 
+
+\par
+In order for one to define an immutable pointer we added a new expression 
+\textbf{newconst}$(T, v)$ which allocates a constant value and return its 
+pointer. 
 
 \begin{figure}[H]
   \begin{center}
@@ -1934,12 +1954,6 @@ predicate.
 \end{figure}
 
 
-\par
-We first need to extend our syntax to have a way of declaring pointers to 
-constant. In the pursuit of simplicity, we include a new expression 
-\textbf{newconst}$(T, v)$ to our language, this creates a new pointer to $T$ and 
-assigns the value $v$. 
-
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
@@ -1948,6 +1962,7 @@ assigns the value $v$.
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Pointer to Constants}
+  \label{fig:tj_const_ptr}
 \end{figure}
 
 \par
@@ -1956,105 +1971,107 @@ The reason for this is because we believe that a constant $nil$ pointer
 serves no purpose and using the $nil$ value is adequate in all operations. 
 
 \par
-The figure above formalises the typing judgement for this new expression and 
-its behaviour is captured using the evaluation rules defined in figure 4.27 
-below.
+The typing judgement in figure \ref{fig:tj_const_ptr} above formalises the 
+typing judgement for this new expression. We define the operational semantics 
+for the new expression in figure \ref{fig:sos_const_ptr}. Additionally, we 
+restrict the ability to modify a the value of a constant heap address.
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta 
-      \uplus \{h \mapsto v\}}
-      {\langle \textbf{newconst}(T, v), \sigma, \tau, \Delta \rangle \longrightarrow \langle h, 
+      \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta + \{h \mapsto v\}}
+      {\langle \textbf{newconst}(T, v), \sigma, \tau, \Delta \rangle \Longrightarrow \langle h, 
       \sigma, \tau, \Delta' \rangle} [(\textbf{newconst} 1)]
       & \\
-      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle e_1', \sigma', \tau', \Delta' \rangle}
-      {\langle \textbf{newconst}(T, e_1), \sigma, \tau, \Delta \rangle \longrightarrow \langle \textbf{newconst}(T, e_1'), 
-      \sigma', \tau', \Delta' \rangle} [(\textbf{newconst} 2)]
-    \end{tabular}
-  \end{center}
-  \caption{Operational Semantics for Pointers to Constants}
-\end{figure}
-
-\par
-Additionally, we need to restrict the ability to rewrite memory location that 
-are deemed non-rewriteable. 
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {c}
-      \inference {h_1 \in \textbf{dom}(\Delta) & \neg is\_nonrewritable(h_1) & \Delta' = \Delta \uplus \{h_1 \mapsto v_1\}}
+      \inference {h_1 \in \textbf{dom}(\Delta) & \neg is\_nonrewritable(h_1) & \Delta' = \Delta[h_1 \mapsto v_1]}
       {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v_1, 
       \sigma, \tau, \Delta' \rangle} [(Pointer assignment)]
     \end{tabular}
   \end{center}
-  \caption{Restricting Write to Immutable Memory Locations}
+  \caption{Operational Semantics for Pointers to Constants}
+  \label{fig:sos_const_ptr}
 \end{figure}
 
+\par
+The introduction of immutable heap address allows us to specify a concrete 
+behaviour for refinement types in the presence of pointers. Adopting a similar 
+strategy to our previous restriction, we require all pointers present in a 
+refinement predicate to not only be a constant itself but it must also be 
+referencing a constant value. In the following text, assume that we are 
+adopting and extending the semantics discussed in section 3.4.3 where we 
+restrict mutation on free variables in a refinement predicate. 
 
 \par
-The introduction of immutable memory locations will allow us to specify the 
-behaviour of pointers in dependent types. We formalise the behaviour by 
-decomposing the operational semantics defined in figure 4.10, 
-stipulating different behaviours for values and references. 
+We define a new predicate that will be used in our definition, $is\_ref(x)$ 
+returns true if and only if $x$ is a pointer variable.
+\par
+Formally, $is\_ref(x) \Leftrightarrow \Gamma(x) = T\textit{ ref}$.
+
+\par
+The new specification is defined in figure \ref{fig:immu_pointer_typedef}.
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
       \inference {
-      \sigma(x) \notin \Delta &
-      a \notin \text{\textbf{dom}}(\sigma) & is\_immutable(x) & a \notin \textbf{dom}(\tau) 
-      \\ \langle e_1, \sigma, \tau + \{a \mapsto \Pi x : A.P(x)\} \rangle 
-      \longrightarrow^{*} \langle v, \sigma', \tau' \rangle}
-      {\langle \textbf{typedef } a = \Pi x :A .P(x) \textbf{ in }e_1\textbf{ end}, 
+      a \notin \text{\textbf{dom}}(\sigma) & a \notin \textbf{dom}(\tau) \\
+      \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_immutable(\alpha)
+      \\
+      \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_ref(\alpha) \Rightarrow is\_nonrewriteable(\sigma(\alpha))
+      \\ \langle C_1, \sigma, \tau + \{a \mapsto \{\upsilon :T\text{ }|\text{ }e\} 
+      \rangle \longrightarrow \langle \sigma', \tau \rangle}
+      {\langle \textbf{begin typedef } a = \{\upsilon :T\text{ }|\text{ }e\};C_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow 
-        \langle v, \sigma', \tau' - \{a\}\rangle}[(\textbf{typedef}) $\Pi$ vals]  
-      & \\
-      \inference {
-      \sigma(x) \in \Delta &
-      a \notin \text{\textbf{dom}}(\sigma) &  a \notin \textbf{dom}(\tau) \\ is\_immutable(x) & is\_nonrewriteable(\sigma(x)) \\
-      & \langle e_1, \sigma, \tau + \{a \mapsto \Pi x : A.P(x)\} \rangle 
-      \longrightarrow^{*} \langle v, \sigma', \tau' \rangle}
-      {\langle \textbf{typedef } a = \Pi x :A .P(x) \textbf{ in }e_1\textbf{ end}, 
-      \sigma, \tau \rangle \longrightarrow 
-        \langle v, \sigma', \tau' - \{a\}\rangle}[(\textbf{typedef}) $\Pi$ refs] 
+        \langle \sigma', \tau \rangle}[(Refine def)]
     \end{tabular}
   \end{center}
-  \caption{Operational Semantics Dependent Type Definition with Pointers}
+  \caption{Typedef refinement types with pointers}
+  \label{fig:immu_pointer_typedef}
 \end{figure}
 
+\par
+The new specification retains all constraints present and make a crucial 
+new addition. In addition to all variables being immutable, a new predicate 
+requires that all pointer variables in the 
+expression must to be pointing to a constant. This ensures that the value pointed 
+to by the pointer would not change throughout the type's existence. Furthermore, 
+we can be sure that any aliases to the heap 
+address will not be able to modify the memory address because of the rules 
+specified in figure \ref{fig:sos_const_ptr}.
 
 \par
-The appropriate rule is applied during evaluation, the top rule 
-(\textbf{typedef} $\Pi$ vals) is evaluated if the variable depended on $x$ is 
-a local variable and not a reference. In this case, our previous logic would hold, 
-$x$ must be a constant. If, however, $x$ is a pointer variable, then we would have 
-to apply the second rule which asserts that in addition to $x$ being a constant, 
-preventing it to be reassigned to a different heap address, 
-the underlying memory location held by $x$ must not be rewriteable. 
+The example program showed previously in figure \ref{fig:amb_refinement_pointers} 
+is now an invalid program. To make it valid we adopted the newly defined rules 
+and rewrote it in figure \ref{fig:valid_ptr_program}.
 
-\par
-With our newly defined rules the program in figure 4.24 becomes invalid, 
-we can rewrite our program to be correct as shown in the example below. 
+
+
+With our newly defined rules the program in figure \ref{fig:amb_refinement_pointers} 
+becomes invalid, we can rewrite our program to be correct as shown in the example below. 
 
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
-    \textbf{let const }$y\text{ }:\text{ } int \textit{ ref} = \textbf{newconst}(int, 10)$\textbf{ in }\\
-    \tab\textbf{typedef }$BoundedIntY$ = $\Pi y : int\text{ ref}. \{i : Int\text{ }|\text{ }i < !y\}$ \textbf{ in } \\ 
-    \tab\tab\textbf{let var }$z\text{ }:\text{ }BoundedIntY = 6$ \textbf{ in skip end}\\
+    \textbf{begin const }$y\text{ }:\text{ } int\textit{ ref} = \textbf{newconst}(int, 10);$\\
+    \tab\textbf{begin typedef }$BoundedIntY$ = $\{i : int\text{ }|\text{ }i <\text{ }!y\}$; \\ 
+    \tab\tab\textbf{begin var }$z\text{ }:\text{ }BoundedIntY = 6;\textbf{skip}$\textbf { end} \\
     \tab\textbf {end} \\
     \textbf{end}
   \end{tabs}  
-  \caption{Valid use of Pointers in Dependent Types}
+  \caption{Pointers in Refinement Types}
+  \label{valid_ptr_program}
 \end{figure}
 
-
 \par
-In this subsection we have adapted our first approach to accomodate advance 
-language features such as heap addresses and aliasing. While minor changes are 
-needed to adapt the reamining two approaches to accomodate, we decided to leave 
-them out of scope for the current project and as an open future work.
+In this section we extended our language with advanced features such as pointers 
+and aliasing. We observe how introducing new form of variables introduces new 
+form of mutation into the language and will require us to adapt new strategies 
+in our language specification. Finally we extended our previously defined 
+semantics to accomodate this new feature. Our use of closures can easily be 
+modified to work with pointers with a similar strategy. As it is very similar 
+the appraoch discussed here, we have left the specification out of the text. The 
+semantics of using closures with pointers is included in the appendencies. 
 
+\section{Summary}
 \chapter{Related Work}
 
 \chapter{Further Work}
