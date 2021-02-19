@@ -1194,8 +1194,8 @@ commands.
 
 \par
 Figure \ref{fig:sos_commands} defines the operational semantics for the basic commands 
-in the language. The semantics for $\textbf{begin }D;C \textbf{end}$ will be 
-covered in the next section.
+in the language. The semantics for $\textbf{begin }D;C \textbf{end}$ and functions 
+will be covered in the subsequent sections.
 
 \subsection{Scoping}
 Scoping has an important role in programming languages, variables can be defined 
@@ -1706,7 +1706,7 @@ semantics should be updated as such.
 \par
 We define $\sigma_1$ and $\tau_1$ as a copy of the program state $\sigma$ and 
 $\tau$ and attach this to the type using the context $\mathcal{R}$. The same 
-applies when one declare a variable of type $\{\upsilon\text{ }|\text{ }e\}$ 
+applies when one declare a variable of type $\{\upsilon : T\text{ }|\text{ }e\}$ 
 without using the \textbf{typedef} command.
 
 \par
