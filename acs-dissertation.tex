@@ -1631,7 +1631,7 @@ without using the \textbf{typedef} command.
       \inference {
       x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) \\
       \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_immutable(\alpha)
-      \\ \langle C_1, \sigma, \tau + \{x \mapsto \{\upsilon :T\text{ }|\text{ }e\} 
+      \\ \langle C_1, \sigma, \tau + \{x \mapsto \{\upsilon :T\text{ }|\text{ }e\}\} 
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
       {\langle \textbf{begin typedef } x = \{\upsilon :T\text{ }|\text{ }e\};C_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow 
@@ -1642,7 +1642,7 @@ without using the \textbf{typedef} command.
       \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_immutable(\alpha)
       \\ \langle C_1, \sigma + \{x \mapsto v\} , \tau
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
-      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }v\} = v_0; C_1 \textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
+      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v;C_1 \textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
       \longrightarrow \langle \sigma'' \setminus \{x\}, \tau \rangle}
     \end{tabular}
   \end{center}
