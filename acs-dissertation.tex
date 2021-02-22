@@ -865,7 +865,7 @@ types, the language is kept at a minimum with only the necessary construct.
 \end{itemize}
 
 \paragraph{Functions}
-Functions Type are defined in Simple-$R$ as $(T_1, T_2,T_3...T_n \longrightarrow T_0)$, 
+Functions Type are defined as $(T_1, T_2,T_3...T_n \longrightarrow T_0)$, 
 it takes a up to $n$ types and returning a type. Note that functions are 
 not first-class in this language, unlike a higher order 
 language, functions types are its own entity and are distinct from the regular 
@@ -1055,16 +1055,44 @@ We begin by defining the formation rule for a refinement type.
 \end{figure}
 
 
-Additionally, we defining the typing rule for a subtypes. A refinement type 
-$A$ is a subtype of another refinement type $B$ if 
-the set of values in $A$ is a subset of or equal the values in $B$, 
+\par
+While functional languages such as Liquid Haskell has shown the ability of type 
+checking refinement types statically at compile time, with the presence of 
+mutation in our language it turns out to be difficult. The refinement predicate 
+may contains variables whose value is only available at runtime or could have 
+changed since declaration. To mitigate this, we adopted a type checking appraoch 
+that validates as much as possible statically and defers complicated type 
+checking until runtime. 
+
+\par
+During compile type, the type checker validates that if one is expecting a 
+refinement type with base type $T$ then it is provided an expression $e$ of type 
+$T$, note that the expression might not be valid refinement type, the refinement 
+predicate might evaluates to false. However, this check will be checked 
+dynamically at runtime. We will discuss runtime type checking later in the text. 
+
+\par
+Our static refinement type checking rule is defined below.
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {\Gamma \vdash e_1 : T}
+      {\Gamma \vdash e_1 : \{\upsilon : T\text{ }|\text{ }e\}} [(Refine Base Static)]
+    \end{tabular}
+  \end{center}
+\end{figure}
+
+Additionally, we defining the typing rule for a subtypes, 
 we express $A$ is a subtype of $B$ as $A \preceq B$. 
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
+      
+      $\Gamma \vdash \{\upsilon : T\text{ }|\text{ }e\} \preceq T$ (Subtype Base 1)
+      & \\
       \inference {\Gamma \vdash \forall \upsilon_1 : T\text{ }s.t.\text{ }e_1 \Rightarrow e_2[\upsilon_1/\upsilon_2]}
-      {\Gamma \vdash \{\upsilon_1 : T_1\text{ }|\text{ }e_1\} \preceq \{\upsilon_2 : T_1\text{ }|\text{ }e_2\}} [(Subtype Base)]
+      {\Gamma \vdash \{\upsilon_1 : T_1\text{ }|\text{ }e_1\} \preceq \{\upsilon_2 : T_1\text{ }|\text{ }e_2\}} [(Subtype Base 2)]
       & \\ 
       \inference {\Gamma \vdash T_1 \preceq T_2 & \Gamma \vdash T_1 \preceq T_3} 
       {\Gamma \vdash T_1 \preceq T_2} [(Subtype Trans)]
@@ -1075,11 +1103,22 @@ we express $A$ is a subtype of $B$ as $A \preceq B$.
 \end{figure}
 
 \par
-The three subtype judgement defined above allows us to perform perform basic 
-polymorphism. One should be able to use a value of type $T_1$ in a context 
-expecting type $T_2$ provided $T_1$ is a subtype of $T_2$. We enable this 
-behaviour using the judgement below.
+The four subtype judgement defined above allows us to perform perform basic 
+polymorphism. (Subtype Base 1 & 2) defines the basic definition of subtype. The 
+first states that a refinement type of $T$ is trivially a subtype of $T$ and the 
+second states that a refinement type $A$ is a subtype of another 
+refinement type $B$ if the set of values in $A$ is a subset of or equal 
+the values in $B$. (Subtype Trans) defines the transitivity of subtype and 
+(Subtype Reflex) defines the reflexivity. 
 
+\par
+One should be able to use a value of type $T_1$ in a context 
+expecting type $T_2$ provided $T_1$ is a subtype of $T_2$. For example, an 
+expression $e$ of type containing all even natural numbers $EvenNat$ when passed 
+to a context expecting a type $Nat$ should be valid. 
+
+\par
+We enable this behaviour using the judgement below.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
@@ -1304,24 +1343,31 @@ function as arguments. Our language defines a strict behaviour that all
 arguments are evaluated in the order they are passed in, i.e. from left to right 
 and arguments are call-by-value.
 
-\subsection{Refinement Type Checking}
+\subsection{Runtime Refinement Type Checking}
 Refinement Type declaration requires specific evaluation rule. When one declare 
 a variable of a refinement type, the language has to ensure the evaluation 
 holds. While we have defined a statically typed language, even in a statically 
 typed language, there are cases when the type of some data cannot be determined 
 statically. Gordon Plotkin discussed the idea of dynamically checking a static 
-language in this work \cite{dynamicCheckStaticLanguage} which inspired our idea.
+language in this work \cite{dynamicCheckStaticLanguage}.
 
 \par
 The refinement predicate proves to be hard to decide at compile time, one might 
 require access to program state for values of variables in order 
 to evaluate the refinement predicate. In many cases, 
 only constants and constant expressions are available at compile time. 
-Alternatively, one can type check refinement type dynamically at runtime. We 
-define a special form of typing judgement to do that. Interestingly, 
-Cormac Flanagan proposed a similar idea dubbed Hybrid Type Checking to verify 
-the correctness of Dependent Types and Refinement Types in a $\lambda$-calculus 
-\cite{hybridTypeChecking}.
+Interestingly, Cormac Flanagan proposed a similar idea dubbed \textit{Hybrid Type 
+Checking} \cite{hybridTypeChecking} to verify the correctness of Dependent Types and Refinement Types 
+in a $\lambda$-calculus. The paper inspired our idea by proposing a type checker that is 
+``a synthesis of these two approaches that enforces precise interface 
+specifications, via static analysis where possible, but also via 
+dynamic checks where necessary''.
+
+\par
+Previously we demonstrated how refinement types are checked statically in Simple-$R$,
+now we show how one can type check refinement types dynamically at runtime. We 
+define a special form of typing judgement to type check refinement types 
+dynamically.
 
 
 \begin{figure}[H]
@@ -1351,10 +1397,10 @@ perform a type check on refinement type using the rule defined below.
 \end{figure}
 
 \par
-The typing judgement in figure \ref{fig:refine_typecheck} asserts that an expression 
-$e_1$ is a valid refinement type if it evaluates to the base type $T_1$ and 
-the refinement predicate $e[e_1/\upsilon]$ evaluates to true under state 
-$\sigma$.
+During runtime, the typing judgement in figure \ref{fig:refine_typecheck} 
+asserts that an expression $e_1$ is a valid refinement type if it 
+evaluates to the base type $T_1$ and the refinement predicate $e[e_1/\upsilon]$ 
+evaluates to true under state $\sigma$.
 
 \par
 Our type check rule looks to capture the behaviour of refinement type however it 
@@ -1575,18 +1621,29 @@ $\upsilon$ is not a free variable.
 
 \par
 Using the new notation we can easily verify that all free variables in a 
-refinement predicate is immutable using the evaluation defined below.
+refinement predicate $is\_immutable$ using the evaluation defined below. The same 
+applies when one declare a variable of type $\{\upsilon : T\text{ }|\text{ }e\}$ 
+without using the \textbf{typedef} command.
+
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
       \inference {
-      a \notin \text{\textbf{dom}}(\sigma) & a \notin \textbf{dom}(\tau) \\
+      x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) \\
       \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_immutable(\alpha)
-      \\ \langle C_1, \sigma, \tau + \{a \mapsto \{\upsilon :T\text{ }|\text{ }e\} 
+      \\ \langle C_1, \sigma, \tau + \{x \mapsto \{\upsilon :T\text{ }|\text{ }e\} 
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
-      {\langle \textbf{begin typedef } a = \{\upsilon :T\text{ }|\text{ }e\};C_1\textbf{ end}, 
+      {\langle \textbf{begin typedef } x = \{\upsilon :T\text{ }|\text{ }e\};C_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow 
-        \langle \sigma', \tau \rangle}[(Refine def)]
+        \langle \sigma', \tau \rangle}
+      & \\
+      \inference {
+      x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) \\
+      \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_immutable(\alpha)
+      \\ \langle C_1, \sigma + \{x \mapsto v\} , \tau
+      \rangle \longrightarrow \langle \sigma', \tau \rangle}
+      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }v\} = v_0; C_1 \textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
+      \longrightarrow \langle \sigma'' \setminus \{x\}, \tau \rangle}
     \end{tabular}
   \end{center}
 \end{figure}
@@ -1705,9 +1762,7 @@ semantics should be updated as such.
 
 \par
 We define $\sigma_1$ and $\tau_1$ as a copy of the program state $\sigma$ and 
-$\tau$ and attach this to the type using the context $\mathcal{R}$. The same 
-applies when one declare a variable of type $\{\upsilon : T\text{ }|\text{ }e\}$ 
-without using the \textbf{typedef} command.
+$\tau$ and attach this to the type using the context $\mathcal{R}$. 
 
 \par
 In order to type check refinement types with closures, we update our refinement 
@@ -2086,17 +2141,63 @@ becomes invalid, we can rewrite our program to be correct as shown in the exampl
   \label{fig:valid_ptr_program}
 \end{figure}
 
+
+\subsubsection{Refinement Type Closure and Pointers}
+Our second approach uses closures to handle refinement type, the approach 
+can easily be modified to work with pointers with a 
+similar strategy. If one declares a refinement type $T$ then in addition to 
+the context being copied, we require any pointer variables in the refinement 
+predicate to be constant. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {
+      \langle C_1, \sigma, \tau + \{y \mapsto \{\upsilon : A\text{ }|\text{ }e\}\}, \mathcal{R}'
+      \rangle \longrightarrow^{*} \langle \sigma', \tau, \mathcal{R} \rangle
+      \\ \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_ref(\alpha) \Rightarrow is\_nonrewriteable(\sigma(\alpha))      
+      \\ \sigma_1 = \sigma & \tau_1 = \tau & \mathcal{R}' = \mathcal{R} + \{\{\upsilon : T\text{ }|\text{ }e\} \mapsto (\sigma_1, \tau_1)\}}
+      {\langle\textbf{begin typedef } y = \{\upsilon : T\text{ }|\text{ }e\};C_1;e_1\textbf{ end}, 
+      \sigma, \tau, \mathcal{R} \rangle \longrightarrow \langle \sigma', \tau, \mathcal{R} \rangle} 
+      & \\
+      \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) 
+      & \langle C_1, \sigma', \tau, \mathcal{R} \rangle \longrightarrow^{*} \langle 
+      \sigma'', \tau, \mathcal{R} \rangle
+      \\ \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_ref(\alpha) \Rightarrow is\_nonrewriteable(\sigma(\alpha))
+      \\ \sigma_1 = \sigma & \tau_1 = \tau & \mathcal{R}' = \mathcal{R} + \{\{\upsilon : T\text{ }|\text{ }e\} \mapsto (\sigma_1, \tau_1)\}} 
+      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v_0; C_1 \textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
+      \longrightarrow \langle \sigma'' \setminus \{x\}, \tau, \mathcal{R} \rangle}
+    \end{tabular}
+  \end{center}
+  \caption{Evaluation of Refinement Type with Closures}
+\end{figure}
+
 \par
-In this section we extended our language with advanced features such as pointers 
-and aliasing. We observe how introducing new form of variables introduces new 
-form of mutation into the language and will require us to adapt new strategies 
-in our language specification. Finally we extended our previously defined 
-semantics to accomodate this new feature. Our use of closures can easily be 
-modified to work with pointers with a similar strategy. As it is very similar 
-the appraoch discussed here, we have left the specification out of the text. The 
-semantics of using closures with pointers is included in the appendencies. 
+In this section we extended our language to include advanced features such 
+as pointers and aliasing. We observe how introducing new form of 
+variables brings new types of mutation into the language and therefore 
+requires us to adapt new strategies in our language specification. We proposed a  
+new requirements that ensures pointers are pointing to immutable locations if used 
+in a refinement predicate. Finally, we incorporate these new requirements 
+into our language by extending previously defined semantics. 
 
 \section{Summary}
+Throughout this chapter we described an imperative programming langauge 
+with refinement types support that is heavily based on C/C++. We showed how 
+statically verifying refinement types is hard to achieve because of the presence 
+of mutation and variables whose values are only available at runtime. We 
+overcome this by adopting a hybrid type checking approach that type checks as 
+much as possible statically but defers complicated checks to runtime. However, 
+we observed that runtime type checking has some ambiguities because of the 
+presence of mutation, we further specified our semantics by proposing two ideas 
+that handles mutation in refinement types. Our first approach is based on the 
+idea of immutable variable and restricting mutation on variables that is associated 
+with refinement types. The second approach utilises closures which makes a copy of 
+the state at the time of type declaration, type checking will 
+use the values in the copied state. Finally, we showed how adding 
+dynamically allocated memory will lead to our definition underspecified, we 
+conclude the chapter by addressing these new ambiguities with newly defined 
+semantics. 
 
 \chapter{Further Work}
 
