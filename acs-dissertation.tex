@@ -2055,6 +2055,9 @@ pointer.
   \caption{Heap Memory Allocation in Simple-$R$}
 \end{figure}
 
+\par
+The typing judgement in figure \ref{fig:tj_const_ptr} above formalises the 
+typing rules for this new expression. 
 
 \begin{figure}[H]
   \begin{center}
@@ -2068,15 +2071,24 @@ pointer.
 \end{figure}
 
 \par
-Notice that unlike C/C++, it is not possible to define a constant $nil$ pointer. 
-The reason for this is because we believe that a constant $nil$ pointer 
-serves no purpose and using the $nil$ value is adequate in all operations. 
+Notice that unlike C/C++, Simple-$R$ does not have the notion of 
+\textit{referencing}, the only way to obtain a pointer is through the use of 
+\textbf{new} or \textbf{newconst}. This form of semantic avoids pitfalls in C/C++ 
+where one gives a pointer to a constant the address of a mutable variable as 
+demonstrated in the program below.
+\begin{center}
+  \begin{tabular}{l}
+    \verb|int x = 10;| &
+    \verb|const int *p = &x;|&
+    \verb|x = 5;|&
+  \end{tabular}
+\end{center}
 
 \par
-The typing judgement in figure \ref{fig:tj_const_ptr} above formalises the 
-typing judgement for this new expression. We define the operational semantics 
-for the new expression in figure \ref{fig:sos_const_ptr}. Additionally, we 
-restrict the ability to modify a the value of a constant heap address.
+The lack of referencing allows us to define semantics that absolutely forbin 
+modification on a heap location. We define the operational semantics for the 
+new expression in figure \ref{fig:sos_const_ptr} that restrict the ability to 
+modify the value of a constant heap address.
 
 \begin{figure}[H]
   \begin{center}
