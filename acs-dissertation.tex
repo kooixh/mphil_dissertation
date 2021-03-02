@@ -1344,15 +1344,27 @@ arguments are evaluated in the order they are passed in, i.e. from left to right
 and arguments are call-by-value.
 
 \subsection{Runtime Refinement Type Checking}
-Refinement Type declaration requires specific evaluation rule. When one declare 
-a variable of a refinement type, the language has to ensure the evaluation 
-holds. While we have defined a statically typed language, even in a statically 
+A declaration of a variable that is a refinement type requires specific 
+evaluation rules. When one declare 
+a variable of a refinement type, the language has to ensure that the refinement 
+predicate evaluates to true. While we have defined a statically typed language, even in a statically 
 typed language, there are cases when the type of some data cannot be determined 
 statically. Gordon Plotkin discussed the idea of dynamically checking a static 
 language in this work \cite{dynamicCheckStaticLanguage}.
 
 \par
-The refinement predicate proves to be hard to decide at compile time, one might 
+Languages like Java are generally considered a statically typed language  
+however certain typing properties are impossible to check at compile time. In 
+order to address this, Java employs a combination of static and dynamic checking. For example, 
+consider downcasting in Java using the classes \verb|A|, \verb|B extends A| and 
+\verb|C extends B|. The expression \verb|A x = new B();(C) x| 
+is valid at compile time as there is a possibility it will succeed at 
+runtime, however in this case it fails at runtime as \verb|x| is not type \verb|C|. Note 
+that in some cases like \verb|Integer i = 10; (String) i|, 
+casting fails at compile time because there is no way for it to succeed at all. 
+
+\par
+The refinement predicate proves to be undecideable at compile time, one might 
 require access to program state for values of variables in order 
 to evaluate the refinement predicate. In many cases, 
 only constants and constant expressions are available at compile time. 
@@ -1389,7 +1401,7 @@ perform a type check on refinement type using the rule defined below.
   \begin{center}
     \begin{tabular} {c}
       \inference{\Gamma \vdash e_1 : T_1 & \langle e[e_1/\upsilon], \sigma \rangle \Longrightarrow^{*} \langle \textit{true}, \sigma \rangle}
-      {\sigma, \Gamma \vdash_{R} e_1 : \{\upsilon : T_1\text{ }|\text{ }e\}} 
+      {\sigma, \Gamma \vdash_{R} e_1 : \{\upsilon : T_1\text{ }|\text{ }e\}} [(Runtime Refine)]
     \end{tabular}
   \end{center}
   \caption{Type Checking Refinement Types}
@@ -1441,7 +1453,7 @@ instance:
 \end{figure}
 
 \par
-The simple program demonstrated in \ref{fig:amb_refinement_vars} declares a 
+The simple program demonstrated in figure \ref{fig:amb_refinement_vars} declares a 
 bounded integer type $BoundedIntY$ whose value cannot be greater than another integer $y$, 
 a free variable in the program. A variable $x$ is declared to be of type 
 $BoundedIntY$ with the appropriate value. Later in the program, the value of $y$ 
@@ -1832,7 +1844,7 @@ them immutable is not enought. Pointers value can be altered through aliasing.
 \par
 In this section we will first extend our syntax with the notion of dynamically 
 allocated memory. Later we will study the feature interaction between 
-pointers and refinement types in order to specify a consistent behaviour. 
+pointers and refinement types in order to identify a consistent behaviour. 
 
 \subsection{Introducing Heap Allocated Memory}
 In programming languages, there are three different types of memory allocation, 
@@ -1843,15 +1855,18 @@ variables which are inaccesible once out of scope as discussed in our scoping ru
 
 \subsubsection{Syntax Extension}
 First we will have to extend our syntax to accomodate these new features, we define 
-the new syntax in figure \ref{fig:ptr_syntax}. 
+the new syntax in figure \ref{fig:ptr_syntax}. For simplicity and safety, 
+we have ommited the need for manual memory management and we 
+assumme that \textit{Automatic Garbage Collection} \cite{GC} is present in 
+the language. 
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {l l l}
       \textit{Types} & $T$ & $:$ $...\text{ }|\text{ }T\text{ \textit{ref }}$ \\
-      \textit{Expressions} & $e$ & $:$ $...\text{ }|\text{ }!e_1\text{ }|\textbf{ new}(T, v)$\\
-      \textit{Commands} & $C$ & $:$ $...$ $|$ $!h := e$ \\
-      \textit{Values} & $vals$& $:$ $...\text{ }|\text{ }h \in \{h_1,h_2, h_3...\} $ $|$ $nil$ \\
+      \textit{Expressions} & $e$ & $:$ $...\text{ }|\text{ }!e_1\text{ }|\textbf{ new}(T, e_1)$\\
+      \textit{Commands} & $C$ & $:$ $...$ $|$ $!e_1 := e_2$ \\
+      \textit{Values} & $vals$& $:$ $...\text{ }|\text{ }h \in \{h_1,h_2, h_3...\} $ \\
       \textit{Heap} & $\Delta$& $:$ $h \mapsto vals$\\
     \end{tabular}
   \end{center}
@@ -1861,7 +1876,8 @@ the new syntax in figure \ref{fig:ptr_syntax}.
 
 \paragraph{Types}
 We introduce a new type, $T$ \textit{ref} as a reference type that behaves like 
-a pointer in C/C++, like pointers, references are typed and its value is a heap address. 
+a pointer in C/C++, like pointers, references are typed and the value of a reference 
+is a heap address. 
 
 \paragraph{Expressions}
 The following expressions are introduced into the language, unlike C/C++ 
@@ -1870,25 +1886,18 @@ system one may only create a pointer through the use of \textbf{new} as
 one would in a language like Java.
 \begin{itemize}
   \item $!e_1$ to dereference the heap address held by expression $e_1$.
-  \item \textbf{new}($T, v$) to allocate and return a $T$ \textit{ref} with the 
-  value $v$.
+  \item \textbf{new}($T, e_1$) to allocate and return a $T$ \textit{ref} with the 
+  value obtained after evaluating $e_1$.
 \end{itemize}
-\par
-For simplicity, we have ommited the need for manual memory management, we 
-assumme that \textit{Automatic Garbage Collection} \cite{GC} 
-is present in the language. 
 
 \paragraph{Commands}
 We add a new command that dereference a heap address and modifies its underlying 
-value. The command $!h := e$ changes the value at heap address $h_1$ to the 
+value. The command $!e_1 := e_2$ changes the value at heap address $h_1$ to the 
 value after evaluating $e$.
 
 \paragraph{Values}
 We added two new values to the language, $h$ is simply a heap address in the set 
 $\{h_0, h_1, h_2...\}$ and $nil$ as an empty reference. 
-A $nil$ reference is treated as a standalone 
-value and not a dedicated heap address as it is the case in C/C++ where a 
-special address is used for NULL pointers. 
 
 \paragraph{Heap}
 Finally, we define a heap context $\Delta$ as a mapping from heap address to values.  
@@ -1897,11 +1906,8 @@ the notation, $\Delta(h)$ to get the value held at a particular heap address.
 
 \subsubsection{Typing Rules}
 We first define the typing judgement for the base types for references. 
-As it is the case with many languages, the $nil$ value is a reference type and a 
-heap address is a reference type. 
 
 \begin{center}
-   $\Gamma \vdash nil : T\textit{ ref}$ ($nil$ reference type) \\
    $\Gamma \vdash h : T\textit{ ref}$ (Heap address type)
 \end{center}
 
@@ -1916,9 +1922,9 @@ allocating a new heap address with type $T$ gets a reference of the same type.
     \begin{tabular} {c}
       \inference {\Gamma \vdash e_1 : T\textit{ ref}}{\Gamma \vdash !e_1 : T}[(dereferencing)]
       \text{ }
-      \inference {\Gamma \vdash v : T}{\Gamma \vdash \textbf{new}(T, v) : T\textit{ ref}}[(\textbf{new} ref)]
+      \inference {\Gamma \vdash e_1 : T}{\Gamma \vdash \textbf{new}(T, e_1) : T\textit{ ref}}[(\textbf{new} ref)]
       & \\
-      \inference {\Gamma \vdash e : T & \Gamma \vdash h : T\textit{ ref}} {\Gamma \vdash_{C}\text{ }!h := e : void}
+      \inference {\Gamma \vdash e_2 : T & \Gamma \vdash e_1 : T\textit{ ref}} {\Gamma \vdash_{C}\text{ }!e_1 := e_2 : void}
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Ref Type}
@@ -1927,24 +1933,39 @@ allocating a new heap address with type $T$ gets a reference of the same type.
 
 \subsubsection{Basic Operational Semantics}
 Lastly, we define the operational semantics for the new expressions in figure 
-\ref{fig:sos_pointers}. Note that in our semantics we ommited the reduction 
-rules to reduce an expression into a heap address value as the rules are 
-trivial. 
+\ref{fig:sos_pointers}.
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {h_1 \in \textbf{dom}(\Delta) & v = \Delta(h_1) & h_1 \neq nil}
+      \inference {
+      \langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
+      {\langle !e_1, \sigma, \tau, \Delta \rangle \Longrightarrow 
+      \langle !e_1', \sigma, \tau, \Delta \rangle} [(Deref expr)]
+      \text{ }
+      \inference {h_1 \in \textbf{dom}(\Delta) & v = \Delta(h_1)}
       {\langle !h_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle v, 
-      \sigma, \tau, \Delta \rangle} [(Pointer deref 1)]
+      \sigma, \tau, \Delta \rangle} [(Deref)]
       & \\
-      \inference {h_1 \in \textbf{dom}(\Delta) & h_1 \neq nil & \Delta' = \Delta[h_1 \mapsto v_1]}
-        {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle v_1, 
-        \sigma, \tau, \Delta' \rangle} [(Pointer deref 2)]
+      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
+        {\langle !e_1 := e_2, \sigma, \tau, \Delta \rangle \Longrightarrow \langle !e_1' := e_2, 
+        \sigma, \tau, \Delta' \rangle} [(P-Assign expr 1)]
+      & \\
+      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
+        {\langle !h_1 := e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle !h_1 := e_1', 
+        \sigma, \tau, \Delta' \rangle} [(P-Assign expr 2)]
+      & \\
+      \inference {h_1 \in \textbf{dom}(\Delta) & \Delta' = \Delta[h_1 \mapsto v_1]}
+        {\langle !h_1 := e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle void, 
+        \sigma, \tau, \Delta' \rangle} [(P-Assign)]
+      & \\
+      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
+        {\langle \textbf{new}(T, e_1), \sigma, \tau, \Delta \rangle \Longrightarrow \langle \textbf{new}(T, e_1), 
+        \sigma, \tau, \Delta' \rangle} [(P-Alloc expr)]
       & \\
       \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta + \{h \mapsto v\}}
         {\langle \textbf{new}(T, v), \sigma, \tau, \Delta \rangle \Longrightarrow \langle h, 
-        \sigma, \tau, \Delta' \rangle} [(Pointer allocation)]
+        \sigma, \tau, \Delta' \rangle} [(P-Alloc)]
     \end{tabular}
   \end{center}
   \caption{Operational Semantics for Pointers}
@@ -1954,40 +1975,36 @@ trivial.
 \par
 Pointers are allocated using the \textbf{new} expression which takes a type $T$ 
 and a value $v$, the evaluation rules allocated a new heap address $h$ that is 
-not currently present, assigns it the value $v$ and return the address. The 
-value can be retrieve and modify through dereferencing, shown in the first two 
-rules. A $nil$ reference is not allocated in the state $\Delta$ and cannot be 
-deference. 
+not currently present, assigns it the value $v$ and returns the address. The 
+value can be retrieved and modified through dereferencing, shown in the first two 
+rules. 
 
 \subsection{Ambiguity of Refinement Types and Pointers}
 The introduction of pointers provides the programmer with multiple new tools. 
 Features such as pass-by-reference and aliasing are now at their disposal. 
 However with the introduction of new features, the feature interaction problem 
-arises once again, the relation between pointers and refinement types is 
-unclear. Throughout the text we learnt that we can avoid ambiguous behaviour 
-between mutation and refinement by using immutability or closures. This appears 
+arises once again and the relation between pointers and refinement types is 
+unclear. Throughout the text we showed that we can avoid ambiguous behaviour 
+between mutation and refinement types using immutability or closures. This appears 
 not to be the case with pointers, to show that consider the code snippet in figure
 \ref{fig:amb_refinement_pointers}. 
 
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
-    \textbf{begin const }$y\text{ }:\text{ } int\textit{ ref} = \textbf{new}(int, 10);
-    $\textbf{begin var }$x\text{ }:\text{ } int\textit{ ref} = y;$\\
+    \textbf{begin const }$y\text{ }:\text{ } int\textit{ ref} = \textbf{new}(int, 10);$\\
     \tab\textbf{begin typedef }$BoundedIntY$ = $\{i : int\text{ }|\text{ }i <\text{ }!y\}$; \\ 
-    \tab\tab\textbf{begin var }$z\text{ }:\text{ }BoundedIntY = 6;!x := 5$\textbf { end} \\
-    \tab\textbf {end} \textbf {end} \\
+    \tab\tab\textbf{begin var }$z\text{ }:\text{ }BoundedIntY = 6;!y := 5$\textbf { end} \\
+    \tab\textbf {end} \\
     \textbf{end}
   \end{tabs}  
-  \caption{Mutation to Free Variables in Refinement Predicate}
+  \caption{Ambiguity of Pointers in Refinement Predicate}
   \label{fig:amb_refinement_pointers}
 \end{figure}
 
 \par
 In this scenario, we declare a constant $y$ as a pointer to an int, 
-initialised with the value 10. We then define another variable $x$ that acts as 
-its alias, i.e. both $x$ and $y$ are different variables but points to the same 
-address. The expression $!x := 5$ indirectly modified the definition of the type 
-$BoundedIntY$, making $z$ ill-typed. 
+initialised with the value 10. The expression $!y := 5$ indirectly modified 
+the definition of the type $BoundedIntY$, making $z$ ill-typed. 
 
 \par
 Our previously defined semantics proves to be underspecified and does not 
@@ -1996,7 +2013,12 @@ refinement predicate to be constant however this is not sufficient for pointers.
 A constant pointer variable simply restrict the address held by the pointer to be 
 changed, manipulating the underlying value is still very much possible. 
 Moreover, using closures also fails to prevent the ambiguity as one can easily 
-modify the heap address and have he changes reflect within the closure.
+modify the heap address and have he changes reflect within the closure. Our  
+semantics resemble Java's \textit{final} mechanics, whereby while the reference variable 
+cannot change, the underlying value can. For instance, in Java,  
+\verb|final A x = new A()| declares a ``constant'' \verb|x| of type \verb|A|, while 
+\verb|x = y| is forbidden, the value of \verb|x| can still be modified 
+using \verb|x.value = 10|.
 
 \par
 In order to address this case, our previously proposed semantics has to be 
@@ -2021,13 +2043,13 @@ and the other operates on heap addresses.
 
 \par
 In order for one to define an immutable pointer we added a new expression 
-\textbf{newconst}$(T, v)$ which allocates a constant value and return its 
+\textbf{newconst}$(T, e_1)$ which allocates a constant value and return its 
 pointer. 
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {l l l}      
-      \textit{Expressions} & $e$& $:$ $...\text{ }|\text{ \textbf{newconst}}(T, v)$ \\
+      \textit{Expressions} & $e$& $:$ $...\text{ }|\text{ \textbf{newconst}}(T, e_1)$ \\
     \end{tabular}
   \end{center}
   \caption{Heap Memory Allocation in Simple-$R$}
@@ -2037,8 +2059,8 @@ pointer.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\Gamma \vdash v : T} 
-        {\Gamma \vdash \textbf{newconst}(T, v): T \textit{ ref}}[(\textbf{newconst} type)] 
+      \inference {\Gamma \vdash e : T} 
+        {\Gamma \vdash \textbf{newconst}(T, e): T \textit{ ref}}[(\textbf{newconst} type)] 
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Pointer to Constants}
