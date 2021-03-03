@@ -2220,37 +2220,38 @@ consistency in refinement types. Finally, we incorporate these new requirements
 into our language, extending our previously defined semantics. 
 
 \section{Summary}
-In this chapter we constructed an imperative programming language with native 
-support for refinement types. We distinguished our system apart from the exisiting 
-work by basing the underlying calculus on a simple ``\textit{WHILE}'' language 
+In this chapter we constructed Simple-$R$, an imperative programming language with native 
+support for refinement types. We distinguished our 
+system apart from exisiting work by basing the underlying calculus 
+on a simple ``\textit{WHILE}'' language 
 rather than the $\lambda$-calculus, to the best of our knowledge this form of 
 specification has not been done previously. The syntax and semantics of our 
 language remsembles C/C++, enhancing the accessibility of our work.
 
 \par
-Throughout the chapter we demonstrated how type checking refinements type 
-statically is undecidable in our system, we drew parallels by comparing 
-mechanics of established languages such as downcasting in Java where the 
-validity cannot be checked at compile time. Adopting a similar strategy, we 
-presented a form of hybrid type checking that overcomes this limitation, the 
-type checker verifies as much as possible statically and defers more complex 
-verification to be done dynamically. 
+Throughout the chapter we demonstrated how type checking refinement types 
+statically proves to be undecidable in our system, we drew parallels by comparing 
+type checking mechanics of established languages such as downcasting in Java 
+where the validity of types cannot be checked at compile time. 
+Adopting a similar strategy, we presented a form of hybrid type checking 
+that overcomes this problem, our type checker verifies as much as possible 
+statically and defers more complex verification to be done dynamically. 
 
 \par
 However, we observed that naive runtime type checking has ambiguities 
 because of the presence of mutation. We identified these underspecifications and 
 proposed two ideas that concretely characterise the behaviour of refinement 
-types in the mutable environment. Our first approach is based on the 
-idea of immutable variables and forbidding mutation on variables that is associated 
-with the refinement predicate. The second approach utilises closures and makes 
-a copy of the state at the time of type declaration, type checking will 
-use the values in the copied state. 
+types in a mutable environment. Our first approach is based on the 
+idea of immutable variables and forbidding mutation on variables associated 
+with the refinement predicate. The second approach utilises the notion of closures, 
+a copy of the state is made at the time of type declaration and the copied 
+state is used for type checking. 
 
 \par
 Finally, we explored the idea of adding dynamically allocated memory into the 
 language and how it leads to more ambiguity. We discussed the difference between 
 immutable reference variable and an immutable object using practical examples in 
-Java and C/C++. Concluding the chapter, we address these ambiguities by 
+Java and C/C++. Concluding the chapter, we addressed these ambiguities by 
 formalising new semantics that completes the language.
 
 
