@@ -2085,21 +2085,26 @@ demonstrated in the program below.
 \end{center}
 
 \par
-The lack of referencing allows us to define semantics that absolutely forbin 
+The lack of referencing allows us to define semantics that completely forbid 
 modification on a heap location. We define the operational semantics for the 
-new expression in figure \ref{fig:sos_const_ptr} that restrict the ability to 
-modify the value of a constant heap address.
+new expression in figure \ref{fig:sos_const_ptr}, the rules simply restrict the 
+ability to modify the value of a constant heap address.
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
+      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
+        {\langle \textbf{newconst}(T, e_1), \sigma, \tau, \Delta \rangle 
+        \Longrightarrow \langle \textbf{newconst}(T, e_1), 
+        \sigma, \tau, \Delta' \rangle} [(PConst-Alloc expr)]
+      & \\
       \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta + \{h \mapsto v\}}
       {\langle \textbf{newconst}(T, v), \sigma, \tau, \Delta \rangle \Longrightarrow \langle h, 
-      \sigma, \tau, \Delta' \rangle} [(\textbf{newconst} 1)]
+      \sigma, \tau, \Delta' \rangle} [(PConst-Alloc)]
       & \\
       \inference {h_1 \in \textbf{dom}(\Delta) & \neg is\_nonrewritable(h_1) & \Delta' = \Delta[h_1 \mapsto v_1]}
       {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v_1, 
-      \sigma, \tau, \Delta' \rangle} [(Pointer assignment)]
+      \sigma, \tau, \Delta' \rangle} [(P-Assign)]
     \end{tabular}
   \end{center}
   \caption{Operational Semantics for Pointers to Constants}
@@ -2145,9 +2150,9 @@ The new specification is defined in figure \ref{fig:immu_pointer_typedef}.
 
 \par
 The new specification retains all constraints present and make a crucial 
-new addition. In addition to all variables being immutable, a new predicate 
-requires that all pointer variables in the 
-expression must to be pointing to a constant. This ensures that the value pointed 
+new addition. In addition to all variables being immutable, a new rule states 
+that all pointer variables in the expression must to be pointing to a constant. 
+This ensures that the value pointed 
 to by the pointer would not change throughout the type's existence. Furthermore, 
 we can be sure that any aliases to the heap 
 address will not be able to modify the memory address because of the rules 
@@ -2157,8 +2162,6 @@ specified in figure \ref{fig:sos_const_ptr}.
 The example program showed previously in figure \ref{fig:amb_refinement_pointers} 
 is now an invalid program. To make it valid we adopted the newly defined rules 
 and rewrote it in figure \ref{fig:valid_ptr_program}.
-
-
 
 With our newly defined rules the program in figure \ref{fig:amb_refinement_pointers} 
 becomes invalid, we can rewrite our program to be correct as shown in the example below. 
@@ -2177,9 +2180,9 @@ becomes invalid, we can rewrite our program to be correct as shown in the exampl
 
 
 \subsubsection{Refinement Type Closure and Pointers}
-Our second approach uses closures to handle refinement type, the approach 
-can easily be modified to work with pointers with a 
-similar strategy. If one declares a refinement type $T$ then in addition to 
+Recall that our second approach uses closures to handle refinement type, 
+this approach can easily be modified to work with pointers using a 
+similar strategy. If one declares a refinement type $T$, then in addition to 
 the context being copied, we require any pointer variables in the refinement 
 predicate to be constant. 
 
@@ -2208,30 +2211,48 @@ predicate to be constant.
 
 \par
 In this section we extended our language to include advanced features such 
-as pointers and aliasing. We observe how introducing new form of 
+as pointers and aliasing. We observed how introducing new form of 
 variables brings new types of mutation into the language and therefore 
-requires us to adapt new strategies in our language specification. We proposed a  
-new requirements that ensures pointers are pointing to immutable locations if used 
-in a refinement predicate. Finally, we incorporate these new requirements 
-into our language by extending previously defined semantics. 
+requires us to adapt new strategies in our specification. We presented  
+a new system that characterised the behaviour of pointers in the context of 
+refinement types. Our system forbids mutation on heap locations which ensures 
+consistency in refinement types. Finally, we incorporate these new requirements 
+into our language, extending our previously defined semantics. 
 
 \section{Summary}
-Throughout this chapter we described an imperative programming langauge 
-with refinement types support that is heavily based on C/C++. We showed how 
-statically verifying refinement types is hard to achieve because of the presence 
-of mutation and variables whose values are only available at runtime. We 
-overcome this by adopting a hybrid type checking approach that type checks as 
-much as possible statically but defers complicated checks to runtime. However, 
-we observed that runtime type checking has some ambiguities because of the 
-presence of mutation, we further specified our semantics by proposing two ideas 
-that handles mutation in refinement types. Our first approach is based on the 
-idea of immutable variable and restricting mutation on variables that is associated 
-with refinement types. The second approach utilises closures which makes a copy of 
-the state at the time of type declaration, type checking will 
-use the values in the copied state. Finally, we showed how adding 
-dynamically allocated memory will lead to our definition underspecified, we 
-conclude the chapter by addressing these new ambiguities with newly defined 
-semantics. 
+In this chapter we constructed an imperative programming language with native 
+support for refinement types. We distinguished our system apart from the exisiting 
+work by basing the underlying calculus on a simple ``\textit{WHILE}'' language 
+rather than the $\lambda$-calculus, to the best of our knowledge this form of 
+specification has not been done previously. The syntax and semantics of our 
+language remsembles C/C++, enhancing the accessibility of our work.
+
+\par
+Throughout the chapter we demonstrated how type checking refinements type 
+statically is undecidable in our system, we drew parallels by comparing 
+mechanics of established languages such as downcasting in Java where the 
+validity cannot be checked at compile time. Adopting a similar strategy, we 
+presented a form of hybrid type checking that overcomes this limitation, the 
+type checker verifies as much as possible statically and defers more complex 
+verification to be done dynamically. 
+
+\par
+However, we observed that naive runtime type checking has ambiguities 
+because of the presence of mutation. We identified these underspecifications and 
+proposed two ideas that concretely characterise the behaviour of refinement 
+types in the mutable environment. Our first approach is based on the 
+idea of immutable variables and forbidding mutation on variables that is associated 
+with the refinement predicate. The second approach utilises closures and makes 
+a copy of the state at the time of type declaration, type checking will 
+use the values in the copied state. 
+
+\par
+Finally, we explored the idea of adding dynamically allocated memory into the 
+language and how it leads to more ambiguity. We discussed the difference between 
+immutable reference variable and an immutable object using practical examples in 
+Java and C/C++. Concluding the chapter, we address these ambiguities by 
+formalising new semantics that completes the language.
+
 
 \chapter{Further Work}
 
