@@ -123,7 +123,7 @@ even a well-typed program still leaves room for various errors such as
 to the problem. Dependent types allows the programmer to create types whose 
 definition depends on a value. A type system that provides such refined 
 control over the values it can take unlocks possibility that are previously 
-unavailable such as domain-specific type checking at compile time.
+unavailable such as domain-specific type checking.
 
 \par
 A further restriction on dependent types can be found in \textit{Refinement 
@@ -135,168 +135,150 @@ expressiveness and ease of use.
 
 \section{Overview of Refinement Types}
 In this section we will discuss at a very high level the behaviour one would 
-expect from a dependently typed language, its benefits and use cases.
+expect from a refinement types and the benefits of using refinement types. 
 
-\subsection{Language Behaviour}
-The key behaviour we are interested in is regarding compile time type checking. 
-For instance, using the example above, if a type is defined as an \textit{EvenInt} 
-then if at any point in the code it becomes odd then it should be caught at 
-compile time. 
-
-\par
-Consider the psedocode below: 
-\begin{figure}[H]
+\begin{figure}[h] 
   \begin{lstlisting}[mathescape=true] 
+  type EvenInt = {v : int | 4 % 2 == 0}
+  
   function f(int x) {
-    if (x \% 2 == 0) {
-      ...
-    }
-    throw error ``x has to be even''
+    if (x % 2 != 0) 
+      throw error ``x has to be even''
+    ...
   }
   
-  function dependent_f(EvenInt i) {
+  function refined_f(EvenInt i) {
     ...
   }
   \end{lstlisting}
-  \caption{Dependenty Typed Language Behaviour}
+  \caption{Example of Refinement Typed Language}
+  \label{code:refine}
 \end{figure}
 
 \par
-The function \textit{f} above checks whether the argument $x$ is even, if it 
-isn't then it throws a runtime error. If dependent type is available, then if an 
-invalid argument is passed in it should signal an error at compile time, saving the 
-error handling code as shown in \textit{dependent\_f}. 
-
-\subsection{Benefits of Dependent Types}
-As we seen in the previous subsection, dependent types allows programmer to 
-define much richer and expressive types that can be checked at compile time. The 
-addition of dependent types allow for safer code as it is able to guarentee certain 
-properties. 
+Consider the psedocode below in figure \ref{code:refine}, the function 
+\textit{f} checks whether the argument $x$ is even, if it 
+is not then it throws a runtime error. Alternative, the function \textit{refined\_f} 
+achieves the same through the use of refinement types. \textit{EvenInt} is a 
+integer type whose value is guaranteed to be even. If one passes an odd integer 
+to the function it will be caught automatically either at compile time or 
+runtime. 
 
 \par
-Furthermore, using dependent types eliminates the need for many trivial error 
-handling code. Around 4\% of code in every program is dedicated to error 
-handling \cite{errorHandlingCode}, dependent types will be able to reduce the 
-numbers and allow the programmer more time to write the logical part of the 
-code, indirectly leading to more robust codebases.
-
-\par
-Consider a banking system where users are able to transfer and withdraw 
-money using a function, 
-in order to prevent overdraft one might be able to define a function that takes 
-a type \textit{Amount$<$T$>$}, a double type that is always 
-greater than 0 and less than \textit{T}, where \textit{T} is the current balance in the account. 
-This approach guarantees the amount is always valid without the need of writing 
-error handling code. This example demonstrated using an object-oriented style 
-language by Vasconcelos \cite{objOritentedDependentType}.
-
+Refinement types allows programmer to define much richer and expressive types 
+which can be type checked at run time if not compile time. The addition 
+of refinement types allow for safer code as it is able to guarentee certain 
+properties. Furthermore, using refinement types eliminates the need for many 
+trivial error handling code. Around 4\% of code in every program is 
+dedicated to error handling \cite{errorHandlingCode}, refinement types will be 
+able to reduce the numbers and allow the programmer more time to 
+focus on writing the logical part of the code, indirectly 
+leading to more robust codebases.
 
 \section{Motivation}
-\par
-As much as we have studied about type systems, dependent types remains 
-uncommon in the industry. While the theory of dependent types has been 
+As much as we have studied about type systems, dependent and refinement types 
+remains uncommon in the industry. While the theory of dependent types has been 
 established several decades ago, only a small number of languages has 
 integrate full dependent type support, most of them being functional languages. 
 Similarly, refinement types remains mostly a research problem, while several 
-programmers have attempted to bring refinement types to the mainstream, their 
+programmers have attempted to bring refinement types to the mainstream the  
 work remains niche. 
-
 
 \par
 The expressive nature of dependent types allow one to 
 define complex mathematical assertations and hence lends itself to 
 theorem proving systems. Mutliple functional languages such as \textit{Epigram} 
 \cite{epigram} and \textit{Agda} \cite{agda} has 
-built in support for dependent typin.  However they remain niche and more 
-mainstream languages like Java and C++ does not get the luxury. In chapter 2 of 
+built in support for dependent typing. However 
+mainstream languages such as Java and C++ does not get the luxury. In chapter 2 of 
 this dissertation we will be providing an in depth analysis of the current state 
 of dependent types in programming languages and answer why dependent types are 
 not more prominant in languages, in particular imperative languages.
 
 \par
-Multiple past research has studied and show the feasibility of an dependently typed 
-imperative language. These studies has expressed the semantics of 
-how an imperative languages would interact with dependent types and in some 
-cases created a new language from the ground up. While we find these work novel 
-and provided highly technical explanation to the field, they fail to caputure 
-how this could relate to mainsteam programming languages. Furhtermore, the 
-semantics provided in these studies are very complex with advanced language 
-features, we propose that a more simple and barebone definiton will allow easier 
-access to the literature and motivate more studies into dependenty types. 
-
+We note that one of the complexity of adopting dependent and refinement types 
+in an imperative programming languages is the presence of mutation. Imperative 
+languages relies on statements that changes the state of the program, these 
+changes has the potential making refinement types ambiguous. For instance, if 
+one defined a refinement type as $\{\upsilon : int\text{ }|\text{ }\upsilon < N\}$, 
+what is the behaviour if the value of $N$ changes?
 
 \par
-Dependent types appears to be one of the niche fields in programming language 
-theory and type theory research. I argue that this is the result of the 
-difficult barrier of entry. Research in dependent types presented are usually 
-highly complex and requires substantial prerequisite. Type systems presented in 
-these paper often assumes full knowledge of \textit{The Lambda Calculus} 
-\cite{lambdaCalculus} or uses the concept of \textit{Monads} \cite{monads}. 
-While these are established framework commonly used to express and reason about 
-computation, with the addition of normal types and dependent types, the 
-underlying logic becomes hard to follow. 
+Past research has studied and shown the feasibility of an dependently typed 
+imperative language, however these studies focused on expressing the semantics 
+of an imperative language and dependent types as a whole. They are often highly 
+technical and complex, requiring prerequisite knowledge in the literature. While 
+we find these work novel and made important advancedments in the field, 
+they fail to caputure how refinement types could relate to 
+mainsteam programming languages.
 
 \par
-Similarly, research in the area that branch away from the convention of building 
-a dependent type system on the lambda calculus often showed highly complex 
-language features such as object orientation and dynamic memory allocation. The 
-purpose of these research often are to demonstrate the feasibility of 
-incorporating dependenet types in complex languages rather than providing an 
-overview of the concept. 
+We argue that the the research in the area of dependent types and refinement 
+types can be made more accessible. Dependent Type systems presented in 
+existing papers often assumes full knowledge of \textit{The Lambda Calculus} 
+\cite{lambdaCalculus} and uses the concept of \textit{Monads} \cite{monads} 
+for state changes. The semantics of the $\lambda$-calculus is simple and naturally 
+relates to functional programming languages, however, when one tries to model 
+imperative programming by extending the calculus, we begin to lose the simple 
+nature. 
 
 \par
 Our project is motivated by the apparent lack of accesible literature on the 
-theory of dependent types. We aim to present a simple, restricted framework that 
-captures the essence of dependent types. The said framework will be presented as 
+theory of refinement types. We aim to present a simple, restricted framework that 
+captures the essence of refinement types. The said framework will be presented as 
 an extension to \textit{WHILE language} \cite{whileLanguage}. Created as a tool 
 to aid the study of programming language theory, we believe it strongly satisfy our 
-requirement of accessibility with its simple syntax and semantics. 
+requirement of accessibility with its simple syntax and semantics. Using the 
+framework, we will study the interactions between mutation and refinement types 
+and relates our findings to concepts in mainstream languages. We believe that 
+imperative languages proves to be the more popular paradigm in modern 
+programming and is more accessible to the majority. 
 
 \par
-At the end of the project we aim to achieve the following, i) Survey the state 
-of dependently typed languages and their differences, ii) Describe a dependently 
-typed language based on the WHILE language, iii) Explore the ambiguity of 
-dependent types in an imperative environments, iv) Demonstrate the use of 
-dependent types to build further language features, v) Discuss how our work 
-compliments the literature. 
+At the end of the project we aim to achieve the following, 
+\begin{enumerate}
+  \item Survey the state of dependent and refinement typed languages 
+  and their differences.
+  \item Describe a refinement typed imperative language based on the WHILE 
+  language.
+  \item  Explore the ambiguity of refinement types in an imperative environment 
+  with mutation.
+  \item Discuss how our work compliments the existing literature and possible 
+  future outlook.
+\end{enumerate}
 
 \par
 This dissertation serves as a document for our findings and is organised as 
-follows. This first chapter serves as an introduction to dependent types, 
-refinement types and the motivation behind our work.
+follows. This first chapter outlines our motivation for this project and our 
+contributions. 
 
 \par
-Chapter 2 if a survey on the current state of dependent types and refinement 
-types in existing programming languages. Different languages with varying 
-paradigm are explored 
-and summarised in order to better understand the extend of their support 
-for dependent types. Functional lanaguages and theorem provers are studied to 
-understand how dependent types behave in their natural environment. As 
-refinement types proves to be more niche and there is no production language 
-with refinement support, we studied past research that attempts to bring the 
-language mainstream. Finally, we extensively studied C++ as its templating 
+In chapter 2 we provide background on the areas, we first give the 
+formal definition of dependent types and how it differs from refinement types. 
+The remainder of the chapter is a survey on the current state of 
+dependent types and refinement types in existing programming languages. 
+Different languages with varying paradigms are explored 
+and summarised in order to have a better understanding of the extend of their 
+support for these advanced types. A range of different languages across different 
+paradigms are studied including Agda, Haskell, Idris, Scala, 
+TypeScript and more. Finally, we extensively studied C++ as its templating 
 engine bears strong resemblence to refinement types and we observe its limitation. 
-We conclude the chapter by proposing how our project will address these limitations. 
 
 \par
-In chapter 3 we will be introducing an imperative language with refinement type support. 
-Our language, named Simple-$R$ is a First-Order Programming Language which 
+In chapter 3 we introduce an imperative language with refinement type support. 
+Our language, named Simple-$R$, is a First-Order Programming Language which 
 highly resembles the C programming language. Our aim with the language is to 
-capture the core behaviour of refinement types and thus for the pursuit 
-of simplicity is kept at a minimal with 
-only the fundamental features. In this chapter, we will be 
-defining the syntax, typing rules and semantics 
+capture the core behaviour of refinement types, for the pursuit 
+of simplicity, the language is kept at a minimal with only the fundamental features. 
+In this chapter, we will be defining the syntax, typing rules and semantics 
 of a basic language with refinement types support which serves as a basis 
-which will be studied throughout the chapter. 
-We then present the semantics of Simple-$\Pi$, in addition 
-to the basic operational semantics, we will raise
+which will be studied throughout the chapter. We then raise 
 multiple scenarios that refinement types cause ambiguity in imperative programming. 
-We start by discussing the impact of mutability has on dependent types and 
-answer the problem by proposing different solutions to resolve the 
-ambiguity and observes how these approaches differs. 
-We follow up our findings by introducing pointers and how the approach used to 
-address mutability can be adapted to handle alias variables. Finally we conclude 
-the chapter by showing an example of building arrays with dependent types. 
+We discuss the impact of mutability has on refinement types and 
+answer these problems by proposing different solutions that resolves the 
+ambiguity and observes how these approaches differs. We draw parallels between 
+our mechanisms and similar mechanisms implemented in established languages such 
+as C++ and Java. 
 
 \par
 In chapter 4 we will discuss our work with regards to the 
@@ -317,7 +299,7 @@ and point out some limitations and unknowns.
 \section{Dependent Types and Refinement Types}
 In this section we will be providing the definitions of dependent types.
 
-\subsection{Basic Definition of Dependent Types}
+\subsection{Definition of Dependent Types}
 At a very high level dependent types are types that depends on the value of 
 another type. For example, we can define a type that captures only the even 
 integers using the definition 
@@ -1233,14 +1215,15 @@ commands.
 
 \par
 Figure \ref{fig:sos_commands} defines the operational semantics for the basic commands 
-in the language. The semantics for $\textbf{begin }D;C \textbf{end}$ and functions 
+in the language. The semantics for $\textbf{begin }D;C \textbf{ end}$ and functions 
 will be covered in the subsequent sections.
 
 \subsection{Scoping}
 Scoping has an important role in programming languages, variables can be defined 
 in scopes and are unavailable once outside. While there are many different 
 variables that does not follow this rule, such as static variables and global 
-variables. For simplicity, we will focus initially on local variables. 
+variables. The current design of Simple-$R$ supports only local variables which 
+heavily relies on scoping. 
 
 \par
 In order to help us formalise the notion of scopes we define a new notation, 
