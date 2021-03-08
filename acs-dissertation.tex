@@ -43,7 +43,7 @@
   backend=bibtex      % biber or bibtex
 %,style=authoryear    % Alphabeticalsch
  ,style=numeric-comp  % numerical-compressed
- ,sorting=none        % no sorting
+ ,sorting=anyt        % no sorting
  ,sortcites=true      % some other example options ...
  ,maxbibnames=99
  ,block=none
@@ -120,8 +120,8 @@ even a well-typed program still leaves room for various errors such as
 
 \par
 \textit{Dependent Types} \cite{depenTypeAtWork} looks to be a potential solution 
-to the problem. Dependent types allows the programmer to create types whose 
-definition depends on a value. A type system that provides such refined 
+to the problem, dependent types allow the programmer to create types whose 
+definition depends on values. A type system that provides such refined 
 control over the values it can take unlocks possibility that are previously 
 unavailable such as domain-specific type checking.
 
@@ -135,7 +135,7 @@ expressiveness and ease of use.
 
 \section{Overview of Refinement Types}
 In this section we will discuss at a very high level the behaviour one would 
-expect from a refinement types and the benefits of using refinement types. 
+expect from refinement types and the benefits of using refinement types. 
 
 \begin{figure}[h] 
   \begin{lstlisting}[mathescape=true] 
@@ -204,9 +204,9 @@ one defined a refinement type as $\{\upsilon : int\text{ }|\text{ }\upsilon < N\
 what is the behaviour if the value of $N$ changes?
 
 \par
-Past research has studied and shown the feasibility of an dependently typed 
+Past research has studied and shown the feasibility of a dependently typed 
 imperative language, however these studies focused on expressing the semantics 
-of an imperative language and dependent types as a whole. They are often highly 
+of an imperative language and dependent types are often highly 
 technical and complex, requiring prerequisite knowledge in the literature. While 
 we find these work novel and made important advancedments in the field, 
 they fail to caputure how refinement types could relate to 
@@ -227,8 +227,8 @@ Our project is motivated by the apparent lack of accesible literature on the
 theory of refinement types. We aim to present a simple, restricted framework that 
 captures the essence of refinement types. The said framework will be presented as 
 an extension to \textit{WHILE language} \cite{whileLanguage}. Created as a tool 
-to aid the study of programming language theory, we believe it strongly satisfy our 
-requirement of accessibility with its simple syntax and semantics. Using the 
+to aid the study of programming language theory, we believe it strongly satisfies 
+our requirement of accessibility with its simple syntax and semantics. Using the 
 framework, we will study the interactions between mutation and refinement types 
 and relates our findings to concepts in mainstream languages. We believe that 
 imperative languages proves to be the more popular paradigm in modern 
@@ -237,14 +237,14 @@ programming and is more accessible to the majority.
 \par
 At the end of the project we aim to achieve the following, 
 \begin{enumerate}
-  \item Survey the state of dependent and refinement typed languages 
-  and their differences.
+  \item Survey the state of dependent and refinement types in different programming 
+  languages and analyse their differences.
   \item Describe a refinement typed imperative language based on the WHILE 
   language.
-  \item  Explore the ambiguity of refinement types in an imperative environment 
-  with mutation.
+  \item  Explore the ambiguity of refinement types in an environment where 
+  mutation is possible and propose a solution to resolve the ambiguity.
   \item Discuss how our work compliments the existing literature and possible 
-  future outlook.
+  future extensions.
 \end{enumerate}
 
 \par
