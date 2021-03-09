@@ -119,7 +119,7 @@ even a well-typed program still leaves room for various errors such as
 \end{enumerate}
 
 \par
-\textit{Dependent Types} \cite{depenTypeAtWork} looks to be a potential solution 
+\textit{Dependent Types} \cite{depenTypeAtWork} appears to be a potential solution 
 to the problem, dependent types allow the programmer to create types whose 
 definition depends on values. A type system that provides such refined 
 control over the values it can take unlocks possibility that are previously 
@@ -127,7 +127,7 @@ unavailable such as domain-specific type checking.
 
 \par
 A further restriction on dependent types can be found in \textit{Refinement 
-Types} \cite{refinementTypes} where one is allowed to specify subtypes 
+Types} \cite{refinementTypes} where one is allowed to define specify subtypes 
 of existing types. A refinement types is constrained by a decidable predicte, 
 bringing a better ease of programming. While dependent types are significantly 
 more powerful than refinement types, the latter provides a good balance between 
@@ -151,13 +151,14 @@ expect from refinement types and the benefits of using refinement types.
     ...
   }
   \end{lstlisting}
-  \caption{Example of Refinement Typed Language}
+  \caption{Example of Refinement Types in Programming}
   \label{code:refine}
 \end{figure}
 
 \par
-Consider the psedocode below in figure \ref{code:refine}, the function 
-\textit{f} checks whether the argument $x$ is even, if it 
+Consider the pseudocode in figure \ref{code:refine}, assume that the function 
+\textit{f} is an arbitrary function that requires the argument $x$ to be even.
+The implementation first checks if the value provided is indeed even, if it 
 is not then it throws a runtime error. Alternative, the function \textit{refined\_f} 
 achieves the same through the use of refinement types. \textit{EvenInt} is a 
 integer type whose value is guaranteed to be even. If one passes an odd integer 
@@ -305,9 +306,6 @@ another type. For example, we can define a type that captures only the even
 integers using the definition 
 \verb+type EvenInt := { i : Int | i % 2 = 0}+. In this case we 
 can say that the type EvenInt \textit{EvenInt} depends on the type \textit{int}.
-Another commonly used example to describe dependent types would be a type like 
-\verb+type FixVec<T, N> := { v : Vec<T> | len(v) = N}+, this type definition defines 
-a vector or array of elements with type $T$ that always contains $N$ elements.
 
 \subsection{Dependent $\Pi$ Types}
 We can capture the definition mathematically using the notion of \textit{dependent 
@@ -324,10 +322,9 @@ mathematically using the $\Pi$ notation as
 
 In this definition, $F(x)$ is the type family for the type $B$ that depends on $A$.
 However $F$ could be a constant function, so we can also express the definition 
-as $\Pi x:A.B$, in this case $B$ does not depend 
-on the value $x$. Using the \textit{EvenInt} example from earlier, 
-it can be defined as 
-$\Pi x:Int.\text{ }\{ i:Int\text{ }|\text{ }i\text{ }\%\text{ }2\text{ }= 0\}$.
+as $\Pi x:A.B$ where in this case $B$ does not depend 
+on the value $x$. One can define an integer type that is bounded by a certain 
+value $x$ as $\Pi x:Int.\text{ }\{ i:Int\text{ }|\text{ }i < x\}$.
 
 \par
 Interestingly, the dependent product type correspond to the 
@@ -369,14 +366,17 @@ the construction a programming language and does not provide any additional
 value. The dependent product type is largely adequate for our goal.
 
 \section{Refinement Types}
-Refinement Types is a type system where a certain base type is refined by a 
-predicate. A refinement type $A$ is written in the form 
-$\{\upsilon : B\text{ }|\text{ }P(\upsilon)\}$. $\upsilon$ is a special variable 
-not in the program, $B$ is a base type and $P(\upsilon)$ is the 
-\textit{refinement predicate}, a boolean expression 
-involving $\upsilon$ and any free variables in the program. Formally, a value 
-$i$ is well typed with regards to a refinement type if $P(i)$ evaluates to 
-\textit{true}.
+\textit{Refinement Types}, sometimes referred to as \textit{Subset Types} 
+\cite{subsetTypes} or \textit{Liquid Types} \cite{liquidTypes} 
+is a type system where a certain base type is refined by a 
+\textit{decidable} predicate, a refinement type $A$ has the form 
+$\{\upsilon : B\text{ }|\text{ }P(\upsilon)\}$. The \textit{value variable} 
+$\upsilon$ is a special variable not in the program and 
+represents the values that $A$ can take. The type $B$ is the 
+base type and $P(\upsilon)$ is the \textit{refinement predicate}, 
+a boolean expression involving $\upsilon$ and any free variables in the program. 
+Formally, a value $x$ is well typed with regards to a refinement type 
+if $P(x)$ evaluates to \textit{true}.
 
 \section{Refinement Types vs Dependent Types}
 
@@ -390,27 +390,39 @@ specifying $A$ is a subtype of $B$, this is not true in a dependent type
 language.
 
 \par
-The decidability of refinement types allow one high level of automation and 
-provide a simpler understanding. While in many cases dependent types prove to be 
+An example of a type possible with dependent types but not possible with 
+refinement types is the classic dependent types of vector of length N. One can 
+define a type \verb|type FixVec :=| $\Pi$\verb+n : T.{ v : Vec<T> | len(v) = n}+ 
+that given and integer $n$ one gets a type that is a vector of length $n$. This 
+is not possible in a refinement type system as the base type $n : Int$ is not 
+the same as the refined type $Vec<T>$.
+
+\par
+While in many cases dependent types prove to be 
 more powerful, refinement types for all intent and purposes does the job in 
 providing the improved expressivity for general programming. For this reason, we 
 will be basing our project on refinement types. 
 
-\section{Functional Languages}
+\par
+The decidability of refinement types allows one to have a high level of automation and 
+provide a simpler understanding. In different refinement types systems, one 
+restrict the refinement predicate to be a SMT decideable, this allows many 
+properties to be checkable at compile time through the use of theorem provers. 
+However, this is only possible in cases where values are known at compile time, 
+in many this is limited to functional languages where mutation is not possible. 
 
+\section{Functional Languages}
 In this section we will be examining three functional languages with 
 dependent typing. Functional languages 
-uses the \textit{functional programming} \cite{overviewFP} paradigm which is a programming 
-paradigm that constructs program using a series of function applications. In 
-this paradigm, functions return values as oppose to altering the state of the 
-program. In this programming paradigm, the language focuses on describing 
-\textit{what} the program will accomplish.
-
-\par
-
-Many functional languages has the notion of purity, i) A function will always 
+uses the \textit{functional programming} \cite{overviewFP} paradigm which 
+is a programming paradigm that constructs program using a series of function 
+applications. Many functional languages has the notion of purity, i) A function will always 
 return the same value when given the same arguments. ii) The evaluation of a 
 function has no side effects (changes to the state of the program).
+ In this paradigm, functions return values as oppose to 
+altering the state of the program. The functional programming paradigm 
+focuses on describing \textit{what} the program will accomplish rather than 
+\textit{how} it accomplish it. 
 
 \subsection{Agda}
 
@@ -452,7 +464,7 @@ awareness and competent users who can program dependent types contribute to Agda
 being a niche language in the programming world and is 
 predominantly used for theorem proving.
 
-\subsection{Haskell}
+\subsection{Haskell and LiquidHaskell}
 \textit{Haskell} \cite{haskell} is a purely functional programming language first appeared in 1990. In 
 contrast to Agda, Haskell is often considered a more general purpose programming 
 language. Haskell is among the most popular programming languages and argubly 
@@ -465,15 +477,8 @@ extensions has been developed to simulate the experience.
 Generalised Algebraic Data Types (GADTs) are a generalization of the 
 algebraic data types, it allows the programmer to 
 explicitly write down the types of the constructors \cite{haskellGADT}. 
-\begin{figure}[H]
-  \begin{lstlisting}
-    data Expr = I Int        
-          | Add Expr Expr 
-          | Mul Expr Expr 
-  \end{lstlisting}
-  \caption{A GADT defintion for arithmetic operations in Haskell}
-\end{figure}
 
+\par
 Using the power of GADT one could define dependent types as so
 
 \begin{figure}[H]
@@ -496,8 +501,28 @@ Haskell does not qualify as a fully dependent
 language due to the lack of certain features such as dependent functions. There 
 have been proposals to add full dependent type support to Haskell however a lot 
 of work remains to be done \cite{dependentHaskell, aRoleForDependentHaskell}. 
-Furthermore, while Haskell is significantly more well known compared to Agda, it 
-still lack the popularity of languages like Java and Python.
+
+\subsubsection{LiquidHaskell}
+\textit{LiquidHaskell} is a static type-checker that allows programmers to specify and 
+check program correctness by applying refinement types theory. The programmer 
+annotates refinement types in the form of Haskell comments 
+\verb|{-@ annotation @-}|, the properties must be SMT decideable and is check 
+using a variety of theorem provers. 
+
+\par
+The verification of LiquidHaskell happens in three phases, phase one is the 
+normal compilation using the Haskell compiler. In phase two LiquidHaskell 
+generates the set of types constraints provided by the annotations, these are 
+checked using a SMT solver in phase three. At the end of the verification, 
+LiquidHaskell outputs \verb``SAFE'' if the program is well-typed. Otherwise, 
+type erros are reported with along with the line it occurs. 
+
+\par
+Static refinement type checking is made possible in Haskell because of the lack 
+of assignment statements. Once a variable $x$ is declared in a scope, the value 
+cannot be changed. This allows SMT solvers to know precisely the value of $x$ 
+and prove the refinement predicate statically. While I/O is possible in 
+Haskell, their properties cannot be verified using LiquidHaskell.
 
 \subsection{Idris}
 \textit{Idris} \cite{idris} is a dependently typed functional language first 
@@ -921,7 +946,28 @@ the context. This context will be used to type check the program using the
 typing judgement in the next section.
 
 \section{Typing Rules}
-This section defines the typing rules for the Simple-$R$ language.
+This section defines the typing rules for the Simple-$R$ language. 
+Throughout the text we will be extending the syntax defined in the 
+previous chapter in order to accomodate more features. 
+We will use the following metavariables and notations throughout our 
+definitions.
+
+\renewcommand\labelitemii{$\blacksquare$}
+\begin{itemize}
+  \item The metavarible $op$ as one of a range of operators. 
+  \item The metavariable $v$ to range over all values.
+  \item The uppercase letter $T$ to range over all types.
+  \item Greek letters ($\alpha$, $\pi$, $\upsilon$) to define local variables in 
+  the formuli. 
+  \item The following notations to operate on states. 
+    \begin{itemize}
+      \item $\sigma + \{x \mapsto v\}$ adds $\{x \mapsto v\}$ to $\sigma$ provided initially $x \notin\textbf{dom}(\sigma)$. 
+      \item $\sigma[x \mapsto v]$ or $\sigma \uplus \{x \mapsto v\}$ updates $\sigma$ such that now $\sigma(x) = v$.
+      \item $\sigma \setminus \{x\}$ to remove $x$ from $sigma$, provided that $x \in \textbf{dom}(\sigma)$.
+    \end{itemize}
+  \item $\langle e, \sigma \rangle \Longrightarrow \langle e', \sigma \rangle$ as the transition relation for expression.
+  \item $\langle C, \sigma \rangle \longrightarrow \langle C', \sigma' \rangle$ and $\langle C, \sigma \rangle \longrightarrow \sigma'$ as the transition relation for commands.
+\end{itemize}
 
 \par
 We begin by defining the typing judgements. The typing judgements used in 
@@ -1122,29 +1168,6 @@ In this section we will define the \textit{Operational Semantics}
 \cite{operationalSemantics} for the Simple-$R$ language 
 using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rules.
 
-\par
-Throughout the text we will be extending the syntax defined in the 
-previous chapter in order to accomodate more features. 
-We will use the following metavariables and notations throughout our 
-definitions.
-
-\renewcommand\labelitemii{$\blacksquare$}
-\begin{itemize}
-  \item The metavarible $op$ as one of a range of operators. 
-  \item The metavariable $v$ to range over all values.
-  \item The uppercase letters $A,B,C,T$ to range over all types.
-  \item Greek letters ($\alpha$, $\pi$, $\upsilon$) to define local variables in 
-  the formuli. 
-  \item The following notations to operate on states. 
-    \begin{itemize}
-      \item $\sigma + \{x \mapsto v\}$ adds $\{x \mapsto v\}$ to $\sigma$ provided initially $x \notin\textbf{dom}(\sigma)$. 
-      \item $\sigma[x \mapsto v]$ or $\sigma \uplus \{x \mapsto v\}$ updates $\sigma$ such that now $\sigma(x) = v$.
-      \item $\sigma \setminus \{x\}$ to remove $x$ from $sigma$, provided that $x \in \textbf{dom}(\sigma)$.
-    \end{itemize}
-  \item $\langle e, \sigma \rangle \Longrightarrow \langle e', \sigma \rangle$ as the transition relation for expression.
-  \item $\langle C, \sigma \rangle \longrightarrow \langle C', \sigma' \rangle$ and $\langle C, \sigma \rangle \longrightarrow \sigma'$ as the transition relation for commands.
-\end{itemize}
-
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
@@ -1174,13 +1197,7 @@ definitions.
   \label{fig:sos_expr}
 \end{figure}
 
-\par
-Figure \ref{fig:sos_expr} defines the reduction rules for expression, importantly, expressions 
-are not able to modify the state of the program. If one defines a singular value 
-it performs no meaningful action. We next define the evaluation rules for 
-commands. 
-
-\begin{figure}[H]
+\begin{figure}[h]
   \begin{center}
     \begin{tabular} {c}
       $\langle \text{\textbf{skip}}, \sigma \rangle \longrightarrow \sigma$ (\textbf{skip})
@@ -1214,7 +1231,10 @@ commands.
 \end{figure}
 
 \par
-Figure \ref{fig:sos_commands} defines the operational semantics for the basic commands 
+Figure \ref{fig:sos_expr} defines the reduction rules for expression, importantly, expressions 
+are not able to modify the state of the program. If one defines a singular value 
+it performs no meaningful action. Figure \ref{fig:sos_commands} defines the 
+operational semantics for the basic commands 
 in the language. The semantics for $\textbf{begin }D;C \textbf{ end}$ and functions 
 will be covered in the subsequent sections.
 
