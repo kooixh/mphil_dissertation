@@ -517,9 +517,17 @@ checked using a SMT solver in phase three. At the end of the verification,
 LiquidHaskell outputs \verb``SAFE'' if the program is well-typed. Otherwise, 
 type erros are reported with along with the line it occurs. 
 
+\begin{figure}[H] 
+  \begin{center}
+    \includegraphics[scale=0.5]{assets/lh_demo_sm.PNG}
+  \end{center}
+  \caption{LiquidHaskell Demo using EvenInt}
+  \label{fig:lh_demo}
+\end{figure}
+
 \par
 Static refinement type checking is made possible in Haskell because of the lack 
-of assignment statements. Once a variable $x$ is declared in a scope, the value 
+of assignment statements. Once a variable $x$ is declared in a scope, its value 
 cannot be changed. This allows SMT solvers to know precisely the value of $x$ 
 and prove the refinement predicate statically. While I/O is possible in 
 Haskell, their properties cannot be verified using LiquidHaskell.
