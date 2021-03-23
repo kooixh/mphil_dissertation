@@ -1686,7 +1686,7 @@ without using the \textbf{typedef} command.
       & \\
       \inference {
       x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) \\
-      \forall \alpha \in \textit{free\_vars}(e).text{ }is\_immutable(\alpha)
+      \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_immutable(\alpha)
       \\ \langle C_1, \sigma + \{x \mapsto v_1\} , \tau
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
       {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v_1;C_1 \textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
@@ -1792,7 +1792,7 @@ $\tau$ and attach this to the type.
   \begin{center}
     \begin{tabular} {c}
       \inference {\sigma_1 = \sigma & \tau_1 = \tau
-      \\ \langle C_1, \sigma, \tau + \{y \mapsto (\{\upsilon : A\text{ }|\text{ }e\}\}, \sigma_1, \tau_1)
+      \\ \langle C_1, \sigma, \tau + \{y \mapsto (\{\upsilon : T\text{ }|\text{ }e\}\}, \sigma_1, \tau_1)
       \rangle \longrightarrow^{*} \langle \sigma', \tau\rangle}
       {\langle\textbf{begin typedef } y = \{\upsilon : T\text{ }|\text{ }e\};C_1;e_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow \langle \sigma', \tau \rangle} 
@@ -2220,22 +2220,13 @@ named Simple-$R^{*}_{C}$
 
 \begin{figure}[H]
   \begin{center}
-    \begin{tabular} {c}
-      \inference {
-      \langle C_1, \sigma, \tau + \{y \mapsto \{\upsilon : A\text{ }|\text{ }e\}\}, \mathcal{R}'
-      \rangle \longrightarrow^{*} \langle \sigma', \tau, \mathcal{R} \rangle
-      \\ \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_ref(\alpha) \Rightarrow is\_immutable\_heap(\sigma(\alpha))      
-      \\ \sigma_1 = \sigma & \tau_1 = \tau & \mathcal{R}' = \mathcal{R} + \{\{\upsilon : T\text{ }|\text{ }e\} \mapsto (\sigma_1, \tau_1)\}}
+    \begin{tabular} {c}      
+      \inference {\sigma_1 = \sigma & \tau_1 = \tau
+      \\ \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_ref(\alpha) \Rightarrow is\_immutable\_heap(\sigma(\alpha))    
+      \\ \langle C_1, \sigma, \tau + \{y \mapsto (\{\upsilon : T\text{ }|\text{ }e\}\}, \sigma_1, \tau_1)
+      \rangle \longrightarrow^{*} \langle \sigma', \tau\rangle}
       {\langle\textbf{begin typedef } y = \{\upsilon : T\text{ }|\text{ }e\};C_1;e_1\textbf{ end}, 
-      \sigma, \tau, \mathcal{R} \rangle \longrightarrow \langle \sigma', \tau, \mathcal{R} \rangle} 
-      & \\
-      \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) 
-      & \langle C_1, \sigma', \tau, \mathcal{R} \rangle \longrightarrow^{*} \langle 
-      \sigma'', \tau, \mathcal{R} \rangle
-      \\ \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_ref(\alpha) \Rightarrow is\_immutable\_heap(\sigma(\alpha))
-      \\ \sigma_1 = \sigma & \tau_1 = \tau & \mathcal{R}' = \mathcal{R} + \{\{\upsilon : T\text{ }|\text{ }e\} \mapsto (\sigma_1, \tau_1)\}} 
-      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v_0; C_1 \textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
-      \longrightarrow \langle \sigma'' \setminus \{x\}, \tau, \mathcal{R} \rangle}
+      \sigma, \tau \rangle \longrightarrow \langle \sigma', \tau \rangle} 
     \end{tabular}
   \end{center}
   \caption{Evaluation of Refinement Type with Closures}
@@ -2247,9 +2238,10 @@ as pointers and aliasing. We observed how introducing new form of
 variables brings new types of mutation into the language and therefore 
 requires us to adapt new strategies in our specification. We presented  
 a new system that characterised the behaviour of pointers in the context of 
-refinement types. Our system forbids mutation on heap locations which ensures 
-consistency in refinement types. Finally, we incorporate these new requirements 
-into our language, extending our previously defined semantics. 
+refinement types. Our system forbids mutation on heap locations used in types 
+to ensure consistency in refinement types. Finally, we incorporate these new requirements 
+into our language by creating two new variants, Simple-$R^{*}_{I}$ 
+and Simple-$R^{*}_{C}$, extending our previously defined semantics. 
 
 \section{Summary}
 In this chapter we constructed Simple-$R$, an imperative programming language with native 
