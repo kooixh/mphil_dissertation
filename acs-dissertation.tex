@@ -1439,10 +1439,11 @@ one can make to address them.
 Programming languages often have a wide range of features, often the team behind 
 the language have to put extensive thought into the design decisions. As there 
 are often multiple way to handle a certain feature, rarely is there a definite 
-answer to which is the most optimal.
+answer to which is the most optimal, often they are a matter of human judgement 
+or aesthetics. 
 
 \par
-This seemingly undecideable problem is known as \textit{feature interactions} 
+This problem is known as \textit{feature interactions} 
 \cite{featInteract}, it describes the problem in some situations multiple 
 features would modify the behaviours of each others. The same applies to 
 refinement types, which can be seen as a feature. For instance, the inclusion 
@@ -1551,7 +1552,7 @@ All previous operational semantics should be updated consistently.
       x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) & \tau' = \tau + \{x \mapsto \{\upsilon : T\text{ }|\text{ }e\}\}}
       {\langle \textbf{begin typedef }x = \{\upsilon : T\text{ }|\text{ }e\};C_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow 
-        \langle v, \sigma', \tau \rangle}[(\textbf{typedef})] \text{ }    
+        \langle \sigma', \tau \rangle}
     \end{tabular}
   \end{center}
 \end{figure}
@@ -1578,7 +1579,7 @@ of the program, all variables declared are final.
 \par
 Using this approach does definitely resolves the uncertainty the usability of 
 the language is poor. Imperative programming relies on state changes, forbidding 
-that go against the paradigm. However, if we strategically enforce immutability 
+that goes against the paradigm. However, if we strategically enforce immutability 
 we can resolve the ambiguity while preserving a flexible imperative style 
 language. In the next few sections we will discuss two approaches that 
 improve the specification of our type checker through restricting changes to 
@@ -1689,8 +1690,8 @@ without using the \textbf{typedef} command.
       \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_immutable(\alpha)
       \\ \langle C_1, \sigma + \{x \mapsto v_1\} , \tau
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
-      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v_1;C_1 \textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
-      \longrightarrow \langle \sigma'' \setminus \{x\}, \tau \rangle}
+      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v_1;C_1 \textbf{ end}, \sigma, \tau \rangle 
+      \longrightarrow \langle \sigma' \setminus \{x\}, \tau \rangle}
     \end{tabular}
   \end{center}
 \end{figure}
@@ -1821,7 +1822,7 @@ and evaluates appropriate, the new rule is defined in figure.
       {\Gamma,\sigma,\tau \vdash_{R} e_1 : x }
     \end{tabular}
   \end{center}
-  \caption{Type Checking a Refinement Type in $Simple-R_{C}$}
+  \caption{Type Checking a Refinement Type in Simple-$R_{C}$}
 \end{figure}
 
 \par
