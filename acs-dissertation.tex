@@ -836,11 +836,11 @@ types. In this chapter we will describe the mechanics of the language in details
   \begin{center}
     \begin{tabular}{l l l}
       \textit{Types} & $T$ & $:\text{ }int\text{ }|\text{ }bool\text{ }|
-      \text{ }\{x: T\text{ }|\text{ }e\}\text{ }|\text{ }void$\\
+      \text{ }\{x: T\text{ }|\text{ }e\}\text{ }|\text{ }Cmd$\\
       \textit{Functions Type} &  & $:\text{ }T_1, T_2,T_3...T_n\longrightarrow T_0$\\
       \textit{Functions Definition} & $f$ & $:$ $(x_0,x_1,...x_n) \longrightarrow C;e$\\
       \textit{Operators} & $ops$ & $:$ $+$ $|$ $-$ $|$ $\wedge$ $|$ $\vee$ $|$ $<$ $|$ $>$ \\
-      \textit{Expressions} & $e$ & $:$ $vals$ $|$ $\textbf{void}$ $|$ $x$ $|$ $e_1$ $ops$ $e_2$ 
+      \textit{Expressions} & $e$ & $:$ $vals$ $|$ $x$ $|$ $e_1$ $ops$ $e_2$ 
       $|$ $f(e_1...e_n)$ \\
       \textit{Commands} & $C$ & $:$ $C_1;C_2$ $|$ \textbf{skip} $|$ $x\text{ }:= e_1$ 
       $|$ \textbf{while} $e_1$ \textbf{do} $C_1$ $|$ \\ 
@@ -875,8 +875,7 @@ types, the language is kept at a minimum with only the necessary construct.
   \item The basic boolean type \textit{bool}
   \item The refinement type, written as $\{x: A\text{ }|\text{ }e\}$. This defines 
   a type that is a refinement of type $A$ that satisfies a boolean expression $e$.
-  \item The \textit{void} type to represent empty or null. Commands are modelled 
-  as having the $void$ type.
+  \item The \textit{Cmd} type to represent a command.
 \end{itemize}
 
 \paragraph{Functions}
@@ -888,10 +887,11 @@ types. This distinction ensures that functions cannot be passed to
 other functions, nor can it return a function as a result. One can compare 
 functions in Simple-$R$ to functions in C or Java. The function body is a 
 command however it must end in an expression as the return value. Note that the 
-return keyword is ommited. Functions return can be difficult to represent, to achieve 
-a simply model for functions, we came to the decision to disallow return in the 
-middle of the function, values can only be returned at the very end of the 
-function.
+return keyword is ommited. Functions return can be difficult to represent, in many 
+languages functions can be terminated in certain branches using the 
+return keyword. In order to achieve a simply model for functions, we came to 
+the decision to disallow return in the middle of the function, values can 
+only be returned at the very end of the function.
 
 \paragraph{Operators}
 The language supports the following built in operators.
@@ -914,8 +914,6 @@ The language supports the following built in operators.
   \item The function call $f(e_1..e_n)$ invokes function $f$ with arguments 
   $e_1..e_n$ and return the result. Functions are classified as expression as 
   one can utilise the computed result in other expressions. 
-  \item $\textbf{void}$ is used as the return value for a function that returns 
-  a $void$ type.
 \end{itemize}
 
 \paragraph{Commands} Commands are statements that can be executed to perform an 
@@ -940,7 +938,7 @@ initialise it the resulting value of expression $e$.
 
 \paragraph{Variables and Values} In Simple-$R$, all variables are allocated 
 locally, we use $x$ to denote a variable. Variables can take values as suggested by the types, all the integer 
-literals $\mathbb{Z}$, booleans $\mathbb{B}$ and $nil$ which is $void$ type. 
+literals $\mathbb{Z}$, booleans $\mathbb{B}$.
 
 \paragraph{Variable Values Context} Variables are mapped to values in the program 
 context $\sigma$. Each variable is allowed to only appear once in 
@@ -982,7 +980,7 @@ We begin by defining the typing judgements. The typing judgements used in
 Simple-$R$ takes the form of the standard notation. 
 \begin{center}
   $\Gamma \vdash e : T$\\
-  $\Gamma \vdash_{C} C : void$\\
+  $\Gamma \vdash_{C} C : Cmd$\\
   $\Gamma \vdash_{D} D \dashv \Gamma'$\\
 \end{center}
 This first and second judgement represents that expression $e$ 
@@ -998,9 +996,8 @@ values \textit{int}, \textit{bool}, $nil$ and variables.
     \begin{tabular} {c}
       $\forall n \in \mathbb{Z}$, $\Gamma \vdash n : int$ & 
       $\forall b \in \mathbb{B}$, $\Gamma \vdash b : bool$ & 
-      $\Gamma \vdash_{C} \textbf{skip} : void$ & 
-      $x : T, \Gamma \vdash x : T$  & 
-      $\Gamma \vdash \textbf{void} : void$
+      $\Gamma \vdash_{C} \textbf{skip} : Cmd$ & 
+      $x : T, \Gamma \vdash x : T$ 
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Base Values}
@@ -1028,20 +1025,20 @@ type checker.
         {\Gamma \vdash e_1 \wedge e_2 : bool}[(\textbf{op} $\wedge$)] \text{ }
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool} 
         {\Gamma \vdash e_1 \vee e_2 : bool}[(\textbf{op} $\vee$)] & \\
-      \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash C_1: void & \Gamma \vdash C_2: void}
+      \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash C_1: Cmd & \Gamma \vdash C_2: Cmd}
         {\Gamma \vdash_{C} \text{\textbf{if }} e_1 \text{\textbf{ then }} 
-        C_1 \text{\textbf{ else }} C_2: void}[(\textbf{if else})]
-      \inference {\Gamma \vdash e_1: bool & \Gamma \vdash C_1: void}
-        {\Gamma \vdash_{C} \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1 : void} [(\textbf{while do})] & \\
+        C_1 \text{\textbf{ else }} C_2: Cmd}[(\textbf{if else})]
+      \inference {\Gamma \vdash e_1: bool & \Gamma \vdash C_1: Cmd}
+        {\Gamma \vdash_{C} \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1 : Cmd} [(\textbf{while do})] & \\
       \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
-        {\Gamma \vdash_{C} x := e_1 : void} [($:=$)] \text{ }
-      \inference {\Gamma \vdash C_1: void & \Gamma \vdash C_2: void} 
+        {\Gamma \vdash_{C} x := e_1 : Cmd} [($:=$)] \text{ }
+      \inference {\Gamma \vdash C_1: Cmd & \Gamma \vdash C_2: Cmd} 
         {\Gamma \vdash_{C} C_1;C_2 : T_2} [(concatenation $;$ $C$)] \text{ }
       & \\
       \inference {\Gamma \vdash e_1: T_1} 
-        {\Gamma \vdash_{D} \textbf{var } x : T_1 = e_1 \dashv \Gamma'} [($vars$ Declaration)]
+        {\Gamma \vdash_{D} \textbf{var } x : T_1 = e_1 \dashv \Gamma + \{x \mapsto T_1\}} [($vars$ Declaration)]
       & \\
-      \inference {\Gamma \vdash D_1 \dashv \Gamma' & \Gamma' \vdash_{C} C_1 : void} 
+      \inference {\Gamma \vdash D_1 \dashv \Gamma' & \Gamma' \vdash_{C} C_1 : Cmd} 
         {\Gamma \vdash_{C} \textbf{begin }D_1;C_1\textbf{ end}} [(Begin scope)]     
     \end{tabular}
   \end{center}
@@ -1083,7 +1080,7 @@ We begin by defining the formation rule for a refinement type.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\Gamma \vdash \upsilon : T & \Gamma \vdash e : bool}
+      \inference {\Gamma \vdash \upsilon : T & \Gamma, \upsilon : T \vdash e : bool}
         {\Gamma \vdash \{\upsilon : T\text{ }|\text{ }e\}: Type}[(Refinment Type formation)]
     \end{tabular}
   \end{center}
@@ -1098,24 +1095,30 @@ mutation in our language it turns out to be difficult. The refinement predicate
 may contains variables whose value is only available at runtime or could have 
 changed since declaration. To mitigate this, we adopted a type checking appraoch 
 that validates as much as possible statically and defers complicated type 
-checking until runtime. 
+checking until runtime. In this section we will focus on static refinement type 
+checking, we will discuss runtime type checking later in the text.
 
 \par
-During compile type, the type checker validates that if one is expecting a 
-refinement type with base type $T$ then it is provided an expression $e$ of type 
-$T$, note that the expression might not be valid refinement type, the refinement 
-predicate might evaluates to false. However, this check will be checked 
-dynamically at runtime. We will discuss runtime type checking later in the text. 
+Statically, we would not be able to verify that a value satisfy a refinement 
+predicate, however we are able to verify some important properties. Consider the 
+following example, $4 : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$, we 
+cannot check the validity statically as the value of $x$ is not available. 
+However, we can verify that there is a possibility for success. Similarly, we 
+can verify some properties that will not succeed at all such as 
+$\textit{false} : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$. We observe that in 
+order for a value to have a chance of being a valid refinement type, it has to 
+type check against the base type. 
 
 \par
-Our static refinement type checking rule is defined below.
+We define an unsound typing judgement to capture this behaviour statically. 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
       \inference {\Gamma \vdash e_1 : T}
-      {\Gamma \vdash e_1 : \{\upsilon : T\text{ }|\text{ }e\}} [(Refine Base Static)]
+      {\Gamma \vdash e_1 : \{\upsilon : T\text{ }|\text{ }e\}} [(Refine-Base-US)]
     \end{tabular}
   \end{center}
+  \label{tj:unsound-refine}
 \end{figure}
 
 Additionally, we defining the typing rule for a subtypes, 
@@ -1196,8 +1199,6 @@ using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rule
         {\langle v\text{ }op\text{ }e_2, \sigma  
         \rangle \Longrightarrow \langle v\text{ }op\text{ }e_2', \sigma \rangle}[($op$ $expr$ 2)]
       & \\
-      $\langle v, \sigma \rangle \Longrightarrow \sigma$ ($vals$) evaluation
-      \text{ }
       \inference {x \in \textbf{dom}(\sigma)}{\langle x, \sigma \rangle \Longrightarrow \langle \sigma(x), \sigma \rangle}[($vars$) evaluation] 
     \end{tabular}
   \end{center}
@@ -1250,7 +1251,7 @@ will be covered in the subsequent sections.
 Scoping has an important role in programming languages, variables can be defined 
 in scopes and are unavailable once outside. While there are many different 
 variables that does not follow this rule, such as static variables and global 
-variables. The current design of Simple-$R$ supports only local variables which 
+variables. The design of Simple-$R$ supports only local variables which 
 heavily relies on scoping. 
 
 \par
@@ -1360,7 +1361,7 @@ evaluation rules. When one declare
 a variable of a refinement type, the language has to ensure that the refinement 
 predicate evaluates to true. While we have defined a statically typed language, even in a statically 
 typed language, there are cases when the type of some data cannot be determined 
-statically. Gordon Plotkin discussed the idea of dynamically checking a static 
+statically. Gordon Plotkin, et al discussed the idea of dynamically checking a static 
 language in this work \cite{dynamicCheckStaticLanguage}.
 
 \par
@@ -1375,9 +1376,9 @@ that in some cases like \verb|Integer i = 10; (String) i|,
 casting fails at compile time because there is no way for it to succeed at all. 
 
 \par
-The refinement predicate proves to be undecideable at compile time, one might 
-require access to program state for values of variables in order 
-to evaluate the refinement predicate. In many cases, 
+The refinement predicate in general proves to be undecideable 
+at compile time, one might require access to program state for values 
+of variables in order to evaluate the refinement predicate. In many cases, 
 only constants and constant expressions are available at compile time. 
 Interestingly, Cormac Flanagan proposed a similar idea dubbed \textit{Hybrid Type 
 Checking} \cite{hybridTypeChecking} to verify the correctness of Dependent Types and Refinement Types 
@@ -1387,10 +1388,10 @@ specifications, via static analysis where possible, but also via
 dynamic checks where necessary''.
 
 \par
-Previously we demonstrated how refinement types are checked statically in Simple-$R$,
-now we show how one can type check refinement types dynamically at runtime. We 
-define a special form of typing judgement to type check refinement types 
-dynamically.
+Previously we demonstrated how basic properties of refinement types are checked 
+statically in Simple-$R$ using an unsound judgement, now we show 
+how thsee refinement types are validated dynamically at runtime. 
+We define a special form of typing judgement to type check refinement types dynamically.
 
 
 \begin{figure}[H]
@@ -1474,31 +1475,67 @@ discuss this problem in detail.
 
 \subsection{Type Declaration}
 First we need to introduce a new declaration statement for type declaration, 
-in the example above we used the statement (\textbf{typedef} $x = T$) to denote a 
-new type $T$ with the name $x$, this declaration statement resembles variable 
-declaration and has the following typing judgement. 
-
-\begin{center}
-  \begin{tabular} {c}
-    \inference{\Gamma \vdash T : Type} {\Gamma \vdash_{D} \textbf{typedef } x = T \dashv \Gamma'}  
-  \end{tabular}
-\end{center}
-  
-\par
-We need to add this construct into our syntax. In our current syntax, 
-we have a context mapping $vars$ to $vals$, We now need to add a similar mapping \
-for types, We use $\tau$ to represent the type name map. 
+in the example above we used the statement 
+(\textbf{typedef} $x = \{\upsilon : T\text{ }|\text{ }e\}$) to denote a 
+new refinement type $\{\upsilon : T\text{ }|\text{ }e\}$ with the name $x$. It is 
+important to note that a \textbf{typedef} can only declare a new refinement type, one is 
+not able to use \textbf{typedef} to provide an alias for a base type, i.e. 
+$\textbf{typedef } x = int$ is forbidden. 
 
 \par
-The syntax is extended by adding the following: 
+Figure \ref{fig:typedef-extend} extends the syntax of Simple-$R$ to introduce 
+the new form of declaration.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {l l l}
-      \textit{Declaration} & $D$ & $:$ ... $|$ \textbf{typedef }$x = T$\\
-      \textit{Type Name Context} & $\tau$& $:$ $vars \mapsto T$ \\
+      \textit{Declaration} & $D$ & $:$ ... $|$ \textbf{typedef }$x = \{\upsilon : T\text{ }|\text{ }e\}$\\
+      \textit{Variable Types Context} & $\Gamma$& $:$ $vars \mapsto T\text{ }|\text{ }Type$\\
+      \textit{Type Name Context} & $\tau$& $:$ $vars \mapsto \{\upsilon : T\text{ }|\text{ }e\}$ \\
     \end{tabular}
   \end{center}
   \caption{Type Name Context Extension for Simple-$R$}
+  \label{fig:typedef-extend}
+\end{figure}
+
+\par
+In our syntax, we have a context mapping $vars$ to $vals$, We now need to 
+add a similar mapping for types, We use $\tau$ to represent the type name map. 
+We modified our Variable Types Context so that we can identify if a certain 
+varaible is a value of a type. 
+
+\par
+The typing judgement has to be updated to accomodate type checking using a 
+declared type. All typing judgement are updated such that $\tau$ is accessible.
+
+\begin{center}
+  \begin{tabular} {c}
+    \inference{\Gamma \vdash \{\upsilon : T\text{ }|\text{ }e\} : Type}
+    {\Gamma, \tau \vdash_{D} \textbf{typedef } x = \{\upsilon : T\text{ }|\text{ }e\} 
+    \dashv \Gamma + \{x \mapsto Type\}, \tau + \{x \mapsto \{\upsilon : T\text{ }|\text{ }e\}\}}  
+  \end{tabular}
+\end{center}
+
+\par
+As a declared type is only ever a refinement type, we established that they cannot 
+be type checked statically. However, we must still validate the 
+static refinement type (Refine-Base-US) rule using the following judgement.
+
+\begin{center}
+  \begin{tabular} {c}
+    \inference{\Gamma, \tau \vdash y : Type & \Gamma, \tau \vdash x : \tau(y)}
+    {\Gamma, \tau \vdash x : y} [(Refine-Base-vars-US)]
+  \end{tabular}
+\end{center}
+
+\par
+During runtime, the type is validated using the following rule.
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference{\Gamma \vdash x : Type & \Gamma \vdash_{R} e_1 : \tau(x)}
+      {\sigma, \Gamma \vdash_{R} e_1 : x }[(Runtime Refine vars)]
+    \end{tabular}
+  \end{center}
 \end{figure}
 
 \par
@@ -1511,8 +1548,8 @@ All previous operational semantics should be updated consistently.
     \begin{tabular} {c}
       \inference { 
       \langle C_1, \sigma, \tau' \rangle \longrightarrow \langle \sigma', \tau' \rangle\\
-      x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) & \tau' = \tau + \{x \mapsto T\}}
-      {\langle \textbf{begin typedef }x = T;C_1\textbf{ end}, 
+      x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) & \tau' = \tau + \{x \mapsto \{\upsilon : T\text{ }|\text{ }e\}\}}
+      {\langle \textbf{begin typedef }x = \{\upsilon : T\text{ }|\text{ }e\};C_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow 
         \langle v, \sigma', \tau \rangle}[(\textbf{typedef})] \text{ }    
     \end{tabular}
@@ -1531,20 +1568,6 @@ into the Type Name context $\tau$. Importantly, the variable $x$ cannot have
 already been defined as a value variable in $\sigma$ and a type of the same name 
 can not already be defined. Logically it is equivalent to the semantics for 
 variable declaration.
-
-\par
-We complete our evaluation to specify how a variable is declared using a type 
-name. 
-
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {c}
-      \inference {y \in \textbf{dom}(\tau) & T = \tau(y)} 
-      {\langle\textbf{begin var }x : y = e_1;C_1\textbf{ end}, \sigma, \tau \rangle 
-      \longrightarrow \langle\textbf{begin var }x : T = e_1;C_1\textbf{ end}, \sigma, \tau \rangle }
-    \end{tabular}
-  \end{center}
-\end{figure}
 
 \subsection{Complete Immutability}
 The main issue one encounters when associating refinement types with imperative 
@@ -1566,7 +1589,8 @@ In order to avoid feature interaction between refinement types and assignments, 
 observe that it is suffice to require free varibles appearing in a refinement 
 predicate to be immutable. This approach improves flexibility of our language as 
 one will still be able to have mutability in context irrelevant to refinement 
-types. 
+types. In this section we extends Simple-$R$ with this functionality and dubbed 
+the new variant Simple-$R_{I}$.
 
 \par
 In order to capture the notation of immutable types, the set of variables $vars$ 
@@ -1580,7 +1604,7 @@ $is\_immutable(x)$ holds if and only if $x$ is immutable.
       \textit{Declaration} & $D$ & $:$ $...\text{ }|\text{ }\textbf{const }x : T = e_1$
     \end{tabular}
   \end{center}
-  \caption{Immutable Variable Context for Simple-$R$}
+  \caption{Immutable Variable Context for Simple-$R_{I}$}
 \end{figure}
  
 One can declare an immutable variable similar to defining a mutable 
@@ -1593,7 +1617,7 @@ The typing judgement which appears identical to that of variable declaration.
 \begin{center}
   \begin{tabular} {c}
     \inference {\Gamma \vdash e_1: T_1} 
-        {\Gamma \vdash_{D} \textbf{const } x : T_1 = e_1 \dashv \Gamma'} [($vars$ Declaration)]
+        {\Gamma \vdash_{D} \textbf{const } x : T_1 = e_1 \dashv \Gamma + \{x \mapsto T_1\}} [($vars$ Declaration)]
   \end{tabular}
 \end{center}
 
@@ -1622,7 +1646,7 @@ here is extending the assignment statement to only accept the latter.
       {\langle x := v, \sigma, \tau \rangle \longrightarrow \langle \sigma[x \mapsto v], \tau \rangle} [(assignment $vals$)]
     \end{tabular}
   \end{center}
-  \caption{Immutable Variables Rules for Simple-$R$}
+  \caption{Immutable Variables Rules for Simple-$R_{I}$}
 \end{figure}
 
 \par
@@ -1653,7 +1677,7 @@ without using the \textbf{typedef} command.
     \begin{tabular}{c}
       \inference {
       x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) \\
-      \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_immutable(\alpha)
+      \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_immutable(\alpha)
       \\ \langle C_1, \sigma, \tau + \{x \mapsto \{\upsilon :T\text{ }|\text{ }e\}\} 
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
       {\langle \textbf{begin typedef } x = \{\upsilon :T\text{ }|\text{ }e\};C_1\textbf{ end}, 
@@ -1662,10 +1686,10 @@ without using the \textbf{typedef} command.
       & \\
       \inference {
       x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) \\
-      \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_immutable(\alpha)
-      \\ \langle C_1, \sigma + \{x \mapsto v\} , \tau
+      \forall \alpha \in \textit{free\_vars}(e).text{ }is\_immutable(\alpha)
+      \\ \langle C_1, \sigma + \{x \mapsto v_1\} , \tau
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
-      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v;C_1 \textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
+      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v_1;C_1 \textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
       \longrightarrow \langle \sigma'' \setminus \{x\}, \tau \rangle}
     \end{tabular}
   \end{center}
@@ -1712,12 +1736,14 @@ The limitation of this approach is of course the fact that one has to strategica
 declare the variables needed, in some cases one might not be able to declare 
 immutable variable but still want the ability to define a refinement type.
 
-\subsection{Refinement Predicate Closure}
+\subsection{Type Closure}
 If we further analyse our design, we notice that our main concern is for the 
 refinement predicate to stay static, any changes in the program context should 
 not change its definition. In this section, we propose a design which allows us 
 to keep variables in a refinement predicate constant without the need of 
-defining the variables immutable.
+defining the variables immutable. We define a new variant of Simple-$R$ named 
+Simple-$R_{C}$ that extends the former utilises this mechanic for handling 
+refinement types. 
 
 \par
 First we recap two ideas commonly found in programming language, \textit{Closures} 
@@ -1734,85 +1760,69 @@ In C/C++, \textit{pass by value} \cite{pbv} is a way of passing a
 parameter into a function in a way that any modification to the 
 parameter in the function does not reflect changes outside and vice versa. In 
 order to make free variables in a predicate independent, we designed a similar 
-approach where we bind free variables with a value. 
+approach where we \emph{bind free variables with a value} and named the approach 
+\emph{Type Closure}.
 
 \par
 Taking the example program in figure \ref{fig:amb_refinement_vars} if the 
-variable $y$ in the refinement predicate is different from the variable 
-$y$ in the program state, then any changes to the variable $y$ will not 
-affect the type definition and the program 
-will stay well typed.
+value of variable $y$ in the refinement predicate is snapshotted at the time of 
+creation, then any changes to the variable $y$ will not 
+affect the type definition and the program will stay well typed.
 
 \par
-Our appraoch is to have the predicate to evaluate in a different environment, we 
+Our appraoch is to have the predicate to evaluate in a closure environment, we 
 denote that every refinement predicate has their own evaluation context, this 
-will be the program context at the time of the type definition. We define a new 
-mapping $\mathcal{R}$.
+will be the program context at the time of the type definition. We modify the 
+definition of $\tau$ to hold this information.
 
 \begin{center}
-  $\mathcal{R}: T \mapsto (\sigma, \tau)$   
+   \begin{tabular} {c c c}
+     \textit{Type Name Context} & $\tau$& $:$ 
+     $vars \mapsto (\{\upsilon : T\text{ }|\text{ }e\}, \sigma, \tau)$ \\
+   \end{tabular}
 \end{center}
 
-The mapping $\mathcal{R}$ is used to associate a refinement type with its 
+The Type Name Context now associate a refinement type with its 
 evaluation context. The said context is simply the $\sigma, \tau$ at the time of 
-the refinement type creation.
-
-\par
-We formalise this behaviour in the evaluation rules below. Our signature is now 
-$\langle C, \sigma, \tau, \mathcal{R} \rangle$, previously defined operational 
-semantics should be updated as such. 
+the refinement type creation. 
+We define $\sigma_1$ and $\tau_1$ as a copy of the program state $\sigma$ and 
+$\tau$ and attach this to the type. 
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {
-      \langle C_1, \sigma, \tau + \{y \mapsto \{\upsilon : A\text{ }|\text{ }e\}\}, \mathcal{R}'
-      \rangle \longrightarrow^{*} \langle \sigma', \tau, \mathcal{R} \rangle      
-      \\ \sigma_1 = \sigma & \tau_1 = \tau & \mathcal{R}' = \mathcal{R} + \{\{\upsilon : T\text{ }|\text{ }e\} \mapsto (\sigma_1, \tau_1)\}}
+      \inference {\sigma_1 = \sigma & \tau_1 = \tau
+      \\ \langle C_1, \sigma, \tau + \{y \mapsto (\{\upsilon : A\text{ }|\text{ }e\}\}, \sigma_1, \tau_1)
+      \rangle \longrightarrow^{*} \langle \sigma', \tau\rangle}
       {\langle\textbf{begin typedef } y = \{\upsilon : T\text{ }|\text{ }e\};C_1;e_1\textbf{ end}, 
-      \sigma, \tau, \mathcal{R} \rangle \longrightarrow \langle \sigma', \tau, \mathcal{R} \rangle} 
-      & \\
-      \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) 
-      & \langle C_1, \sigma', \tau, \mathcal{R} \rangle \longrightarrow^{*} \langle 
-      \sigma'', \tau, \mathcal{R} \rangle
-      \\ \sigma_1 = \sigma & \tau_1 = \tau & \mathcal{R}' = \mathcal{R} + \{\{\upsilon : T\text{ }|\text{ }e\} \mapsto (\sigma_1, \tau_1)\}} 
-      {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v_0; C_1 \textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
-      \longrightarrow \langle \sigma'' \setminus \{x\}, \tau, \mathcal{R} \rangle}
+      \sigma, \tau \rangle \longrightarrow \langle \sigma', \tau \rangle} 
     \end{tabular}
   \end{center}
   \caption{Evaluation of Refinement Type with Closures}
 \end{figure}
 
 \par
-We define $\sigma_1$ and $\tau_1$ as a copy of the program state $\sigma$ and 
-$\tau$ and attach this to the type using the context $\mathcal{R}$. 
+In order to type check refinement types with closures, we update our typing 
+judgement for refinement type. Notice that we would only require type 
+closure for named type, if one declares a refinement type inline the rule 
+(Refine Runtime) that evaluates the predicate using the environment still hold. 
 
 \par
-In order to type check refinement types with closures, we update our refinement 
-typing judgement with the addition of $\mathcal{R}$
-
-\begin{center}
-  \begin{tabular} {c}
-    $\mathcal{R},\Gamma \vdash_{R} x : \{\upsilon : T\text{ }|\text{ }e\}$
-  \end{tabular}
-\end{center}
-
-\par
-Our new typing judgement now retrieves the associated context from $\mathcal{R}$ 
+Our new typing judgement now retrieves the associated context 
 and evaluates appropriate, the new rule is defined in figure. 
 
 \begin{figure}[H]
   \begin{center}
-    \begin{tabular}{c}
-      \inference{\Gamma \vdash e_1 : T_1 
-      & (\sigma, \tau) = \mathcal{R}(\{\upsilon : T_1\text{ }|\text{ }e\}) 
-      & \langle e[e_1/\upsilon], \sigma, \tau \rangle \Longrightarrow^{*} \langle \textit{true}, \sigma, \tau \rangle}
-      {\mathcal{R}, \Gamma \vdash_{R} e_1 : \{\upsilon : T_1\text{ }|\text{ }e\}} 
+    \begin{tabular}{c}      
+      \inference{
+      \langle e[e_1/\upsilon], \sigma_1, \tau_1 \rangle \Longrightarrow^{*} \langle \textit{true}, \sigma_1, \tau_1 \rangle  
+      \\
+      \Gamma,\sigma, \tau \vdash x : Type & (\{\upsilon : T\text{ }|e\text{ }\}, \sigma_1, \tau_1) = \tau(x)}
+      {\Gamma,\sigma,\tau \vdash_{R} e_1 : x }
     \end{tabular}
   \end{center}
-  \caption{Type Checking a Refinement Type with $\mathcal{R}$}
+  \caption{Type Checking a Refinement Type in $Simple-R_{C}$}
 \end{figure}
-
 
 \par
 The typing judgement behaves similar to our initial judgement, the only 
@@ -1827,11 +1837,11 @@ the free variable $y$ is reassigned to another value.
  
 \par
 Unlike C++, this form of sematics allows one to utilise non-constant expression 
-in type definition. This is achieved by fixing a refinement type with an 
-environement as one does in closures. 
+in type definition. This is achieved by using the idea of closures and 
+snapshotting the value of variabels at the time of type definition. 
  
 \subsection{Summary}
-In this section, we proposed a scenario where our refinement type checker is 
+In this section, we gave a scenario where our refinement type system is 
 underspecified in the presence of mutation. We proposed two different approaches 
 to complete our specification, approach one utilise constants and immutable 
 variables to disallow modification of free variables used in a refinement 
@@ -1840,17 +1850,17 @@ consistency.
 
 \par
 While the proposed solutions are effective in dealing with mutation on local 
-variables. As the language starts incorporating more features, our current 
-design becomes underspecified yet again. In the next section, we will analyse 
+variables. As Simple-$R$ starts incorporating more features, our design becomes 
+underspecified yet again. In the next section, we will analyse 
 the behaviour of our system in the presence of dynamic memory allocation.
 
 \section{Refinement Types and Pointers}
 We previously proposed a set of rules that specify behaviour of refinement 
 types with regards to local variables and we learn that we can keep behaviour 
 consistent if we restrict changes to the variable. However, our solution does 
-not accomodate for reference variables and pointers. If a refinement type 
+not accomodate reference variables and pointers. If a refinement type 
 relies on pointers in the refinement predicate then the simple act of declaring 
-them immutable is not enought. Pointers value can be altered through aliasing. 
+them immutable is not enought. Pointer values can be altered through aliasing. 
 
 \par
 In this section we will first extend our syntax with the notion of dynamically 
@@ -1863,12 +1873,14 @@ static, stack and heaps \cite{heapVsStack}. While we have not explicitly
 discussed our memory management model, it is rather obvious that Simple-$R$ 
 operates on a stack based model. It is apparent in the behaviour of local 
 variables which are inaccesible once out of scope as discussed in our scoping rules. 
+We introduce a new variant of Simple-$R$ called Simple-$R^{*}$ that supports 
+dynamic memory allocation.
 
 \subsubsection{Syntax Extension}
 First we will have to extend our syntax to accomodate these new features, we define 
 the new syntax in figure \ref{fig:ptr_syntax}. For simplicity and safety, 
-we have ommited the need for manual memory management and we 
-assumme that \textit{Automatic Garbage Collection} \cite{GC} is present in 
+we have omited the need for manual memory management and we 
+assume that \textit{Automatic Garbage Collection} \cite{GC} is present in 
 the language. 
 
 \begin{figure}[H]
@@ -1881,7 +1893,7 @@ the language.
       \textit{Heap} & $\Delta$& $:$ $h \mapsto vals$\\
     \end{tabular}
   \end{center}
-  \caption{Heap Memory Allocation in Simple-$R$}
+  \caption{Heap Memory Allocation in Simple-$R^{*}$}
   \label{fig:ptr_syntax}
 \end{figure}
 
@@ -1908,7 +1920,7 @@ value after evaluating $e$.
 
 \paragraph{Values}
 We added two new values to the language, $h$ is simply a heap address in the set 
-$\{h_0, h_1, h_2...\}$ and $nil$ as an empty reference. 
+$\{h_0, h_1, h_2...\}$.
 
 \paragraph{Heap}
 Finally, we define a heap context $\Delta$ as a mapping from heap address to values.  
@@ -1935,7 +1947,7 @@ allocating a new heap address with type $T$ gets a reference of the same type.
       \text{ }
       \inference {\Gamma \vdash e_1 : T}{\Gamma \vdash \textbf{new}(T, e_1) : T\textit{ ref}}[(\textbf{new} ref)]
       & \\
-      \inference {\Gamma \vdash e_2 : T & \Gamma \vdash e_1 : T\textit{ ref}} {\Gamma \vdash_{C}\text{ }!e_1 := e_2 : void}
+      \inference {\Gamma \vdash e_2 : T & \Gamma \vdash e_1 : T\textit{ ref}} {\Gamma \vdash_{C}\text{ }!e_1 := e_2 : Cmd}
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Ref Type}
@@ -1967,11 +1979,11 @@ Lastly, we define the operational semantics for the new expressions in figure
         \sigma, \tau, \Delta' \rangle} [(P-Assign expr 2)]
       & \\
       \inference {h_1 \in \textbf{dom}(\Delta) & \Delta' = \Delta[h_1 \mapsto v_1]}
-        {\langle !h_1 := e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle void, 
+        {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle void, 
         \sigma, \tau, \Delta' \rangle} [(P-Assign)]
       & \\
       \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
-        {\langle \textbf{new}(T, e_1), \sigma, \tau, \Delta \rangle \Longrightarrow \langle \textbf{new}(T, e_1), 
+        {\langle \textbf{new}(T, e_1), \sigma, \tau, \Delta \rangle \Longrightarrow \langle \textbf{new}(T, e_1'), 
         \sigma, \tau, \Delta' \rangle} [(P-Alloc expr)]
       & \\
       \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta + \{h \mapsto v\}}
@@ -2037,14 +2049,20 @@ extended to address two different features. One is to prevent the pointer from
 modifying the underlying heap address and no aliases should be able to modify 
 the address indirectly.
 
+\subsection{Immutable Heap Locations}
+
 \par
 In C/C++, one is able to declare a pointer to a constant, we would require 
-the same mechanism in Simple-$R$. It is important to note the 
+the same mechanism in Simple-$R^{*}$. We create a new variant of Simple-$R^{*}$ 
+called Simple-$R^{*}_{I}$ to capture this behaviour. 
+
+\par
+It is important to note the 
 difference between an immutable pointer and a pointer 
 to an immutable. The latter allows the pointer variable to change. In order to 
 concrete differentiate the two in a definite manner, we introduce 
-a new predicate $is\_nonrewriteable(h)$ to specify if the value held at a 
-specific memory address is immutable. The $is\_nonrewriteable(h)$ predicate 
+a new predicate $is\_immutable\_heap(h)$ to specify if the value held at a 
+specific memory address is immutable. The $is\_immutable\_heap(h)$ predicate 
 holds if and only if the heap address $h$ is a constant and cannot be modified. 
 
 \par
@@ -2063,7 +2081,7 @@ pointer.
       \textit{Expressions} & $e$& $:$ $...\text{ }|\text{ \textbf{newconst}}(T, e_1)$ \\
     \end{tabular}
   \end{center}
-  \caption{Heap Memory Allocation in Simple-$R$}
+  \caption{Heap Memory Allocation in Simple-$R^{*}_{C}$}
 \end{figure}
 
 \par
@@ -2082,7 +2100,7 @@ typing rules for this new expression.
 \end{figure}
 
 \par
-Notice that unlike C/C++, Simple-$R$ does not have the notion of 
+Notice that unlike C/C++, Simple-$R^{*}$ does not have the notion of 
 \textit{referencing}, the only way to obtain a pointer is through the use of 
 \textbf{new} or \textbf{newconst}. This form of semantic avoids pitfalls in C/C++ 
 where one gives a pointer to a constant the address of a mutable variable as 
@@ -2096,6 +2114,10 @@ demonstrated in the program below.
 \end{center}
 
 \par
+The program is valid because in C/C++ the keyword \textbf{const} does not mean 
+immutable, instead the keyword simply provides a contract that they variable 
+will not be used to modify the value, it does not guarantee that the values 
+would not be change through a different manner. 
 The lack of referencing allows us to define semantics that completely forbid 
 modification on a heap location. We define the operational semantics for the 
 new expression in figure \ref{fig:sos_const_ptr}, the rules simply restrict the 
@@ -2113,7 +2135,7 @@ ability to modify the value of a constant heap address.
       {\langle \textbf{newconst}(T, v), \sigma, \tau, \Delta \rangle \Longrightarrow \langle h, 
       \sigma, \tau, \Delta' \rangle} [(PConst-Alloc)]
       & \\
-      \inference {h_1 \in \textbf{dom}(\Delta) & \neg is\_nonrewritable(h_1) & \Delta' = \Delta[h_1 \mapsto v_1]}
+      \inference {h_1 \in \textbf{dom}(\Delta) & \neg is\_immutable\_heap(h_1) & \Delta' = \Delta[h_1 \mapsto v_1]}
       {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v_1, 
       \sigma, \tau, \Delta' \rangle} [(P-Assign)]
     \end{tabular}
@@ -2135,19 +2157,17 @@ restrict mutation on free variables in a refinement predicate.
 We define a new predicate that will be used in our definition, $is\_ref(x)$ 
 returns true if and only if $x$ is a pointer variable.
 \par
-Formally, $is\_ref(x) \Leftrightarrow \Gamma(x) = T\textit{ ref}$.
-
-\par
-The new specification is defined in figure \ref{fig:immu_pointer_typedef}.
+Formally, $is\_ref(x) \Leftrightarrow \Gamma(x) = T\textit{ ref}$, 
+the new specification is defined in figure \ref{fig:immu_pointer_typedef}.
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{c}
       \inference {
       a \notin \text{\textbf{dom}}(\sigma) & a \notin \textbf{dom}(\tau) \\
-      \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_immutable(\alpha)
+      \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_immutable(\alpha)
       \\
-      \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_ref(\alpha) \Rightarrow is\_nonrewriteable(\sigma(\alpha))
+      \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_ref(\alpha) \Rightarrow is\_immutable\_heap(\sigma(\alpha))
       \\ \langle C_1, \sigma, \tau + \{a \mapsto \{\upsilon :T\text{ }|\text{ }e\} 
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
       {\langle \textbf{begin typedef } a = \{\upsilon :T\text{ }|\text{ }e\};C_1\textbf{ end}, 
@@ -2191,11 +2211,12 @@ becomes invalid, we can rewrite our program to be correct as shown in the exampl
 
 
 \subsubsection{Refinement Type Closure and Pointers}
-Recall that our second approach uses closures to handle refinement type, 
-this approach can easily be modified to work with pointers using a 
+Recall that previous we propsed Simple-$R_{C}$ which uses closures to handle 
+refinement type, this approach can easily be modified to work with pointers using a 
 similar strategy. If one declares a refinement type $T$, then in addition to 
 the context being copied, we require any pointer variables in the refinement 
-predicate to be constant. 
+predicate to be constant. This variant extended from Simple-$R{*}$ is 
+named Simple-$R^{*}_{C}$
 
 \begin{figure}[H]
   \begin{center}
@@ -2203,7 +2224,7 @@ predicate to be constant.
       \inference {
       \langle C_1, \sigma, \tau + \{y \mapsto \{\upsilon : A\text{ }|\text{ }e\}\}, \mathcal{R}'
       \rangle \longrightarrow^{*} \langle \sigma', \tau, \mathcal{R} \rangle
-      \\ \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_ref(\alpha) \Rightarrow is\_nonrewriteable(\sigma(\alpha))      
+      \\ \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_ref(\alpha) \Rightarrow is\_immutable\_heap(\sigma(\alpha))      
       \\ \sigma_1 = \sigma & \tau_1 = \tau & \mathcal{R}' = \mathcal{R} + \{\{\upsilon : T\text{ }|\text{ }e\} \mapsto (\sigma_1, \tau_1)\}}
       {\langle\textbf{begin typedef } y = \{\upsilon : T\text{ }|\text{ }e\};C_1;e_1\textbf{ end}, 
       \sigma, \tau, \mathcal{R} \rangle \longrightarrow \langle \sigma', \tau, \mathcal{R} \rangle} 
@@ -2211,7 +2232,7 @@ predicate to be constant.
       \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) 
       & \langle C_1, \sigma', \tau, \mathcal{R} \rangle \longrightarrow^{*} \langle 
       \sigma'', \tau, \mathcal{R} \rangle
-      \\ \forall \alpha \in \textit{free\_vars}(e)\text{ }s.t.\text{ }is\_ref(\alpha) \Rightarrow is\_nonrewriteable(\sigma(\alpha))
+      \\ \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_ref(\alpha) \Rightarrow is\_immutable\_heap(\sigma(\alpha))
       \\ \sigma_1 = \sigma & \tau_1 = \tau & \mathcal{R}' = \mathcal{R} + \{\{\upsilon : T\text{ }|\text{ }e\} \mapsto (\sigma_1, \tau_1)\}} 
       {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v_0; C_1 \textbf{ end}, \sigma, \tau, \mathcal{R} \rangle 
       \longrightarrow \langle \sigma'' \setminus \{x\}, \tau, \mathcal{R} \rangle}
@@ -2236,7 +2257,8 @@ support for refinement types. We distinguished our
 system apart from exisiting work by basing the underlying calculus 
 on a simple ``\textit{WHILE}'' language 
 rather than the $\lambda$-calculus, to the best of our knowledge this form of 
-specification has not been done previously. The syntax and semantics of our 
+specification for refinement type with mutation has not been done 
+previously. The syntax and semantics of our 
 language remsembles C/C++, enhancing the accessibility of our work.
 
 \par
@@ -2255,16 +2277,20 @@ proposed two ideas that concretely characterise the behaviour of refinement
 types in a mutable environment. Our first approach is based on the 
 idea of immutable variables and forbidding mutation on variables associated 
 with the refinement predicate. The second approach utilises the notion of closures, 
-a copy of the state is made at the time of type declaration and the copied 
-state is used for type checking. 
+a snapshot of the state is made at the time of type declaration and the copied 
+state is used for type checking. The the base language is extended into two 
+new variants, Simple-$R_{I}$ and Simple-$R_{C}$ incorporates the first 
+and second approach respectively.
 
 \par
 Finally, we explored the idea of adding dynamically allocated memory into the 
 language and how it leads to more ambiguity. We discussed the difference between 
 immutable reference variable and an immutable object using practical examples in 
-Java and C/C++. Concluding the chapter, we addressed these ambiguities by 
-formalising new semantics that completes the language.
-
+Java. Furthermore, we discussed the subtle difference between const and 
+immutable C/C++ and how it might affect the behaviour of refinement types. We 
+showed how our variant avoid these pitfalls by disallowing referncing. We 
+conclude the chapter by extending Simple-$R_{I}$ and Simple-$R_{C}$ with our new  
+idea. 
 
 \chapter{Further Work}
 
