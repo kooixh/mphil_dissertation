@@ -309,7 +309,7 @@ can say that the type EvenInt \textit{EvenInt} depends on the type \textit{int}.
 
 \subsection{Dependent $\Pi$ Types}
 We can capture the definition mathematically using the notion of \textit{dependent 
-product types}, i.e. $\Pi$ type. This is also sometimes referred to as 
+product types}, written as $\Pi$ type. This is also sometimes referred to as 
 \textit{dependent function type} as in this definition we construct a function 
 $F: A \rightarrow B$. The function $F$ takes an element of type $A$ and 
 gives us an element of type $B$ which depends on $A$. We express it 
@@ -503,7 +503,8 @@ have been proposals to add full dependent type support to Haskell however a lot
 of work remains to be done \cite{dependentHaskell, aRoleForDependentHaskell}. 
 
 \subsubsection{LiquidHaskell}
-\textit{LiquidHaskell} is a static type-checker that allows programmers to specify and 
+\textit{LiquidHaskell} \cite{liquidHaskell} 
+is a static type-checker that allows programmers to specify and 
 check program correctness by applying refinement types theory. The programmer 
 annotates refinement types in the form of Haskell comments 
 \verb|{-@ annotation @-}|, the properties must be SMT decideable and is check 
@@ -514,7 +515,7 @@ The verification of LiquidHaskell happens in three phases, phase one is the
 normal compilation using the Haskell compiler. In phase two LiquidHaskell 
 generates the set of types constraints provided by the annotations, these are 
 checked using a SMT solver in phase three. At the end of the verification, 
-LiquidHaskell outputs \verb``SAFE'' if the program is well-typed. Otherwise, 
+LiquidHaskell outputs ``SAFE'' if the program is well-typed. Otherwise, 
 type erros are reported with along with the line it occurs. 
 
 \begin{figure}[H] 
@@ -582,16 +583,16 @@ languages while Java, C#, Kotlin are Object-Oriented Languages. Some languages s
 as C++, Python are multi-paradigm and allows the programmer to write code both 
 in a procedural manner or object-oriented manner. 
 
-\par
+\subsection{Research Languages}
+Currently there is no production imperative programming language with 
+native support for dependent type or refinement types. 
+However, previous research has look at creating languages with these 
+capabilities or extending existing languages. In this section we will survey 
+two previous work at the area. 
 
-Currently there is no production ready imperative programming language with 
-proper dependent type support. Previous research has look at creating an 
-impertaive language with dependent types but these are not available to the 
-general programmers. Certain mainstream languages also have aspect that 
-resembles dependent types but do not provide the complete feature.
-
-\subsection{Xanadu}
-\textit{Xanadu} \cite{xanadu} is a dependently typed imperative language created by a team at 
+\subsubsection{Xanadu}
+\textit{Xanadu} \cite{xanadu} is a dependently typed imperative language 
+created by a team at 
 the University of Cincinnati. The language was implemented in OCaml and was 
 said to be available online in the original paper, however the original cited 
 location looks to have been taken offline. It is safe to conclude that 
@@ -612,6 +613,79 @@ Our project complements the work by Xi by providing analysis on the problem at
 hand. The original paper merely demonstrated the development and semantics of 
 Xanadu, our project aims to discuss more on the topic. 
 
+\subsubsection{Refined TypeScript}
+\textit{TypeScript} is a superset of JavaScript that brings static typing to the 
+language. A team from the University of California, San Diego wrote a paper \cite{rts} 
+in 2016 showcasing Refined TypeScript (RSC), a lightweight refinement type 
+system for TypeScript. 
+
+\par
+The key observation of RSC behaves like LiquidHaskell, it serves as a program 
+verifier that verifies the refinement predicate using an SMT solver. However, unlike 
+Haskell, Typescript is an imperative language and mutable is possible. 
+The authors handled the mutable code in two ways, i) refinements are 
+restricted to immutable variables and ii) reassignment is handled using 
+Static single assignment (SSA) translation.
+
+\par
+The paper provides a unique way of handling assignment via SSA translation 
+however this method introduces complexity into the design which are unnecessary 
+in our project. 
+
+\subsection{Refined Scala}
+The \textit{Scala} \cite{scala} Programming Language is a statically 
+typed multi-paradigm language, it is compiled into Java ByteCode and 
+executed on the \textit{Java Virtual Machine}. 
+As such, Scala shares similarity with Java and provides language 
+interoperability. The Scala Type System is richer than the Java Type System, 
+Scala supports certain types not available in Java such as Monads, 
+Singleton Types, etc. Despite the rich type system, refinement types and dependent 
+types are not native features of the language. However, an open source project 
+named \textit{refined} \cite{refinedScala} has brought refinement types into Scala. 
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[scale=0.7]{assets/refined_scala.PNG}
+  \end{center}
+  \caption{Refinement Types in Scala using refined}
+  \label{code:refined-scala}
+\end{figure}
+
+Figure \ref{code:refined-scala} is an example of refinement types using  
+refined. While the library does not have a formal write up of its 
+implementation and design decisions, the informal documentation is sufficient 
+for us to identify and discuss multiple interesting design. 
+
+\par
+The first interesting observation we made is that the library does not allow 
+refinement types with any arbitrary refinement predicate. Instead,  
+the library has a set of predefined predicates one is able to associate 
+with refinement types. In the example provided in figure \ref{code:refined-scala} 
+we use the predicate \verb|Less[N]| to refine the integer type such that its value 
+is always less than \verb|N|. As scala is an imperative language where mutation 
+is possible, the library insist that \verb|N| must be a 
+literal and not a form of variable.
+
+\par
+Furthermore, in 
+order to have compile time refinement type check, one must initialise the 
+variable of refinement type with a literal. In the example, 
+\verb|val l: Int Refined Less[10] = x| is forbidden. 
+
+\par
+If one wishes to initialise a refinement type using a variable or function, one 
+must use the \verb|refineV[P](v)| function, where \verb|P| is a predicate and 
+\verb|v| is a value. The function will either give an error if \verb|v| does not 
+satify \verb|P| or it gives the value \verb|v| which is refined using \verb|P|. 
+An example of this use case in shown in figure \ref{code:refined-scala}.
+
+\par
+The refined Scala library provides a simple of using refinement types in a modern 
+language through a restrictive manner. However, there are many design decisions 
+one can take away from this project such as the combination of compile-time and 
+runtime type checking. 
+
+
 \subsection{C++ Templates}
 \textit{C++ Templates} \cite{cppTemplate} are a way of passing the type of a 
 data as a parameter so certain code can be reused. For instance, the same 
@@ -624,99 +698,22 @@ Templates are often compared to Java's \textit{Generics} \cite{javaGenerics}
 as the C++ equivalent. While this statement is mostly true, C++ templates 
 differ in a big way. 
 Generics only allow the template parameter to be a class, templates on the other 
-hand allow the parameter to be a class, values or pointers. The ability to 
-pass values into a template to create types certainly resembles dependent types.
+hand allow the parameter to be a class, values or pointers. This feature allows 
+one to create types that resembles refinement types. 
 
 \par
-The code listing below is an example of templates with values. It defines the 
-struct that represents an integer less than N. 
-
-\begin{figure}[H]
-  \begin{lstlisting}[language=c++]     
-    template <int N>
-    struct LessThanN {
-      int value;
-      LessThanN(int x) {
-        if (x < N)
-            value = x;
-        else
-           throw ``invalid type'';
-      }
-    };
-  \end{lstlisting}
-  \caption{Struct dependent on values using C++ Templates}
-\end{figure}
-
-\par
-Using the above definition it is possible to define types such as \\
-\verb+LessThanN<5> ltf = LessThanN<5>(3)+, this will define a type that will has 
-to be less than 5. However, certain questions arise from this definition, 
-
-i) What will happen if the constructor is given an invalid argument? 
-
-ii) What if the template parameter is a variable and its 
-value change? 
-
-iii) What if the value of \textit{value} change during execution?
-
-In the subsequent text, the term ``Dependent Value'' will be used to refer to the 
-value $N$ and ``Value'' will refer to the actual value held by a LessThanN type, 
-i.e. the \textit{value} state in the struct. 
-
-\subsubsection{The Intended Behaviour}
-First, we observe the intended behaviour of LessThanN using the following test 
-code:
-\begin{figure}[H]
-  \begin{lstlisting}[language=c++]     
-    int main() {
-      LessThanN<5> ltf = LessThanN<5>(3);
-      cout << ltf.value; // Prints out 3
-      return 0;
-    }
-  \end{lstlisting}
-  \caption{Intended Behaviour of LessThanN in C++}
-\end{figure}
-
-\par
-As expected, the code compiles perfectly and outputs 3 when executed.
-
-\subsubsection{Invalid Definition of LessThanN}
-In order to observe the behaviour of i), we simply have to pass in an 
-invalid value into the constructor, i.e. a value greater than N, 
-the test is conducted using the code below. 
-
-\begin{figure}[H]
-  \begin{lstlisting}[language=c++]     
-    int main() {
-      LessThanN<5> ltf = LessThanN<5>(10); // Error here
-      cout << ltf.value; 
-      return 0;
-    }
-  \end{lstlisting}
-  \caption{Invalid Definition of LessThanN in C++}
-\end{figure}
-
-\par
-Interestingly, the code compiles perfectely despite the invalid definition. 
-However it fails to execute as the exeception thrown in the \textbf{else} clause 
-is left uncaught. This behaviour makes it no better than an simple if statement 
-in the constructor. An addition in C++ 11 was the introduction of 
+C++ 11 introducted the notion of 
 \textit{constexpr} and \textit{static\_assertation}. These allow for certain 
 compile time checking, however the values checked must fulfil 
 the \textit{constant expression} requiremets \cite{cppConstExpr}. 
-
-\par
-Modifying the \textbf{struct} to use the code below we get compile time type 
-checking. 
 
 \begin{figure}[H]
   \begin{lstlisting}[language=c++]     
     template <int N, int M>
     struct LessThanN {
-      int value;
-      LessThanN() {
+      const int value;
+      LessThanN(): value(M) {
         static_assert(M < N, ``type is invalid'');
-        value = M;
       }
     };
   \end{lstlisting}
@@ -725,15 +722,26 @@ checking.
 \end{figure}
 
 \par
-Now, providing an invalid definition yields a compile time error, with the 
-following: 
-\verb+LessThanN<10, 12> ltf = LessThanN<10, 12>;+ 
+Figure \ref{code:compileLTN} shows a struct that represents a refined integer 
+type whose values is can only be less than \verb|N|, defined as 
+\verb|LessThanN<10, 5> x = LessThanN<10, 5>;|. Type checking is done at compile 
+time using the \verb|static_assert| in the constructor. If one provides an 
+invalid definition then a compile time error is thrown. 
 
+\par
+\verb|LessThanN<10, 12> x = LessThanN<10, 12>;| yields the following message: 
+\par
 \textbf{static\_assert failed due to requirement `12 $<$ 10' ``type is invalid''}
+
+\par
+Notice in our example we made the \verb|LessThanN| type immutable, the reason 
+here is that there is no trivial way to ensure that if the programmer change the 
+value using \verb|x.value = 100| the new value coheres with the refinement 
+type.
 
 \subsubsection{Mutation of Template Variable}
 In our previous example we have been passing integer literal as the template 
-parameter for the dependent value. Often programmers are required to 
+parameter. Often programmers are required to 
 work with varied values through variables, how will this effect the behaviour? 
 
 \par
@@ -744,7 +752,7 @@ figure \ref{code:compileLTN}:
   \begin{lstlisting}[language=c++]     
     int n = 5;
     LessThanN<n, 3> ltf = LessThanN<n, 3>();
-    n = 2; // Is ltf still well typed??
+    n = 2;
   \end{lstlisting}
   \caption{Mutating the Dependent Variable for LessThanN in C++}
 \end{figure}
@@ -755,77 +763,37 @@ arguments to be constant expressions. In order to use variables as template
 arguments, they have to be defined \textbf{const}. In which case the above 
 situation is impossible as the variable $n$ now cannot be changed. 
 
-\subsubsection{Changing The Value of Struct During Execution}
-We've showed that it is not possible to change the dependent value in 
-the program, however what if the value changes? Will a 
-variable be well-typed on one line and ill-typed on the next line? 
+\par
+We see glimpses of refinement typing in C++, while it is still far from full 
+refinement types. We are able to take note of certain mechanics such as ensuring 
+variables associated with types are constant and the use of immutability. 
+
+
+\section{Summary}
+
+In this chapter we formally introduced dependent types and refinement types, 
+these two type systems are similar in many aspect but are formally very 
+different. Certain functional languages such as Agda and Idris has native support for 
+dependent types however we observed that there is no imperative language with 
+the same support. Research has attempted to bring dependent types to imperative 
+programming and while they have been successful in the project, the languages 
+that are created is not widespread. 
 
 \par
-Consider the following code: 
-\begin{figure}[H]
-  \begin{lstlisting}[language=c++]     
-    const int n = 5;
-    LessThanN<n, 3> ltf = LessThanN<n, 3>(); // Well typed
-    ltf.value = 10; // Now ill-typed but not caught
-  \end{lstlisting}
-  \caption{Mutating the value of LessThanN in C++}
-\end{figure}
+Informally, one is able to implement refinement types support in 
+different mainstream languages such as Scala and C++ however they are restricted 
+and not documented. We analyse \textit{refined}, a Scala based library that 
+introduces refinement types to the language. Finally, we attempted to construct 
+refinement types in C++ using templates. 
 
 \par
-In order to achieve our intended behaviour there has to be some form of check 
-that runs throughout the lifetime of the program, currently there is no native 
-support for this form of invariant. However one potential workaround as a 
-programmer would be to make the LessThanN type immutable, by setting \textit{value} 
-to be a \textbf{const} however that significantly limits the usability of the 
-language. 
-
-\par
-We see glimpses of dependent typing in certain imperative languages, the 
-examples using C++ presented above is one of them. One could argue arrays in 
-Java and C++ resembles the fixed size vector however they are quite similar. In 
-the subsequent chapters of this dissertation we will define a language to 
-address these uncertainties. 
+Throughout our research, we observed certain ideas that are common across 
+different work. In the next chapter, we will introduce key concepts that are 
+relevant to our project and how these idea will be used to create a refinement 
+type system.
 
 
-\section{Summary of Dependently Typed Langauge}
-\begin{table} [H]
-  \begin{tabular}{|p{2cm}|p{2cm}|p{10cm}|}
-    \hline
-    \textbf{Name} & \textbf{Paradigm} & \textbf{Notes} \\ 
-    \hline
-    Agda & Purely Functional & Actively developed but 
-      Predominantly used for theorem proving rather than general programming. \\ 
-    \hline
-    Haskell & Functional & Widely used as a general purpose programming language, however not natively dependently typed. \\ 
-    \hline
-    Idris & Purely Functional & More general purpose compared to Agda however 
-      still lacks mainstream recognition. \\
-    \hline
-    \textit{ATS} \cite{ATS} & Functional & Developed by Xi who created Xanadu, 
-      support dependent typing however only for static terms. \\
-    \hline
-    \textit{F*} \cite{FStar} & Functional & Jointly developed by Microsoft 
-    Research and Inria aimed at program verification. Lacks mainstream 
-    programming recognition.\\
-    \hline
-  \end{tabular}
-  \caption{Summary of Dependently Typed Language}
-\end{table}
-
-\par
-The table above shows a number of languages that supports dependent typing, we 
-observed that majority of the languages in this category are using the 
-functional paradigm. As functional languages pale in comparison to imperative 
-languages in terms of populatiry, the general awareness for dependent types 
-remains low. 
-
-\par
-Our aim for this project is to i) Explore how dependent types should behave in 
-an imperative language and how a language can use different mechanism to enable 
-this behaviour. ii) Encourage the research into dependent types by extending the 
-WHILE language \cite{whileLanguage} to support dependent typing. We chose this 
-language because of its simple and familair syntax which at its core resembles 
-popular languages such as C. 
+\chapter{Key Concepts in Programming Languages}
 
 \chapter{The Simple-$R$ Language}
 We propose Simple-$R$, a basic procedural language with support for refinement 
@@ -1042,7 +1010,7 @@ type checker.
         {\Gamma \vdash_{C} \textbf{begin }D_1;C_1\textbf{ end}} [(Begin scope)]     
     \end{tabular}
   \end{center}
-\caption{Basic Typing Rules for Simple-$\Pi$}
+\caption{Basic Typing Rules for Simple-$R$}
 \label{fig:basic_typecheck}
 \end{figure}
 
@@ -1673,7 +1641,7 @@ refinement predicate $is\_immutable$ using the evaluation defined below. The sam
 applies when one declare a variable of type $\{\upsilon : T\text{ }|\text{ }e\}$ 
 without using the \textbf{typedef} command.
 
-\begin{figure}[H]
+\begin{figure}[h]
   \begin{center}
     \begin{tabular}{c}
       \inference {

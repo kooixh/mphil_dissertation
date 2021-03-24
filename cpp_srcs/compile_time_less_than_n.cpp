@@ -7,15 +7,14 @@ using namespace std;
 template <int N, int M>
 struct LessThanN {
     int value;
-    LessThanN() {
+    LessThanN(): value(M) {
         static_assert(M < N, "type is invalid");
-        value = M;
     }
 };
 
 int main() {
     const int n = 10;
-    LessThanN<n, 9> ltt = LessThanN<n,9>();
+    LessThanN<n, 12> ltt = LessThanN<n,12>();
     cout << ltt.value << endl; 
     ltt.value = 50;
     cout << ltt.value;

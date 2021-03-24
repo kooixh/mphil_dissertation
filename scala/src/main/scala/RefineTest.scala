@@ -15,6 +15,7 @@ object RefineTest {
     println("Compile Time Refinement Type Check: " + l)
 
     val i: Int = -1
+    val c: Char = 'c'
     val i1: Either[String, Int Refined Greater[1]] = refineV[Greater[1]](i)
     println("Runtime Refinement Type Check: " + i1.getOrElse("invalid ref predicate"))
 
