@@ -1202,7 +1202,7 @@ we express $A$ is a subtype of $B$ as $A \preceq B$.
       
       $\Gamma \vdash \{\upsilon : T\text{ }|\text{ }e\} \preceq T$ (Subtype Base 1)
       & \\
-      \inference {\Gamma \vdash \forall \upsilon_1 : T\text{ }s.t.\text{ }e_1 \Rightarrow e_2[\upsilon_1/\upsilon_2]}
+      \inference {\Gamma \vdash \forall \upsilon_1 : T.\text{ }e_1 \Rightarrow e_2[\upsilon_1/\upsilon_2]}
       {\Gamma \vdash \{\upsilon_1 : T_1\text{ }|\text{ }e_1\} \preceq \{\upsilon_2 : T_1\text{ }|\text{ }e_2\}} [(Subtype Base 2)]
       & \\ 
       \inference {\Gamma \vdash T_1 \preceq T_2 & \Gamma \vdash T_1 \preceq T_3} 
