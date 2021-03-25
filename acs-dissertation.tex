@@ -19,7 +19,7 @@
 \def\authorname{Xiu Hong\ Kooi\xspace}
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
-\def\dissertationtitle{Exploring Refinement Types in a Mutable Environment}
+\def\dissertationtitle{Refinement Types in Real-World Programming}
 \def\wordcount{0}
 
 
@@ -775,25 +775,129 @@ In this chapter we formally introduced dependent types and refinement types,
 these two type systems are similar in many aspect but are formally very 
 different. Certain functional languages such as Agda and Idris has native support for 
 dependent types however we observed that there is no imperative language with 
-the same support. Research has attempted to bring dependent types to imperative 
-programming and while they have been successful in the project, the languages 
+the same support. Research has attempted to bring dependent types and refinement types 
+to imperative programming, these projects have been successful but the languages 
 that are created is not widespread. 
 
 \par
-Informally, one is able to implement refinement types support in 
-different mainstream languages such as Scala and C++ however they are restricted 
-and not documented. We analyse \textit{refined}, a Scala based library that 
-introduces refinement types to the language. Finally, we attempted to construct 
-refinement types in C++ using templates. 
+Some open-source projects has attempted to bring refinement types to mainstream 
+languages. We analyse \textit{refined}, a Scala based library that 
+introduces refinement types to the language in a restrictive manner. We find the 
+project interesting however it remains informal and lacks formal documentation. 
+Finally, we studied C++ templates and notice the potential of introducing 
+types that bears resembles refinement types.
 
 \par
-Throughout our research, we observed certain ideas that are common across 
-different work. In the next chapter, we will introduce key concepts that are 
+We identify that work in the area are missing in certain aspect, dependent types 
+and refinement types are conventionally associated with functional languages 
+because of the lack of mutation. Previous research that attempts to bring the more 
+advanced type system to imperative languages remains mainly theoretical and 
+does not relate to real-world languages. Practical projects that address 
+these form of typing in real-world languages remains informal and are 
+mainly documented as online articles. Our project will be focused on providing 
+formal semantics for refinement types in a real-world imperative language. 
+
+\chapter{Key Concepts in Programming Languages}
+Throughout our research, we observed certain ideas that are commonly used across 
+different work. In this next chapter, we will introduce key concepts that are 
 relevant to our project and how these idea will be used to create a refinement 
 type system.
 
+\section{Immutability vs Constant} \label{section:const_immutable}
+In the previous section we have discussed extensively the concept of 
+immutability, an object is \textit{immutable} if it cannot be change after the 
+time of creation. A constant is often mistaken as an alternate name for 
+immutability however they are different concepts. A \textit{constant} is a 
+variable that cannot be modified at runtime. These two notion does not provide the 
+same guarantees.
 
-\chapter{Key Concepts in Programming Languages}
+Consider the following Java code in figure \ref{code:java_const}, assume a class \verb|Number| with a 
+single field \verb|value|.
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{l}
+      \verb|final Number n = new Number(10);| &
+      \verb|n.value = 12;|
+    \end{tabular}
+  \end{center}
+  \caption{Modifying Constant in Java}
+  \label{code:java_const}
+\end{figure}
+
+
+\par
+In our simple example, we defined a constant \verb|n|, however the \verb|n| is 
+not immutable which allowed us to modify the value despite the variable \verb|n| 
+being a constant. 
+
+\par
+Similarly in C++, consider the code in figure \ref{code:cpp_const} where one declare a pointer \verb|p| 
+that points to a constant integer. C++ ensures that one is not able to modify the 
+value of \verb|&x| using the pointer \verb|p| however it does not guarantee 
+\verb|x| cannot be modified in a different manner. The value pointed to by 
+\verb|p| can change even though it is defined as a constant. 
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{l}
+      \verb|int x = 10;| &
+      \verb|const int *p = &x;|&
+      \verb|x = 5;|&
+    \end{tabular}
+  \end{center}
+  \caption{Modifying Constant in C++}
+  \label{code:cpp_const}
+\end{figure}
+
+\par
+Immutability is a key idea in our project as it is one of the biggest hurdle in 
+bringing dependent types and refinement types into imperative programming. A 
+good understanding the difference between constant and immutable proves to be a 
+critical in the development of our language. 
+
+
+\section{Closures} \label{section:closures}
+In programming languages, \textit{Closures} are a way of enclosing functions 
+with its surrounding environment, it allows a function to have access to local 
+variables in the outer scope even if the variables has gone out of scope. 
+Closures are present in many languages with first-class functions such as 
+JavaScript, Python and Ruby. 
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{lstlisting}[language=C]
+      function outer_function(x) {
+          function inner_function(y) {
+            return x + y;
+          }
+          return inner_function;
+      }
+      let closure = outer_function(10);
+      closure(5); // 15
+    \end{lstlisting}    
+  \end{center}
+  \caption{Closures in JavaScript}
+  \label{code:clousure_js}
+\end{figure}
+
+Figure \ref{code:clousure_js} is an example of a function closure written in 
+JavaScript. The function \verb|inner_function| is a closure as the variable 
+\verb|x| from the outer scope is accessible within. The line 
+\verb|let closure = outer_function(10)| binds the value 10 to \verb|x|, even after the 
+\verb|outer_function| exits and \verb|x| is out of scope, the closure retains 
+the value of \verb|x|.
+
+\par
+Semantically, a closures can be modelled as a data structure mapping 
+functions to environment as demonstrated in the extended lambda calulus proposed by 
+Gerald J. Sussman and Guy L. Steele Jr in this paper \cite{closureLambdaOp}. 
+
+\par
+Closures are predominantly associated with functions, however the idea itself is 
+useful. The ability to bind values to variables within a scope will be explored 
+further in our project.
+
+\section{Hybrid Type Checking}
+
 
 \chapter{The Simple-$R$ Language}
 We propose Simple-$R$, a basic procedural language with support for refinement 
@@ -1715,22 +1819,13 @@ Simple-$R_{C}$ that extends the former utilises this mechanic for handling
 refinement types. 
 
 \par
-First we recap two ideas commonly found in programming language, \textit{Closures} 
-\cite{closures} and \textit{Pass By Value} \cite{pbv}.
-In languages such as JavaScript, Python and Ruby, a closure is simply a  
-function enclosed with an environment. Closures have access to 
+Recall in section \ref{section:closures} we introduced the idea of closures, a 
+closure is simply a function enclosed with an environment. Closures have access to 
 variables from the calling context, even if the original variable goes out of 
-scope. Semantically, a closures can be modelled as a data structure mapping 
-functions to environment as demonstrated in the extended lambda calulus proposed by 
-Gerald J. Sussman and Guy L. Steele Jr in this paper \cite{closureLambdaOp}. 
-
-\par
-In C/C++, \textit{pass by value} \cite{pbv} is a way of passing a 
-parameter into a function in a way that any modification to the 
-parameter in the function does not reflect changes outside and vice versa. In 
-order to make free variables in a predicate independent, we designed a similar 
-approach where we \emph{bind free variables with a value} and named the approach 
-\emph{Type Closure}.
+scope. A value is bound to the variable in the closure such that changes does 
+not reflect within. In order to make free variables in a predicate independent, 
+we designed a similar approach where we \emph{bind free variables with a value} 
+and named the approach \emph{Type Closure}.
 
 \par
 Taking the example program in figure \ref{fig:amb_refinement_vars} if the 
@@ -2006,11 +2101,8 @@ A constant pointer variable simply restrict the address held by the pointer to b
 changed, manipulating the underlying value is still very much possible. 
 Moreover, using closures also fails to prevent the ambiguity as one can easily 
 modify the heap address and have he changes reflect within the closure. Our  
-semantics resemble Java's \textit{final} mechanics, whereby while the reference variable 
-cannot change, the underlying value can. For instance, in Java,  
-\verb|final A x = new A()| declares a ``constant'' \verb|x| of type \verb|A|, while 
-\verb|x = y| is forbidden, the value of \verb|x| can still be modified 
-using \verb|x.value = 10|.
+semantics resemble Java's \textit{final} mechanics discussed in section \ref{section:const_immutable}, 
+whereby while the reference variable cannot change, the underlying value can.
 
 \par
 In order to address this case, our previously proposed semantics has to be 
@@ -2073,14 +2165,7 @@ Notice that unlike C/C++, Simple-$R^{*}$ does not have the notion of
 \textit{referencing}, the only way to obtain a pointer is through the use of 
 \textbf{new} or \textbf{newconst}. This form of semantic avoids pitfalls in C/C++ 
 where one gives a pointer to a constant the address of a mutable variable as 
-demonstrated in the program below.
-\begin{center}
-  \begin{tabular}{l}
-    \verb|int x = 10;| &
-    \verb|const int *p = &x;|&
-    \verb|x = 5;|&
-  \end{tabular}
-\end{center}
+demonstrated in \ref{section:const_immutable}.
 
 \par
 The program is valid because in C/C++ the keyword \textbf{const} does not mean 
