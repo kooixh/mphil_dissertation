@@ -177,24 +177,21 @@ focus on writing the logical part of the code, indirectly
 leading to more robust codebases.
 
 \section{Motivation}
-As much as we have studied about type systems, dependent and refinement types 
-remains uncommon in the industry. While the theory of dependent types has been 
-established several decades ago, only a small number of languages has 
-integrate full dependent type support, most of them being functional languages. 
-Similarly, refinement types remains mostly a research problem, while several 
-programmers have attempted to bring refinement types to the mainstream the  
-work remains niche. 
+Types systems have been studied extensively, however dependent and refinement types 
+are uncommon in real-world programming. While their theory has been 
+established several decades ago, only a small number of programming languages 
+support these advanced type systems. Furthermore, the languages that do support 
+them are limited to functional languages and theorem provers that are rarely 
+used in real-world programming.
+
 
 \par
-The expressive nature of dependent types allow one to 
+The expressive nature of dependent types and refinement types allow one to 
 define complex mathematical assertations and hence lends itself to 
 theorem proving systems. Mutliple functional languages such as \textit{Epigram} 
 \cite{epigram} and \textit{Agda} \cite{agda} has 
 built in support for dependent typing. However 
-mainstream languages such as Java and C++ does not get the luxury. In chapter 2 of 
-this dissertation we will be providing an in depth analysis of the current state 
-of dependent types in programming languages and answer why dependent types are 
-not more prominant in languages, in particular imperative languages.
+mainstream languages such as Java and C++ does not get the luxury.
 
 \par
 We note that one of the complexity of adopting dependent and refinement types 
@@ -206,19 +203,19 @@ what is the behaviour if the value of $N$ changes?
 
 \par
 Past research has studied and shown the feasibility of a dependently typed 
-imperative language, however these studies focused on expressing the semantics 
-of an imperative language and dependent types are often highly 
+imperative language, however these studies that are focused on expressing 
+the semantics of dependent types in an imperative language are often highly 
 technical and complex, requiring prerequisite knowledge in the literature. While 
 we find these work novel and made important advancedments in the field, 
-they fail to caputure how refinement types could relate to 
+they fail to caputure how these types systems could relate to 
 mainsteam programming languages.
 
 \par
 We argue that the the research in the area of dependent types and refinement 
-types can be made more accessible. Dependent Type systems presented in 
-existing papers often assumes full knowledge of \textit{The Lambda Calculus} 
-\cite{lambdaCalculus} and uses the concept of \textit{Monads} \cite{monads} 
-for state changes. The semantics of the $\lambda$-calculus is simple and naturally 
+types can be made more accessible. Research in the area often assumes full 
+knowledge of \textit{The Lambda Calculus} \cite{lambdaCalculus} and uses 
+the concept of \textit{Monads} \cite{monads} for state changes. The semantics 
+of the $\lambda$-calculus is simple and naturally 
 relates to functional programming languages, however, when one tries to model 
 imperative programming by extending the calculus, we begin to lose the simple 
 nature. 
@@ -227,9 +224,10 @@ nature.
 Our project is motivated by the apparent lack of accesible literature on the 
 theory of refinement types. We aim to present a simple, restricted framework that 
 captures the essence of refinement types. The said framework will be presented as 
-an extension to \textit{WHILE language} \cite{whileLanguage}. Created as a tool 
-to aid the study of programming language theory, we believe it strongly satisfies 
-our requirement of accessibility with its simple syntax and semantics. Using the 
+an extension to \textit{WHILE language} \cite{whileLanguage}. The WHILE language was 
+created as a tool to aid the study of programming language theory, 
+thus we believe it strongly satisfies our requirement of accessibility with 
+its simple syntax and semantics. Using the 
 framework, we will study the interactions between mutation and refinement types 
 and relates our findings to concepts in mainstream languages. We believe that 
 imperative languages proves to be the more popular paradigm in modern 
@@ -291,14 +289,14 @@ thinking about incorporating dependent types into a real language.
 
 
 \chapter{Background Research} 
-In this chapter we will be reviewing the current knowledge of dependent types 
-in different programming languages. It will cover languages with full dependent 
-types support as well as some languages with similar concepts and point out how 
-it differs from dependent types. Lastly we will summarise all these languages 
-and point out some limitations and unknowns. 
-
-\section{Dependent Types and Refinement Types}
-In this section we will be providing the definitions of dependent types.
+In this chapter we will provide a formal introduction to the theory of dependent 
+types and refinement types. We follow up by reviewing the current knowledge 
+in the area, we analyse different programming languages and how they can 
+be made to support for the two types system and note interesting design 
+decisions. Finally, we summarise our finding and identify the novelty of our 
+project. 
+ 
+\section{Dependent Types}
 
 \subsection{Definition of Dependent Types}
 At a very high level dependent types are types that depends on the value of 
@@ -379,7 +377,6 @@ Formally, a value $x$ is well typed with regards to a refinement type
 if $P(x)$ evaluates to \textit{true}.
 
 \section{Refinement Types vs Dependent Types}
-
 The key differentiating factor between refinement types and dependent types is 
 that the latter is unrestricted. A refinement type is restricted predicate 
 $P(\upsilon)$ whereas a dependent types is able to rely on a function $P(x)$ 
@@ -2022,7 +2019,7 @@ allocating a new heap address with type $T$ gets a reference of the same type.
 Lastly, we define the operational semantics for the new expressions in figure 
 \ref{fig:sos_pointers}.
 
-\begin{figure}[H]
+\begin{figure}[h]
   \begin{center}
     \begin{tabular} {c}
       \inference {
@@ -2165,7 +2162,7 @@ Notice that unlike C/C++, Simple-$R^{*}$ does not have the notion of
 \textit{referencing}, the only way to obtain a pointer is through the use of 
 \textbf{new} or \textbf{newconst}. This form of semantic avoids pitfalls in C/C++ 
 where one gives a pointer to a constant the address of a mutable variable as 
-demonstrated in \ref{section:const_immutable}.
+demonstrated in section \ref{section:const_immutable}.
 
 \par
 The program is valid because in C/C++ the keyword \textbf{const} does not mean 
@@ -2177,7 +2174,7 @@ modification on a heap location. We define the operational semantics for the
 new expression in figure \ref{fig:sos_const_ptr}, the rules simply restrict the 
 ability to modify the value of a constant heap address.
 
-\begin{figure}[H]
+\begin{figure}[h]
   \begin{center}
     \begin{tabular} {c}
       \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
@@ -2203,18 +2200,18 @@ The introduction of immutable heap address allows us to specify a concrete
 behaviour for refinement types in the presence of pointers. Adopting a similar 
 strategy to our previous restriction, we require all pointers present in a 
 refinement predicate to not only be a constant itself but it must also be 
-referencing a constant value. In the following text, assume that we are 
-adopting and extending the semantics discussed in section 3.4.3 where we 
+referencing a constant value. In the following text, we will be incorporating 
+the same idea used in Simple-$R_{I}$ where we 
 restrict mutation on free variables in a refinement predicate. 
 
 \par
-We define a new predicate that will be used in our definition, $is\_ref(x)$ 
-returns true if and only if $x$ is a pointer variable.
+We define a new predicate, $is\_ref(x)$, which returns true if and only if $x$ 
+is a pointer variable. Formally, $is\_ref(x) \Leftrightarrow \Gamma(x) = T\textit{ ref}$.
 \par
-Formally, $is\_ref(x) \Leftrightarrow \Gamma(x) = T\textit{ ref}$, 
-the new specification is defined in figure \ref{fig:immu_pointer_typedef}.
+The new specification for refinement type definition 
+is proposed in figure \ref{fig:immu_pointer_typedef}.
 
-\begin{figure}[H]
+\begin{figure}[h]
   \begin{center}
     \begin{tabular}{c}
       \inference {
@@ -2247,9 +2244,6 @@ specified in figure \ref{fig:sos_const_ptr}.
 The example program showed previously in figure \ref{fig:amb_refinement_pointers} 
 is now an invalid program. To make it valid we adopted the newly defined rules 
 and rewrote it in figure \ref{fig:valid_ptr_program}.
-
-With our newly defined rules the program in figure \ref{fig:amb_refinement_pointers} 
-becomes invalid, we can rewrite our program to be correct as shown in the example below. 
 
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
