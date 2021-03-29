@@ -252,7 +252,7 @@ follows. This first chapter outlines our motivation for this project and our
 contributions. 
 
 \par
-In chapter 2 we provide background on the areas, we first give the 
+In chapter \ref{chapter:background} we provide background on the areas, we first give the 
 formal definition of dependent types and how it differs from refinement types. 
 The remainder of the chapter is a survey on the current state of 
 dependent types and refinement types in existing programming languages. 
@@ -264,7 +264,13 @@ TypeScript and more. Finally, we extensively studied C++ as its templating
 engine bears strong resemblence to refinement types and we observe its limitation. 
 
 \par
-In chapter 3 we introduce an imperative language with refinement type support. 
+In chapter \ref{chapter:key_concepts} we identify several key concepts in 
+programming language that are relevant to our project. We explain 
+and show examples of these concepts in action. Some mechanics are in programming 
+languages are non-trivial, we explain and clarify some of these behaviours.  
+
+\par
+In chapter \ref{chapter:simple_r} we introduce an imperative language with refinement type support. 
 Our language, named Simple-$R$, is a First-Order Programming Language which 
 highly resembles the C programming language. Our aim with the language is to 
 capture the core behaviour of refinement types, for the pursuit 
@@ -280,15 +286,13 @@ our mechanisms and similar mechanisms implemented in established languages such
 as C++ and Java. 
 
 \par
-In chapter 4 we will discuss our work with regards to the 
+In chapter \ref{chapter:related_work} we will discuss our work with regards to the 
 existing work done in the area and how it completments the literature.
-Finally we will conclude by discussing advanced features that can be integrated 
-into our languages and how it can further complicate the language. We will also 
-discuss some of the other considerations that need to be taken account when 
-thinking about incorporating dependent types into a real language. 
+Finally, we will conclude by discussing advanced features that can be integrated 
+into our languages and how it can further complicate the language in chapter 
+\ref{chapter:further_work}. 
 
-
-\chapter{Background Research} 
+\chapter{Background Research} \label{chapter:background}
 In this chapter we will provide a formal introduction to the theory of dependent 
 types and refinement types. We follow up by reviewing the current knowledge 
 in the area, we analyse different programming languages and how they can 
@@ -794,7 +798,7 @@ these form of typing in real-world languages remains informal and are
 mainly documented as online articles. Our project will be focused on providing 
 formal semantics for refinement types in a real-world imperative language. 
 
-\chapter{Key Concepts in Programming Languages}
+\chapter{Key Concepts in Programming Languages} \label{chapter:key_concepts}
 Throughout our research, we observed certain ideas that are commonly used across 
 different work. In this next chapter, we will introduce key concepts that are 
 relevant to our project and how these idea will be used to create a refinement 
@@ -895,8 +899,9 @@ further in our project.
 
 \section{Hybrid Type Checking}
 
+\section{Summary}
 
-\chapter{The Simple-$R$ Language}
+\chapter{The Simple-$R$ Language} \label{chapter:simple_r}
 We propose Simple-$R$, a basic procedural language with support for refinement 
 types. In this chapter we will describe the mechanics of the language in details.
 
@@ -2332,9 +2337,9 @@ showed how our variant avoid these pitfalls by disallowing referncing. We
 conclude the chapter by extending Simple-$R_{I}$ and Simple-$R_{C}$ with our new  
 idea. 
 
-\chapter{Further Work}
+\chapter{Related Work} \label{chapter:related_work}
 
-\chapter{Related Work}
+\chapter{Further Work} \label{chapter:further_work}
 
 \chapter{Summary and Conclusions} 
 
