@@ -899,7 +899,7 @@ Closures are predominantly associated with functions, however the idea itself is
 useful. The ability to bind values to variables within a scope will be explored 
 further in our project.
 
-\section{Hybrid Type Checking}
+\section{Hybrid Type Checking} \label{section:hybrid_type_checking}
 Programming languages handle type checking in two main ways, \textit{statically} 
 and \textit{dynamically}. Static type checking is the act of verifying the type 
 safety of a program by analysing the program's text. Dynamic type checking 
@@ -1180,7 +1180,7 @@ Evaluation of the function will then satisfy the return type $T_0$.
   \caption{Typing Rules for Functions in Simple-$R$}
 \end{figure}
 
-\subsubsection{Refinement Types}
+\subsubsection{Refinement Types} \label{section:ref_type_check}
 Finally we define typing rules for a refinement types. A refinement type 
 is represented in our system as $\{\upsilon : T\text{ }|\text{ }e\}$ and is 
 constructed by a base type $T$ and a refinement predicate $e$ which may contain 
@@ -1474,30 +1474,32 @@ and arguments are call-by-value.
 
 \subsection{Runtime Refinement Type Checking}
 A declaration of a variable that is a refinement type requires specific 
-evaluation rules. When one declare 
-a variable of a refinement type, the language has to ensure that the refinement 
-predicate evaluates to true. While we have defined a statically typed language, even in a statically 
-typed language, there are cases when the type of some data cannot be determined 
-statically. 
+evaluation rules. When one declare a variable of a refinement type, the language 
+has to ensure that the refinement predicate evaluates to true. While we have 
+defined a statically typed language, even in a statically typed language, 
+there are cases when the type of some data cannot be determined statically as 
+discussed in section \ref{section:hybrid_type_checking}.
 
 \par
 The refinement predicate in general proves to be undecidable 
 at compile time, one might require access to program state for values 
-of variables in order to evaluate the refinement predicate. In many cases, 
+of variables in order to evaluate it. In many cases, 
 only constants and constant expressions are available at compile time. 
 Interestingly, Cormac Flanagan proposed a similar idea dubbed \textit{Hybrid Type 
-Checking} \cite{hybridTypeChecking} to verify the correctness of Dependent Types and Refinement Types 
-in a $\lambda$-calculus. The paper inspired our idea by proposing a type checker that is 
+Checking} \cite{hybridTypeChecking} to verify the correctness of 
+Dependent Types and Refinement Types in a $\lambda$-calculus. The paper 
+inspired our idea by proposing a type checker that is 
 ``a synthesis of these two approaches that enforces precise interface 
 specifications, via static analysis where possible, but also via 
 dynamic checks where necessary''.
 
 \par
-Previously we demonstrated how basic properties of refinement types are checked 
-statically in Simple-$R$ using an unsound judgement, now we show 
-how these refinement types are validated dynamically at runtime. 
-We define a special form of typing judgement to type check refinement types dynamically.
-
+In section \ref{section:ref_type_check} we demonstrated how basic properties 
+of refinement types are checked statically in Simple-$R$ using 
+the unsound typing judgement (Refine-Base-US), now we show 
+how these refinement types are validated dynamically. 
+We define a special form of typing judgement to type check 
+refinement types dynamically.
 
 \begin{figure}[H]
   \begin{center}
