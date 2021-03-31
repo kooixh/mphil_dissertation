@@ -933,8 +933,8 @@ environment and thus it cannot be checked statically however there are certain
 properties about downcasting that can be checked statically.
 
 \par
-Consider three classes \verb|A|, \verb|B extends A| and 
-\verb|C extends B|. The program \verb|A x = new B();(C) x| 
+Consider a program with three classes \verb|A|, \verb|B extends A| and 
+\verb|C extends B|. The statements \verb|A x = new B();(C) x| 
 type checks at compile time as there is a possibility it will succeed at 
 runtime, however in this case it fails at runtime as \verb|x| is not a reference of 
 type \verb|C|. Note that in other cases such as \verb|Integer i = 10; (String) i|, 
@@ -943,6 +943,14 @@ succeed at all. The Java type checker verifies as much as possible
 statically, requiring only the most complicated type checks to runtime. 
 
 \section{Summary}
+In this chapter we introduced several key ideas in programming languages and 
+explained the meaning behind them. We note the difference between a constant and 
+immutabile object which will be key in the study of refinement types in 
+imperative languages. We introduced the concept of closures and showed examples 
+of it in action using JavaScript. Finally, we explained the difference in static 
+and dynamic type checking. We followed up by observing how these two type 
+checking mechanics are combined in feature-rich langauges like Java in order to 
+verify the correctness of complicated operations such as downcasting. 
 
 \chapter{The Simple-$R$ Language} \label{chapter:simple_r}
 We propose Simple-$R$, a basic procedural language with support for refinement 
@@ -1142,13 +1150,13 @@ type checker.
         {\Gamma \vdash e_1 \wedge e_2 : bool}[(\textbf{op} $\wedge$)] \text{ }
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool} 
         {\Gamma \vdash e_1 \vee e_2 : bool}[(\textbf{op} $\vee$)] & \\
+      \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
+        {\Gamma \vdash_{C} x := e_1 : Cmd} [($:=$)] & \\
       \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash C_1: Cmd & \Gamma \vdash C_2: Cmd}
         {\Gamma \vdash_{C} \text{\textbf{if }} e_1 \text{\textbf{ then }} 
-        C_1 \text{\textbf{ else }} C_2: Cmd}[(\textbf{if else})]
+        C_1 \text{\textbf{ else }} C_2: Cmd}[(\textbf{if else})] & \\
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash C_1: Cmd}
         {\Gamma \vdash_{C} \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1 : Cmd} [(\textbf{while do})] & \\
-      \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
-        {\Gamma \vdash_{C} x := e_1 : Cmd} [($:=$)] \text{ }
       \inference {\Gamma \vdash C_1: Cmd & \Gamma \vdash C_2: Cmd} 
         {\Gamma \vdash_{C} C_1;C_2 : T_2} [(concatenation $;$ $C$)] \text{ }
       & \\
@@ -1311,7 +1319,7 @@ using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rule
       \inference {\langle e_1, \sigma\rangle \Longrightarrow \langle e_1', \sigma \rangle}
         {\langle e_1\text{ }op\text{ }e_2, \sigma  
         \rangle \Longrightarrow \langle e_1'\text{ }op\text{ }e_2, \sigma \rangle}[($op$ $expr$)]
-      \text{ }
+      & \\
       \inference {\langle e_2, \sigma\rangle \Longrightarrow \langle e_2', \sigma \rangle}
         {\langle v\text{ }op\text{ }e_2, \sigma  
         \rangle \Longrightarrow \langle v\text{ }op\text{ }e_2', \sigma \rangle}[($op$ $expr$ 2)]
@@ -1730,11 +1738,12 @@ The typing judgement which appears identical to that of variable declaration.
 \end{center}
 
 \par
-The operational semantics describing the process of creating a immutable 
-variable is similar to the one for regular mutable variables. The only oddity 
-here is extending the assignment statement to only accept the latter. 
+The operational semantics in figure \ref{fig:immu_rules} describes the process of 
+declaring an immutable variable, the semantics are similar to that of  
+mutable variables. The only new addition here is extending the assignment 
+statement to only accept the latter. 
 
-\begin{figure}[H]
+\begin{figure}[h]
   \begin{center}
     \begin{tabular}{c}
       \inference {
@@ -1755,6 +1764,7 @@ here is extending the assignment statement to only accept the latter.
     \end{tabular}
   \end{center}
   \caption{Immutable Variables Rules for Simple-$R_{I}$}
+  \label{fig:immu_rules}
 \end{figure}
 
 \par
