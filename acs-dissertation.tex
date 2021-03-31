@@ -900,6 +900,47 @@ useful. The ability to bind values to variables within a scope will be explored
 further in our project.
 
 \section{Hybrid Type Checking}
+Programming languages handle type checking in two main ways, \textit{statically} 
+and \textit{dynamically}. Static type checking is the act of verifying the type 
+safety of a program by analysing the program's text. Dynamic type checking 
+verifies the same at runtime, after consideration the execution of statements. 
+
+\par
+One often associates the strong and weak typing with static and dynamic type 
+checking. While it is true that most weakly typed languages employs dynamica 
+type checking, strongly typed languages do no exclusively use static typing. 
+Modern programming languages offer complex features and some of which are hard 
+or impossible to decide statically. 
+
+\par
+In order to accomodate the evolving complexity of programming languages, the two 
+distinct approachs are incorporated together. Gordon Plotkin, et al discussed the 
+idea of dynamically checking a static language in this paper 
+\cite{dynamicCheckStaticLanguage}. In practice, modern languages like 
+Java and C# now supports the combination of static and dynamic type checking. 
+We refer to this new form of type check method as \emph{Hybrid Type Checking}.
+
+\subsubsection{Example of Hybrid Type Checking}
+Languages like Java are generally considered a statically typed language  
+however certain typing properties are impossible to check at compile time. In 
+order to address this, Java employs a combination of static and dynamic checking 
+to verify the type safety of advanced features such as \emph{downcasting}. 
+Downcasting is the act of converting a reference of a base class to one of its 
+derived class. However, unlike upcasting, downcasting is only possible if the 
+variable of the base class has a value of the derived class being downcasted to. 
+Discovering if a variable can be downcasted relies on dynamic runtime 
+environment and thus it cannot be checked statically however there are certain 
+properties about downcasting that can be checked statically.
+
+\par
+Consider three classes \verb|A|, \verb|B extends A| and 
+\verb|C extends B|. The program \verb|A x = new B();(C) x| 
+type checks at compile time as there is a possibility it will succeed at 
+runtime, however in this case it fails at runtime as \verb|x| is not a reference of 
+type \verb|C|. Note that in other cases such as \verb|Integer i = 10; (String) i|, 
+type checking fails at compile time because there is no way for the casting to 
+succeed at all. The Java type checker verifies as much as possible 
+statically, requiring only the most complicated type checks to runtime. 
 
 \section{Summary}
 
@@ -1437,19 +1478,7 @@ evaluation rules. When one declare
 a variable of a refinement type, the language has to ensure that the refinement 
 predicate evaluates to true. While we have defined a statically typed language, even in a statically 
 typed language, there are cases when the type of some data cannot be determined 
-statically. Gordon Plotkin, et al discussed the idea of dynamically checking a static 
-language in this work \cite{dynamicCheckStaticLanguage}.
-
-\par
-Languages like Java are generally considered a statically typed language  
-however certain typing properties are impossible to check at compile time. In 
-order to address this, Java employs a combination of static and dynamic checking. For example, 
-consider downcasting in Java using the classes \verb|A|, \verb|B extends A| and 
-\verb|C extends B|. The expression \verb|A x = new B();(C) x| 
-is valid at compile time as there is a possibility it will succeed at 
-runtime, however in this case it fails at runtime as \verb|x| is not type \verb|C|. Note 
-that in some cases like \verb|Integer i = 10; (String) i|, 
-casting fails at compile time because there is no way for it to succeed at all. 
+statically. 
 
 \par
 The refinement predicate in general proves to be undecidable 
