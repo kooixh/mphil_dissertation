@@ -960,13 +960,14 @@ We propose Simple-$R$, a basic procedural language with support for refinement
 types. In this chapter we will describe the mechanics of the language in details.
 
 \section{Language Syntax}
-\begin{figure}[H]
+\begin{figure}[h]
   \begin{center}
     \begin{tabular}{l l l}
       \textit{Types} & $T$ & $:\text{ }int\text{ }|\text{ }bool\text{ }|
-      \text{ }\{x: T\text{ }|\text{ }e\}\text{ }|\text{ }Cmd$\\
-      \textit{Functions Type} &  & $:\text{ }T_1, T_2,T_3...T_n\longrightarrow T_0$\\
-      \textit{Functions Definition} & $f$ & $:$ $(x_0,x_1,...x_n) \longrightarrow C;e$\\
+      \text{ }\{x: T\text{ }|\text{ }e\}$\\
+      \textit{Function Type} &  & $:\text{ }T_1, T_2,T_3...T_n\longrightarrow T_0$\\
+      \textit{Function Definition} & $f$ & $:$ $(x_0,x_1,...x_n) \longrightarrow C;e$ $|$ \\ 
+      & & \; $(x_0,x_1,...x_n) \longrightarrow \textbf{begin } D;C;e\textbf{ end}$\\
       \textit{Operators} & $ops$ & $:$ $+$ $|$ $-$ $|$ $\wedge$ $|$ $\vee$ $|$ $<$ $|$ $>$ \\
       \textit{Expressions} & $e$ & $:$ $vals$ $|$ $x$ $|$ $e_1$ $ops$ $e_2$ 
       $|$ $f(e_1...e_n)$ \\
@@ -974,7 +975,7 @@ types. In this chapter we will describe the mechanics of the language in details
       $|$ \textbf{while} $e_1$ \textbf{do} $C_1$ $|$ \\ 
         & & \; \textbf{if} $e_1$ \textbf{then} $C_1$ \textbf{else} $C_2$ $|$ 
         $\textbf{begin } D;C_1\textbf{ end}$ \\
-      \textit{Declarations} & $D$ & $:$ $\textbf{var } x : T = e$ \\
+      \textit{Declarations} & $D$ & $:$ $\textbf{var } x : T = e$ $|$ $D_0;D_1$\\
       \textit{Variables} & $vars$& $:$ $x \in {a,b,c...z}$\\
       \textit{Values} & $vals$& $:$ $\forall v \in \mathbb{Z}$ $|$ $\forall v \in \mathbb{B}$\\
       \textit{Variable Types Context} & $\Gamma$& $:$ $vars \mapsto T$\\
@@ -982,10 +983,11 @@ types. In this chapter we will describe the mechanics of the language in details
     \end{tabular}
   \end{center}
   \caption{Language Syntax for Simple-$R$}
+  \label{fig:simple_r_syntax}
 \end{figure}
 
 \par
-Figure 3.1 shown above is the syntax of Simple-$R$, the paragraphs below 
+Figure \ref{fig:simple_r_syntax} shown above is the syntax of Simple-$R$, the paragraphs below 
 explains the language in details. In contrast to other literature in this area, 
 Simple-$R$ is a \textit{First Order Programming Language} \cite{FOL} modeled 
 after the WHILE \cite{whileLanguage} programming language but with functions.
@@ -1003,7 +1005,6 @@ types, the language is kept at a minimum with only the necessary construct.
   \item The basic boolean type \textit{bool}
   \item The refinement type, written as $\{x: A\text{ }|\text{ }e\}$. This defines 
   a type that is a refinement of type $A$ that satisfies a boolean expression $e$.
-  \item The \textit{Cmd} type to represent a command.
 \end{itemize}
 
 \paragraph{Functions}
@@ -1062,7 +1063,8 @@ actions. Simple-$R$ supports the following commands,
 \paragraph{Declaration} Declarations are the method one use declare new construct 
 in the program. We start the language off having the most basic variable declaration 
 $\textbf{var }x : T = e$ which declare a new variable $x$ of type $T$ and 
-initialise it the resulting value of expression $e$.
+initialise it the resulting value of expression $e$. Multiple declarations can 
+be declared in a scope by concatenating multiple declaration as $D_0;D_1$.
 
 \paragraph{Variables and Values} In Simple-$R$, all variables are allocated 
 locally, we use $x$ to denote a variable. Variables can take values as suggested by the types, all the integer 
@@ -1097,7 +1099,7 @@ definitions.
     \begin{itemize}
       \item $\sigma + \{x \mapsto v\}$ adds $\{x \mapsto v\}$ to $\sigma$ provided initially $x \notin\textbf{dom}(\sigma)$. 
       \item $\sigma[x \mapsto v]$ or $\sigma \uplus \{x \mapsto v\}$ updates $\sigma$ such that now $\sigma(x) = v$.
-      \item $\sigma \setminus \{x\}$ to remove $x$ from $sigma$, provided that $x \in \textbf{dom}(\sigma)$.
+      \item $\sigma \setminus \{x\}$ to remove $x$ from $\sigma$, provided that $x \in \textbf{dom}(\sigma)$.
     \end{itemize}
   \item $\langle e, \sigma \rangle \Longrightarrow \langle e', \sigma \rangle$ as the transition relation for expression.
   \item $\langle C, \sigma \rangle \longrightarrow \langle C', \sigma' \rangle$ and $\langle C, \sigma \rangle \longrightarrow \sigma'$ as the transition relation for commands.
@@ -1108,7 +1110,7 @@ We begin by defining the typing judgements. The typing judgements used in
 Simple-$R$ takes the form of the standard notation. 
 \begin{center}
   $\Gamma \vdash e : T$\\
-  $\Gamma \vdash_{C} C : Cmd$\\
+  $\Gamma \vdash_{C} C : void$\\
   $\Gamma \vdash_{D} D \dashv \Gamma'$\\
 \end{center}
 This first and second judgement represents that expression $e$ 
@@ -1124,7 +1126,7 @@ values \textit{int}, \textit{bool}, $nil$ and variables.
     \begin{tabular} {c}
       $\forall n \in \mathbb{Z}$, $\Gamma \vdash n : int$ & 
       $\forall b \in \mathbb{B}$, $\Gamma \vdash b : bool$ & 
-      $\Gamma \vdash_{C} \textbf{skip} : Cmd$ & 
+      $\Gamma \vdash_{C} \textbf{skip} : void$ & 
       $x : T, \Gamma \vdash x : T$ 
     \end{tabular}
   \end{center}
@@ -1154,20 +1156,23 @@ type checker.
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool} 
         {\Gamma \vdash e_1 \vee e_2 : bool}[(\textbf{op} $\vee$)] & \\
       \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
-        {\Gamma \vdash_{C} x := e_1 : Cmd} [($:=$)] & \\
-      \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash C_1: Cmd & \Gamma \vdash C_2: Cmd}
+        {\Gamma \vdash_{C} x := e_1 : void} [($:=$)] \text{ }
+      \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash C_1: void & \Gamma \vdash C_2: void}
         {\Gamma \vdash_{C} \text{\textbf{if }} e_1 \text{\textbf{ then }} 
-        C_1 \text{\textbf{ else }} C_2: Cmd}[(\textbf{if else})] & \\
-      \inference {\Gamma \vdash e_1: bool & \Gamma \vdash C_1: Cmd}
-        {\Gamma \vdash_{C} \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1 : Cmd} [(\textbf{while do})] & \\
-      \inference {\Gamma \vdash C_1: Cmd & \Gamma \vdash C_2: Cmd} 
-        {\Gamma \vdash_{C} C_1;C_2 : T_2} [(concatenation $;$ $C$)] \text{ }
-      & \\
+        C_1 \text{\textbf{ else }} C_2: void}[(\textbf{if else})] & \\
+      \inference {\Gamma \vdash e_1: bool & \Gamma \vdash C_1: void}
+        {\Gamma \vdash_{C} \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1 : void} [(\textbf{while do})] \text{ }
+      \inference {\Gamma \vdash C_0: void & \Gamma \vdash C_1 : void} 
+        {\Gamma \vdash_{C} C_0;C_1 : T_2} [($C$-Concat)] 
+        & \\
       \inference {\Gamma \vdash e_1: T_1} 
-        {\Gamma \vdash_{D} \textbf{var } x : T_1 = e_1 \dashv \Gamma + \{x \mapsto T_1\}} [($vars$ Declaration)]
+        {\Gamma \vdash_{D} \textbf{var } x : T_1 = e_1 \dashv \Gamma + \{x \mapsto T_1\}} [(D-$Vars$)] 
       & \\
-      \inference {\Gamma \vdash D_1 \dashv \Gamma' & \Gamma' \vdash_{C} C_1 : Cmd} 
-        {\Gamma \vdash_{C} \textbf{begin }D_1;C_1\textbf{ end}} [(Begin scope)]     
+      \inference {\Gamma \vdash_{D} D_0 \dashv \Gamma' & \Gamma' \vdash_{D} D_1 \dashv \Gamma''} 
+        {\Gamma \vdash_{D} D_0;D_1 \dashv \Gamma''} [($D$-Concat)] \text{ }  
+      & \\
+      \inference {\Gamma \vdash D_1 \dashv \Gamma' & \Gamma' \vdash_{C} C_1 : void} 
+        {\Gamma \vdash_{C} \textbf{begin }D_1;C_1\textbf{ end} : void} [(Begin scope)]     
     \end{tabular}
   \end{center}
 \caption{Basic Typing Rules for Simple-$R$}
@@ -1185,7 +1190,7 @@ Evaluation of the function will then satisfy the return type $T_0$.
     \begin{tabular} {c}
       \inference {f : T_1,T_2...T_n \longrightarrow T_0 \\ 
       \Gamma \vdash e_1 : T_1 & \Gamma \vdash e_2 : T_2 &...& \Gamma \vdash e_n : T_n}
-        {\Gamma \vdash f(e_1...e_n): T_0}[(\textit{functions})]
+        {\Gamma \vdash f(e_1...e_n): T_0}[(Func)]
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Functions in Simple-$R$}
@@ -1209,7 +1214,7 @@ We begin by defining the formation rule for a refinement type.
   \begin{center}
     \begin{tabular} {c}
       \inference {\Gamma \vdash \upsilon : T & \Gamma, \upsilon : T \vdash e : bool}
-        {\Gamma \vdash \{\upsilon : T\text{ }|\text{ }e\}: Type}[(Refinement Type formation)]
+        {\Gamma \vdash \{\upsilon : T\text{ }|\text{ }e\}: Type}[(Refine-Type-Form)]
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Refinement Types in Simple-$R$}
@@ -1238,7 +1243,7 @@ order for a value to have a chance of being a valid refinement type, it has to
 type check against the base type. 
 
 \par
-We define an unsound typing judgement to capture this behaviour statically. 
+We define an \emph{unsound} typing judgement to capture this behaviour statically. 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
@@ -1256,15 +1261,15 @@ we express $A$ is a subtype of $B$ as $A \preceq B$.
   \begin{center}
     \begin{tabular} {c}
       
-      $\Gamma \vdash \{\upsilon : T\text{ }|\text{ }e\} \preceq T$ (Subtype Base 1)
+      $\Gamma \vdash \{\upsilon : T\text{ }|\text{ }e\} \preceq T$ (Subtype-Base 1)
       & \\
       \inference {\Gamma \vdash \forall \upsilon_1 : T.\text{ }e_1 \Rightarrow e_2[\upsilon_1/\upsilon_2]}
-      {\Gamma \vdash \{\upsilon_1 : T_1\text{ }|\text{ }e_1\} \preceq \{\upsilon_2 : T_1\text{ }|\text{ }e_2\}} [(Subtype Base 2)]
+      {\Gamma \vdash \{\upsilon_1 : T_1\text{ }|\text{ }e_1\} \preceq \{\upsilon_2 : T_1\text{ }|\text{ }e_2\}} [(Subtype-Base 2)]
       & \\ 
       \inference {\Gamma \vdash T_1 \preceq T_2 & \Gamma \vdash T_1 \preceq T_3} 
-      {\Gamma \vdash T_1 \preceq T_2} [(Subtype Trans)]
+      {\Gamma \vdash T_1 \preceq T_2} [(Subtype-Trans)]
       & \\
-      $\Gamma \vdash T_1 \preceq T_1$ (Subtype Reflex)
+      $\Gamma \vdash T_1 \preceq T_1$ (Subtype-Reflex)
     \end{tabular}
   \end{center}
 \end{figure}
@@ -1310,24 +1315,24 @@ using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rule
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {v = v_1 + v_2}{\langle v_1 + v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(op $+$)] \text{ }
-      \inference {v = v_1 - v_2}{\langle v_1 - v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(op $-$)]
+      \inference {v = v_1 + v_2}{\langle v_1 + v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(Op-Add)] \text{ }
+      \inference {v = v_1 - v_2}{\langle v_1 - v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(Op-Minus)]
       & \\
-      \inference {v = v_1 < v_2}{\langle v_1 < v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(op $<$)] \text{ }
-      \inference {v = v_1 > v_2}{\langle v_1 > v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(op $>$)]
+      \inference {v = v_1 < v_2}{\langle v_1 < v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(Op-Less)] \text{ }
+      \inference {v = v_1 > v_2}{\langle v_1 > v_2, \sigma \rangle \Longrightarrow  \langle v, \sigma \rangle}[(Op-Greater)]
       & \\
-      \inference {v = v_1 \wedge v_2}{\langle v_1 \wedge v_2, \sigma \rangle \Longrightarrow \langle v, \sigma \rangle}[(op $\wedge$)] \text{ }
-      \inference {v = v_1 \vee v_2}{\langle v_1 \vee v_2, \sigma \rangle \Longrightarrow \langle v, \sigma \rangle}[(op $\vee$)]
+      \inference {v = v_1 \wedge v_2}{\langle v_1 \wedge v_2, \sigma \rangle \Longrightarrow \langle v, \sigma \rangle}[(Op-AND)] \text{ }
+      \inference {v = v_1 \vee v_2}{\langle v_1 \vee v_2, \sigma \rangle \Longrightarrow \langle v, \sigma \rangle}[(Op-OR)]
       & \\
       \inference {\langle e_1, \sigma\rangle \Longrightarrow \langle e_1', \sigma \rangle}
         {\langle e_1\text{ }op\text{ }e_2, \sigma  
-        \rangle \Longrightarrow \langle e_1'\text{ }op\text{ }e_2, \sigma \rangle}[($op$ $expr$)]
+        \rangle \Longrightarrow \langle e_1'\text{ }op\text{ }e_2, \sigma \rangle}[(Op-$E$ 1)]
       & \\
       \inference {\langle e_2, \sigma\rangle \Longrightarrow \langle e_2', \sigma \rangle}
         {\langle v\text{ }op\text{ }e_2, \sigma  
-        \rangle \Longrightarrow \langle v\text{ }op\text{ }e_2', \sigma \rangle}[($op$ $expr$ 2)]
+        \rangle \Longrightarrow \langle v\text{ }op\text{ }e_2', \sigma \rangle}[(Op-$E$ 2)]
       & \\
-      \inference {x \in \textbf{dom}(\sigma)}{\langle x, \sigma \rangle \Longrightarrow \langle \sigma(x), \sigma \rangle}[($vars$) evaluation] 
+      \inference {x \in \textbf{dom}(\sigma)}{\langle x, \sigma \rangle \Longrightarrow \langle \sigma(x), \sigma \rangle}[(Vars)] 
     \end{tabular}
   \end{center}
   \caption{Basic Evaluation Rules for Simple-$R$ Expression}
@@ -1337,30 +1342,30 @@ using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rule
 \begin{figure}[h]
   \begin{center}
     \begin{tabular} {c}
-      $\langle \text{\textbf{skip}}, \sigma \rangle \longrightarrow \sigma$ (\textbf{skip})
+      $\langle \text{\textbf{skip}}, \sigma \rangle \longrightarrow \sigma$ (Skip)
       \text{ }
       \inference {\langle C_1, \sigma \rangle \longrightarrow\sigma'}
-        {\langle C_1;C_2, \sigma \rangle \longrightarrow \langle C_2, \sigma' \rangle}[($C_1;C_2$)]
+        {\langle C_1;C_2, \sigma \rangle \longrightarrow \langle C_2, \sigma' \rangle}[(Cmd-Concat)]
       & \\
       $\langle \text{\textbf{if }\textit{true}} \text{\textbf{ then }} C_1 \text{\textbf{ else }} 
-        C_2, \sigma \rangle \longrightarrow \langle C_1, \sigma\rangle$ (\textbf{if} true)
+        C_2, \sigma \rangle \longrightarrow \langle C_1, \sigma\rangle$ (IF-True)
       & \\
       $\langle \text{\textbf{if }\textit{false}} \text{\textbf{ then }} C_1 \text{\textbf{ else }} 
-        C_2, \sigma \rangle \longrightarrow \langle C_2, \sigma\rangle$ (\textbf{if} false)
+        C_2, \sigma \rangle \longrightarrow \langle C_2, \sigma\rangle$ (IF-False)
       & \\
       \inference {\langle e_1, \sigma \rangle\Longrightarrow\langle e_1', \sigma \rangle}
         {\langle \text{\textbf{if }} e_1 \text{\textbf{ then }} C_1 \text{\textbf{ else }} 
         C_2, \sigma \rangle \longrightarrow \langle \textbf{if } e_1' \text{\textbf{ then }} C_1 \text{\textbf{ else }} 
-        C_2, \sigma \rangle}[(\textbf{if} $expr$)] 
+        C_2, \sigma \rangle}[(IF-$E$)] 
       & \\
       $\langle \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1, \sigma \rangle \longrightarrow \langle 
         \text{\textbf{if }} e_1 \text{\textbf{ then }} C_1;
-        (\text{\textbf{while }} e_1 \text{\textbf{ do }} C_1) \text{\textbf{ else }} \textbf{skip}, \sigma \rangle$ (\textbf{while do})      
+        (\text{\textbf{while }} e_1 \text{\textbf{ do }} C_1) \text{\textbf{ else }} \textbf{skip}, \sigma \rangle$ (WHILE)      
       & \\
       \inference {x \in \textbf{dom}(\sigma)} 
-      {\langle x := v, \sigma \rangle \longrightarrow \sigma[x \mapsto v]} [(assign 1)] \text{ }
+      {\langle x := v, \sigma \rangle \longrightarrow \sigma[x \mapsto v]} [(Assign-$V$)] \text{ }
       \inference {\langle e, \sigma \rangle \Longrightarrow \langle e', \sigma \rangle} 
-      {\langle x := e, \sigma \rangle \longrightarrow \langle x := e', \sigma \rangle} [(assign 2)]
+      {\langle x := e, \sigma \rangle \longrightarrow \langle x := e', \sigma \rangle} [(Assign-$E$)]
      \end{tabular}
   \end{center}
   \caption{Operational Semantics for Simple-$R$ Commands}
@@ -1401,13 +1406,25 @@ in figure \ref{fig:scoping_rules}.
       \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) 
       & \langle C_1, \sigma' \rangle \longrightarrow^{*} \sigma''} 
       {\langle\textbf{begin var }x : T = v_0; C_1 \textbf{ end}, \sigma \rangle 
-      \longrightarrow \sigma'' \setminus \{x\}} [(\textbf{begin end} values)] 
+      \longrightarrow \sigma'' \setminus \{x\}} [(Begin-$V$)] 
       & \\
       \footnotesize
       \inference {\langle e_1, \sigma \rangle \Longrightarrow \langle e_1', \sigma \rangle} 
       {\langle \textbf{begin var }x : T = e_1;C_1\textbf{ end}, \sigma \rangle 
-      \Longrightarrow \langle\textbf{begin var }x : T = e_1;C_1\textbf{ end}, \sigma \rangle} 
-      [(\textbf{begin end} $expr$)]
+      \longrightarrow \langle\textbf{begin var }x : T = e_1';C_1\textbf{ end}, \sigma \rangle} 
+      [(Begin-$E$)]
+      \normalsize
+      & \\
+      \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) 
+      & \langle \textbf{begin }D_1;C_1 \textbf{ end}, \sigma' \rangle \longrightarrow^{*} \sigma''} 
+      {\langle\textbf{begin var }x : T = v_0;D_1;C_1 \textbf{ end}, \sigma \rangle 
+      \longrightarrow \sigma'' \setminus \{x\}} [(Begin-$D$-Concat-$V$)] 
+      & \\
+      \footnotesize
+      \inference {\langle e_1, \sigma \rangle \Longrightarrow \langle e_1', \sigma \rangle} 
+      {\langle \textbf{begin var }x : T = e_1;D;C_1\textbf{ end}, \sigma \rangle 
+      \longrightarrow \langle\textbf{begin var }x : T = e_1';D;C_1\textbf{ end}, \sigma \rangle} 
+      [(Begin-$D$-Concat-$E$)]
       \normalsize
     \end{tabular}
   \end{center}
@@ -1433,6 +1450,14 @@ The multi-step evaluation provides us to easily express scoping rules,
 the alternative would be to model an explicit call stack, which complicates the 
 formulas and syntax.
 
+\par
+Multiple declarations are handled by evaluating the declarations in order 
+starting from the first. The rule (Begin-D-Concat-V) and (Begin-D-Concat-E) 
+formalise the behaviour, note that since the rules for a single declaration and 
+concatenated declaration appears similar, in the rest of the chapter we only 
+specify operational semantics for the former. The corresponding rule for 
+concatenation can be formalised easily. 
+
 \subsection{Functions} \label{section:functions_sos}
 Functions in almost all imperative language operates in their own scope. In many 
 cases they do not have the access to the local variables out of their scope however 
@@ -1444,7 +1469,7 @@ evaluate functions in their own scope.
 \par
 In order to define the operational semantics of a function we will need to 
 specify the function body. We define a mapping 
-\textit{fns} $: f \mapsto ((x_1, x_2...x_n), C_1;e)$, 
+\textit{fns} $: f \mapsto ((x_1, x_2...x_n), f_{body})$, 
 using this mapping allows us to retrieve the body of a function. Since functions 
 definition cannot be changed at runtime, this does not need to be part of the 
 configuration and can be consider as a static context.
@@ -1455,20 +1480,26 @@ We can then evaluate the function body which using the multi-step evaluation.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\textit{fns}(f) = ((x_1..x_n), C_1;e_1) & \langle C_1, \sigma' 
+      \inference {\textit{fns}(f) = ((x_1..x_n), C;e) & \langle C, \sigma' 
       \rangle \longrightarrow^{*} \sigma''
-        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \langle e_1, \sigma'' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
-      {\langle f(v_1...v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(function call vals)]
+        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \langle e, \sigma'' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
+      {\langle f(v_1...v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(Func-$V$)]
+      & \\
+      \inference {
+      \textit{fns}(f) = ((x_1..x_n),\textbf{begin }D;C;e\textbf{ end}) \\
+      \langle \textbf{begin }D;C;\textbf{ end}, \sigma' \rangle \longrightarrow^{*} \sigma'' \setminus \{\alpha, \beta, ...\}
+      \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\}  & \langle e, \sigma'' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
+      {\langle f(v_1...v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(Func-$D$)]
       & \\
       \inference {\langle e_k, \sigma \rangle \Longrightarrow \langle e_k', \sigma' \rangle}
-      {\langle f(v_0...v_{k - 1},e_k...e_n), \sigma \rangle \Longrightarrow \langle f(v_0...v_{k - 1}, e_{k}'...e_n), \sigma \rangle} [(function call expr)]
+      {\langle f(v_0...v_{k - 1},e_k...e_n), \sigma \rangle \Longrightarrow \langle f(v_0...v_{k - 1}, e_{k}'...e_n), \sigma \rangle} [(Func-$E$)]
     \end{tabular}
   \end{center}
   \caption{Functions Semantics for Simple-$R$}
 \end{figure}
 
 \par
-The first rule (function call vals) resembles the evaluation rule for 
+The first rule (Func-$V$) resembles the evaluation rule for 
 variable declaration but it differs in a crucial way, in the new context for a 
 function call, none of the variables from the previous scope transfer over, only 
 the argument values are copied. We then evaluates the function body until it 
@@ -1477,7 +1508,13 @@ scopes, functions only update its local state which is dellalocated upon return.
 It cannot change the caller's state. 
 
 \par
-The second rule (function call $expr$) evaluates the expression passed into the 
+The second rule (Func-$D$) allows one to declare new variables in the function 
+body that can be used in the final return value. The operational semantics 
+evaluates the command using the semantics for \textbf{begin end}, however, we 
+retain the modified state and evaluates the expression with the new values. 
+
+\par
+The third rule (Func-$E$) evaluates the expression passed into the 
 function as arguments. Our language defines a strict behaviour that all 
 arguments are evaluated in the order they are passed in, i.e. from left to right 
 and arguments are call-by-value.
@@ -1595,9 +1632,9 @@ in the example above we used the statement
 (\textbf{typedef} $x = \{\upsilon : T\text{ }|\text{ }e\}$) to denote a 
 new refinement type $\{\upsilon : T\text{ }|\text{ }e\}$ with the name $x$. It is 
 important to note that a \textbf{typedef} can only declare a new refinement type, one is 
-not able to use \textbf{typedef} to provide an alias for a base type, i.e. 
-$\textbf{typedef } x = int$ is forbidden however, one is able to achieve the 
-same by declaring $\{\upsilon : int\text{ }|\text{ }true\}$.
+not able to use \textbf{typedef} to provide an alias for a base type, the type 
+definition $\textbf{typedef } x = int$ is forbidden, however one is able to achieve the 
+same effect by declaring $\textbf{typedef }newint = \{\upsilon : int\text{ }|\text{ }true\}$.
 
 \par
 Figure \ref{fig:typedef-extend} extends the syntax of Simple-$R$ to introduce 
@@ -1629,7 +1666,7 @@ $\Gamma, \tau \vdash e : T$.
   \begin{tabular} {c}
     \inference{\Gamma \vdash \{\upsilon : T\text{ }|\text{ }e\} : Type}
     {\Gamma, \tau \vdash_{D} \textbf{typedef } x = \{\upsilon : T\text{ }|\text{ }e\} 
-    \dashv \Gamma + \{x \mapsto Type\}, \tau + \{x \mapsto \{\upsilon : T\text{ }|\text{ }e\}\}}  
+    \dashv \Gamma + \{x \mapsto Type\}, \tau + \{x \mapsto \{\upsilon : T\text{ }|\text{ }e\}\}} [(Typedef)]
   \end{tabular}
 \end{center}
 
@@ -1641,7 +1678,7 @@ static refinement type (Refine-Base-US) rule using the following judgement.
 \begin{center}
   \begin{tabular} {c}
     \inference{\Gamma, \tau \vdash y : Type & \Gamma, \tau \vdash x : \tau(y)}
-    {\Gamma, \tau \vdash x : y} [(Refine-Base-vars-US)]
+    {\Gamma, \tau \vdash x : y} [(Refine-Base-Vars-US)]
   \end{tabular}
 \end{center}
 
@@ -1651,7 +1688,7 @@ During runtime, the type is validated using the following rule.
   \begin{center}
     \begin{tabular} {c}
       \inference{\Gamma \vdash x : Type & \Gamma \vdash_{R} e_1 : \tau(x)}
-      {\sigma, \Gamma \vdash_{R} e_1 : x }[(Runtime Refine vars)]
+      {\sigma, \Gamma \vdash_{R} e_1 : x }[(Runtime-Refine-Vars)]
     \end{tabular}
   \end{center}
 \end{figure}
@@ -1669,7 +1706,7 @@ All previous operational semantics should be updated consistently.
       x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) & \tau' = \tau + \{x \mapsto \{\upsilon : T\text{ }|\text{ }e\}\}}
       {\langle \textbf{begin typedef }x = \{\upsilon : T\text{ }|\text{ }e\};C_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow 
-        \langle \sigma', \tau \rangle}
+        \langle \sigma', \tau \rangle} [(Type-$D$)]
     \end{tabular}
   \end{center}
 \end{figure}
@@ -1735,7 +1772,7 @@ The typing judgement which parallels to that of variable declaration using $\tex
 \begin{center}
   \begin{tabular} {c}
     \inference {\Gamma \vdash e_1: T_1} 
-        {\Gamma \vdash_{D} \textbf{const } x : T_1 = e_1 \dashv \Gamma + \{x \mapsto T_1\}} [($vars$ Declaration)]
+        {\Gamma \vdash_{D} \textbf{const } x : T_1 = e_1 \dashv \Gamma + \{x \mapsto T_1\}} [(Const-$D$)]
   \end{tabular}
 \end{center}
 
@@ -1752,17 +1789,24 @@ statement to only accept the latter.
       \langle C_1, \sigma', \tau \rangle \longrightarrow^{*} \langle \sigma'', \tau' \rangle 
       \\ \sigma' = \sigma + \{x \mapsto v\} & x \notin \textbf{dom}(\sigma)} 
       {\langle \textbf{begin const }x : T = v;C_1\textbf{ end}, \sigma, \tau \rangle 
-      \longrightarrow \langle \sigma'' \setminus \{x\}, \tau' \rangle} [(\textbf{let in} values)] 
+      \longrightarrow \langle \sigma'' \setminus \{x\}, \tau' \rangle} [(Begin-$C$)] 
       & \\
       \footnotesize
       \inference {\langle e_1, \sigma, \tau \rangle \Longrightarrow \langle e_1', \sigma, \tau \rangle} 
       {\langle \textbf{begin const }x : T = e_1;C_1\textbf{ end}, \sigma,\tau \rangle 
       \longrightarrow \langle \textbf{begin const }x : T = e_1';C_1\textbf{ end}, \sigma, \tau \rangle}
-      [(\textbf{const in} $expr$)]
+      [(Begin-Const-E)]
       \normalsize
       & \\
+      \inference {
+      \langle \textbf{begin }D_1;C_1\textbf{ end}, \sigma', \tau \rangle \longrightarrow^{*} \langle \sigma'', \tau' \rangle 
+      \\ \sigma' = \sigma + \{x \mapsto v\} & x \notin \textbf{dom}(\sigma)} 
+      {\langle \textbf{begin const }x : T = v;D_1;C_1\textbf{ end}, \sigma, \tau \rangle 
+      \longrightarrow \langle \sigma'' \setminus \{x\}, \tau' \rangle} [(Begin-Concat-$C$)] 
+      & \\
       \inference {x \in \textbf{dom}(\sigma) & \neg is\_immutable(x)} 
-      {\langle x := v, \sigma, \tau \rangle \longrightarrow \langle \sigma[x \mapsto v], \tau \rangle} [(assignment $vals$)]
+      {\langle x := v, \sigma, \tau \rangle \longrightarrow \langle \sigma[x \mapsto v], 
+      \tau \rangle} [(Assign-$C$)]
     \end{tabular}
   \end{center}
   \caption{Immutable Variables Rules for Simple-$R_{I}$}
@@ -1801,7 +1845,7 @@ without using the \textbf{typedef} command.
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
       {\langle \textbf{begin typedef } x = \{\upsilon :T\text{ }|\text{ }e\};C_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow 
-        \langle \sigma', \tau \rangle}
+        \langle \sigma', \tau \rangle} [(Refine-Typdef-Immu)]
       & \\
       \inference {
       x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) \\
@@ -1809,7 +1853,7 @@ without using the \textbf{typedef} command.
       \\ \langle C_1, \sigma + \{x \mapsto v_1\} , \tau
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
       {\langle\textbf{begin var }x : \{\upsilon : T\text{ }|\text{ }e\} = v_1;C_1 \textbf{ end}, \sigma, \tau \rangle 
-      \longrightarrow \langle \sigma' \setminus \{x\}, \tau \rangle}
+      \longrightarrow \langle \sigma' \setminus \{x\}, \tau \rangle} [(Refine-Immu)]
     \end{tabular}
   \end{center}
 \end{figure}
@@ -1897,7 +1941,7 @@ $\tau$ and attach this to the type.
       \\ \langle C_1, \sigma, \tau + \{y \mapsto (\{\upsilon : T\text{ }|\text{ }e\}\}, \sigma_1, \tau_1)
       \rangle \longrightarrow^{*} \langle \sigma', \tau\rangle}
       {\langle\textbf{begin typedef } y = \{\upsilon : T\text{ }|\text{ }e\};C_1\textbf{ end}, 
-      \sigma, \tau \rangle \longrightarrow \langle \sigma', \tau \rangle} 
+      \sigma, \tau \rangle \longrightarrow \langle \sigma', \tau \rangle} [(Refine-Typedef-Closure)]
     \end{tabular}
   \end{center}
   \caption{Evaluation of Refinement Type with Closures}
@@ -1913,7 +1957,7 @@ the predicate using the current environment will hold.
 
 \par
 Our new typing judgement now retrieves the associated context 
-and evaluates appropriate, the new rule is defined in figure. 
+and evaluates appropriate, the new rule is defined in figure \ref{fig:runtime_refine_closure}. 
 
 \begin{figure}[H]
   \begin{center}
@@ -1922,10 +1966,11 @@ and evaluates appropriate, the new rule is defined in figure.
       \langle e[e_1/\upsilon], \sigma_1, \tau_1 \rangle \Longrightarrow^{*} \langle \textit{true}, \sigma_1, \tau_1 \rangle  
       \\
       \Gamma,\sigma, \tau \vdash x : Type & (\{\upsilon : T\text{ }|e\text{ }\}, \sigma_1, \tau_1) = \tau(x)}
-      {\Gamma,\sigma,\tau \vdash_{R} e_1 : x }
+      {\Gamma,\sigma,\tau \vdash_{R} e_1 : x } [(Refine-Runtime-Closure)]
     \end{tabular}
   \end{center}
   \caption{Type Checking a Refinement Type in Simple-$R_{C}$}
+  \label{fig:runtime_refine_closure}
 \end{figure}
 
 \par
@@ -2036,7 +2081,7 @@ the notation, $\Delta(h)$ to get the value held at a particular heap address.
 We first define the typing judgement for the base types for references. 
 
 \begin{center}
-   $\Gamma \vdash h : T\textit{ ref}$ (Heap address type)
+   $\Gamma \vdash h : T\textit{ ref}$ (Heap-Addr)
 \end{center}
 
 \par
@@ -2048,11 +2093,12 @@ allocating a new heap address with type $T$ gets a reference of the same type.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\Gamma \vdash e_1 : T\textit{ ref}}{\Gamma \vdash !e_1 : T}[(dereferencing)]
+      \inference {\Gamma \vdash e_1 : T\textit{ ref}}{\Gamma \vdash !e_1 : T}[(Deref)]
       \text{ }
-      \inference {\Gamma \vdash e_1 : T}{\Gamma \vdash \textbf{new}(T, e_1) : T\textit{ ref}}[(\textbf{new} ref)]
+      \inference {\Gamma \vdash e_1 : T}{\Gamma \vdash \textbf{new}(T, e_1) : T\textit{ ref}}[(New-Ref)]
       & \\
-      \inference {\Gamma \vdash e_2 : T & \Gamma \vdash e_1 : T\textit{ ref}} {\Gamma \vdash_{C}\text{ }!e_1 := e_2 : Cmd}
+      \inference {\Gamma \vdash e_2 : T & \Gamma \vdash e_1 : T\textit{ ref}} {\Gamma \vdash_{C}\text{ }!e_1 := e_2 : void} 
+      [(Deref-Assign)]
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Ref Type}
@@ -2069,19 +2115,19 @@ Lastly, we define the operational semantics for the new expressions in figure
       \inference {
       \langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
       {\langle !e_1, \sigma, \tau, \Delta \rangle \Longrightarrow 
-      \langle !e_1', \sigma, \tau, \Delta \rangle} [(Deref expr)]
+      \langle !e_1', \sigma, \tau, \Delta \rangle} [(Deref-E)]
       \text{ }
       \inference {h_1 \in \textbf{dom}(\Delta) & v = \Delta(h_1)}
       {\langle !h_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle v, 
-      \sigma, \tau, \Delta \rangle} [(Deref)]
+      \sigma, \tau, \Delta \rangle} [(Deref-V)]
       & \\
       \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
         {\langle !e_1 := e_2, \sigma, \tau, \Delta \rangle \Longrightarrow \langle !e_1' := e_2, 
-        \sigma, \tau, \Delta' \rangle} [(P-Assign expr 1)]
+        \sigma, \tau, \Delta' \rangle} [(P-Assign-$E$ 1)]
       & \\
       \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
         {\langle !h_1 := e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle !h_1 := e_1', 
-        \sigma, \tau, \Delta' \rangle} [(P-Assign expr 2)]
+        \sigma, \tau, \Delta' \rangle} [(P-Assign-$E$ 2)]
       & \\
       \inference {h_1 \in \textbf{dom}(\Delta) & \Delta' = \Delta[h_1 \mapsto v_1]}
         {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle void, 
@@ -2089,11 +2135,11 @@ Lastly, we define the operational semantics for the new expressions in figure
       & \\
       \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
         {\langle \textbf{new}(T, e_1), \sigma, \tau, \Delta \rangle \Longrightarrow \langle \textbf{new}(T, e_1'), 
-        \sigma, \tau, \Delta' \rangle} [(P-Alloc expr)]
+        \sigma, \tau, \Delta' \rangle} [(P-Alloc-$E$)]
       & \\
       \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta + \{h \mapsto v\}}
         {\langle \textbf{new}(T, v), \sigma, \tau, \Delta \rangle \Longrightarrow \langle h, 
-        \sigma, \tau, \Delta' \rangle} [(P-Alloc)]
+        \sigma, \tau, \Delta' \rangle} [(P-Alloc-$V$)]
     \end{tabular}
   \end{center}
   \caption{Operational Semantics for Pointers}
@@ -2192,7 +2238,7 @@ typing rules for this new expression.
   \begin{center}
     \begin{tabular} {c}
       \inference {\Gamma \vdash e : T} 
-        {\Gamma \vdash \textbf{newconst}(T, e): T \textit{ ref}}[(\textbf{newconst} type)] 
+        {\Gamma \vdash \textbf{newconst}(T, e): T \textit{ ref}}[(New-Const)] 
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Pointer to Constants}
@@ -2218,11 +2264,11 @@ ability to modify the value of a constant heap address.
       \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
         {\langle \textbf{newconst}(T, e_1), \sigma, \tau, \Delta \rangle 
         \Longrightarrow \langle \textbf{newconst}(T, e_1), 
-        \sigma, \tau, \Delta' \rangle} [(PConst-Alloc expr)]
+        \sigma, \tau, \Delta' \rangle} [(PConst-Alloc-$E$)]
       & \\
       \inference {h \notin \textbf{dom}(\Delta) & \Delta' = \Delta + \{h \mapsto v\}}
       {\langle \textbf{newconst}(T, v), \sigma, \tau, \Delta \rangle \Longrightarrow \langle h, 
-      \sigma, \tau, \Delta' \rangle} [(PConst-Alloc)]
+      \sigma, \tau, \Delta' \rangle} [(PConst-Alloc-$V$)]
       & \\
       \inference {h_1 \in \textbf{dom}(\Delta) & \neg is\_immutable\_heap(h_1) & \Delta' = \Delta[h_1 \mapsto v_1]}
       {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle v_1, 
@@ -2261,7 +2307,7 @@ is proposed in figure \ref{fig:immu_pointer_typedef}.
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
       {\langle \textbf{begin typedef } a = \{\upsilon :T\text{ }|\text{ }e\};C_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow 
-        \langle \sigma', \tau \rangle}[(Refine def)]
+        \langle \sigma', \tau \rangle}[(Refine-Typedef-Immu-P)]
     \end{tabular}
   \end{center}
   \caption{Typedef refinement types with pointers}
@@ -2312,7 +2358,7 @@ named Simple-$R^{*}_{C}$
       \\ \langle C_1, \sigma, \tau + \{y \mapsto (\{\upsilon : T\text{ }|\text{ }e\}\}, \sigma_1, \tau_1)
       \rangle \longrightarrow^{*} \langle \sigma', \tau\rangle}
       {\langle\textbf{begin typedef } y = \{\upsilon : T\text{ }|\text{ }e\};C_1;e_1\textbf{ end}, 
-      \sigma, \tau \rangle \longrightarrow \langle \sigma', \tau \rangle} 
+      \sigma, \tau \rangle \longrightarrow \langle \sigma', \tau \rangle} [(Refine-Typedef-Closure-P)]
     \end{tabular}
   \end{center}
   \caption{Evaluation of Refinement Type with Closures}
