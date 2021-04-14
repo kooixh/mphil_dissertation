@@ -690,7 +690,7 @@ one can take away from this project such as the combination of compile-time and
 runtime type checking. 
 
 
-\subsection{C++ Templates}
+\subsection{C++ Templates} \label{section:cpp_templates}
 \textit{C++ Templates} \cite{cppTemplate} are a way of passing the type of a 
 data as a parameter so certain code can be reused. For instance, the same 
 sorting algorithm can be used on multiple data types such as \textit{int} and 
@@ -774,7 +774,6 @@ variables associated with types are constant and the use of immutability.
 
 
 \section{Summary}
-
 In this chapter we formally introduced dependent types and refinement types, 
 these two type systems are similar in many aspect but are formally very 
 different. Certain functional languages such as Agda and Idris has native support for 
@@ -802,21 +801,33 @@ mainly documented as online articles. Our project will be focused on providing
 formal semantics for refinement types in a real-world imperative language. 
 
 \chapter{Key Concepts in Programming Languages} \label{chapter:key_concepts}
-Throughout our research, we observed certain ideas that commonly appear across 
-different language constructs. In this next chapter, we will introduce key concepts that are 
-relevant to our project and how these ideas will be used to create a refinement 
-type system.
+Throughout our research, we observe certain ideas that commonly appear across 
+different language constructs. In this chapter, we introduce three key concepts, 
+immutability, closures and hybrid type checking. We discuss these concepts 
+in depth, identifying how they relate to refinement types and how they 
+can be incorporated into our project.
 
-\section{Immutable vs Constant} \label{section:const_immutable}
-In the previous section we have discussed extensively the concept of 
-immutability, an object is \textit{immutable} if it cannot be change after the 
-time of creation. A constant is often mistaken as an alternate name for 
-immutability however they are different concepts in many languages. A \textit{constant} is a 
-variable that cannot be modified at runtime. These two notion does not provide the 
-same guarantees.
+\section{Immutable Objects in Programming}
+In this section we analyse the crucial differences between an immutable object   
+and a constant in different programming lanaguages. We follow up our analysis by 
+stating the importance of immutability and constancy with regards to type 
+systems.
 
-Consider the following Java code in figure \ref{code:java_const}, assume a class \verb|Number| with a 
-single field \verb|value|.
+\subsection{Immutable vs Constant} \label{section:const_immutable}
+\emph{Immutability} is an important concept in many programming languages, an 
+object is immutable if its state cannot be modified after creation. 
+\emph{Contancy} is often mistaken as an alternate name for 
+immutability however they are two different concepts in programming languages. 
+A constant is a variable that cannot be reassigned after initialisation, one can say 
+that a constant is an immutable variable. 
+The difference between an immutable object and a constant is subtle but crucial, 
+these two notions does not provide the same guarantees that a value remains the 
+same.
+ 
+\par
+Consider the following Java code in figure \ref{code:java_const}, 
+assume a class \verb|Number| with a single field \verb|value| 
+that is not \verb|final|.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular}{l}
@@ -824,22 +835,23 @@ single field \verb|value|.
       \verb|n.value = 12;|
     \end{tabular}
   \end{center}
-  \caption{Modifying References in Java}
+  \caption{Modifying References held by a Constant in Java}
   \label{code:java_const}
 \end{figure}
 
+\par
+In our simple example, we defined a constant \verb|n|, however the object held by 
+\verb|n| is not immutable which allowed us to modify the 
+value despite the variable \verb|n| being a constant. 
 
 \par
-In our simple example, we defined a constant \verb|n|, however the \verb|n| is 
-not immutable which allowed us to modify the value despite the variable \verb|n| 
-being a constant.
-
-\par
-Similarly in C++, consider the code in figure \ref{code:cpp_const} where one declares 
-a pointer \verb|p| that points to a constant integer. C++ ensures that 
-one is not able to modify the 
-value of \verb|&x| using the pointer \verb|p| however it does not guarantee 
-\verb|x| cannot be modified in a different manner. The value pointed to by 
+C++ provides a stronger form of constant where the previous example is not 
+possible, however C++ allow a different scenario where the value of a constant 
+can be changed. Consider the code snippet in figure \ref{code:cpp_const} 
+where one declares a pointer \verb|p| that points to a constant integer. 
+C++ ensures that one is not able to modify the value of \verb|&x| using 
+the pointer \verb|p| however it does not guarantee \verb|x| cannot be 
+modified in a different manner. The value pointed to by 
 \verb|p| can change even though it is defined as a constant. 
 \begin{figure}[H]
   \begin{center}
@@ -849,18 +861,36 @@ value of \verb|&x| using the pointer \verb|p| however it does not guarantee
       \verb|x = 5;|&
     \end{tabular}
   \end{center}
-  \caption{Modifying Constant in C++}
+  \caption{Modifying Values of a Constant in C++}
   \label{code:cpp_const}
 \end{figure}
+
+\subsection{Importance of Immutability}
+The concept of immutability is fundamental and taught to new programmers early 
+in the curriculum. However, the declration of constants are often introduced as 
+a good software engineering practice that mitigates point of error in the code. 
+While it is a key use case of constants, they are often used to achieve a lot 
+more. 
+
+\par
+Recall from section \ref{section:cpp_templates}, constants are used to enforce 
+the behaviours of certain language features such as templates in C++. 
+We see the same being done in Java's Lambda expression whereby any local variables 
+referenced in the expression must be a constant. 
 
 \par
 Immutability is a key idea in our project as it is one of the biggest hurdle in 
 bringing dependent types and refinement types into imperative programming. A 
 good understanding the difference between constant and immutable proves to be a 
-critical in the development of our language. 
-
+critical in the development of our language. Furthermore, we see how different 
+imperative languages enforce constancy and immutability in areas where changes 
+to variables are problematic. We identify the same idea can be incoporated into 
+our language, enforcing immutable variables in refinement types. 
 
 \section{Closures} \label{section:closures}
+In this section we introduce the concept of closures using practical examples. 
+
+\subsection{Introducing Closures}
 In programming languages, \textit{Closures} are a way of enclosing functions 
 with its surrounding environment, it allows a function to have access to local 
 variables in the outer scope even if these variables have gone out of scope. 
@@ -896,44 +926,57 @@ Semantically, a closures can be modeled as a data structure mapping
 functions to environment as demonstrated in the extended lambda calculus proposed by 
 Gerald J. Sussman and Guy L. Steele Jr in this paper \cite{closureLambdaOp}. 
 
+\subsection{Closures in Types}
+Closures are predominantly associated with functions, however the idea 
+itself is useful more generally. The ability to bind values to variables 
+within a scope can also be applied to types in order to preserve state and achieve 
+a more consistent behaviour when performing type checking. 
+
 \par
-Closures are predominantly associated with functions, however the idea itself is 
-useful more generally. The ability to bind values to variables within a scope will be explored 
-further in our project, e.g. when types refer to variables. 
+Recall that one of the difficulty of implementing refinement types in an 
+imperative language is the presence of mutation. We propose that using the idea  
+of closure one can prevent mutation to variables in a refinement type. For 
+example, given the refinement type 
+$\{\upsilon : int \text{ }|\text{ }\upsilon > x\}$, one can close $x$ within the 
+type and independent of any changes to another variable $x$ in the program. 
+This idea is explored in depth further in the project.
 
 \section{Hybrid Type Checking} \label{section:hybrid_type_checking}
+Type checking can be difficult in programming languages with advanced features. 
+In this section we introduce \emph{Hybrid Type Checking} \cite{hybridTypeChecking} 
+as a combination of static and dynamic type checking. We show practical example 
+of hybrid type checking in mainstream languages. Finally we propose a way of 
+type checking refinement types using a hybrid type checking appraoch.
+
+\subsection{Static vs Dynamic Type Checking}
 Programming languages handle type checking in two main ways, \textit{statically} 
-and \textit{dynamically}. Static type checking is the act of verifying the type 
+and \textit{dynamically}. Static type checking is verifies the type 
 safety of a program by analysing the program's text. Dynamic type checking 
 verifies the same at runtime, after consideration the execution of statements. 
 
 \par
 One often associates the strong and weak typing with static and dynamic type 
-checking. While it is true that most weakly typed languages employs dynamica 
+checking. While it is true that most weakly typed languages employs dynamic  
 type checking, strongly typed languages do no exclusively use static typing. 
 Modern programming languages offer complex features and some of which are hard 
-or impossible to decide statically, e.g. Java's runtime checks for downcasting 
-which will be discussed in the text below. 
-
-\par
-In order to accomodate the evolving complexity of programming languages, the two 
-distinct approachs are incorporated together. Gordon Plotkin, et al discussed the 
+or impossible to decide statically. In order to accomodate the evolving 
+complexity of programming languages, the two distinct approachs are 
+incorporated together. Gordon Plotkin, et al discussed the 
 idea of dynamically checking a static language in this paper 
 \cite{dynamicCheckStaticLanguage}. In practice, modern languages like 
-Java and C# now supports the combination of static and dynamic type checking. 
-We refer to this new form of type check method as \emph{Hybrid Type Checking}.
+Java and C# now supports the combination of static and dynamic type checking, 
+e.g. Java's runtime checks for downcasting which will be 
+discussed in the next subsection.
 
-\subsubsection{Example of Hybrid Type Checking}
-Languages like Java are generally considered a statically typed language  
-however certain typing properties are impossible to check at compile time. In 
-order to address this, Java employs a combination of static and dynamic checking 
-to verify the type safety of advanced features such as \emph{downcasting}. 
+\subsection{Example of Hybrid Type Checking in Java} 
 Downcasting is the act of converting a reference of a base class to one of its 
 derived class. However, unlike upcasting, downcasting is only possible if the 
 variable of the base class has a value of the derived class being downcasted to. 
 Discovering if a variable can be downcasted relies on dynamic runtime 
 environment and thus it cannot be checked statically however there are certain 
-properties about downcasting that can be checked statically.
+properties about downcasting that can be checked statically. As such, 
+Java employs a combination of static and dynamic checking 
+to verify the type safety of this advanced feature. 
 
 \par
 Consider a program with three classes \verb|A|, \verb|B extends A| and 
@@ -944,6 +987,41 @@ type \verb|C|. Note that in other cases such as \verb|Integer i = 10; (String) i
 type checking fails at compile time because there is no way for the casting to 
 succeed at all. The Java type checker verifies as much as possible 
 statically, requiring only the most complicated type checks to runtime. 
+
+\subsection{Hybrid Type Checking in Refinement Types} \label{section:htc_ref}
+Functional languages such as Liquid Haskell has shown the ability of type 
+checking certain refinement types statically at compile time, however with the 
+presence of mutation in imperative languages it turns out to be more difficult. 
+The refinement predicate may contains variables whose value is only available 
+at runtime or could have changed since declaration. This is an area that hybrid 
+type checking proves to be useful. 
+
+\par
+Interestingly, Cormac Flanagan 
+proposed a similar idea with the same name to verify the correctness of 
+Dependent Types and Refinement Types 
+in a $\lambda$-calculus \cite{hybridTypeChecking}. The paper 
+inspired our idea by proposing a type checker that is 
+``a synthesis of these two approaches that enforces precise interface 
+specifications, via static analysis where possible, but also via 
+dynamic checks where necessary''.
+
+\par
+Statically, we would not be able to verify that a value satisfy a refinement 
+predicate, however we are able to verify some important properties. Consider the 
+following example, $4 : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$, we 
+cannot check the validity statically as the value of $x$ is not available. 
+However, we can verify that there is a possibility for success. Similarly, we 
+can verify some properties that will not succeed at all such as 
+$\textit{false} : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$. This 
+property can be easily checked by type checking the value against the base type.
+
+\par
+We proposed that we can a use hybrid type checking technique to type check 
+refinement types in an imperative language. We first statically verify that 
+a value type checks against the base type, at runtime we reasserts that the 
+refinement predicate holds. This idea is incorporated into our language 
+and discussed in details further in the next chapter. 
 
 \section{Summary}
 In this chapter we introduced several key ideas in programming languages and 
@@ -1113,9 +1191,11 @@ Simple-$R$ takes the form of the standard notation.
   $\Gamma \vdash_{C} C : void$\\
   $\Gamma \vdash_{D} D \dashv \Gamma'$\\
 \end{center}
-This first and second judgement represents that expression $e$ 
-under the context $\Gamma$ has the type $T$. The third states that a declaration 
-produces the output context $\Gamma'$.
+This first judgement represents that expression $e$ 
+under the context $\Gamma$ has the type $T$. For a more consistent syntax, 
+we use a pseudotype $void$ to represent that a command, the second judgement 
+states that under environment $\Gamma$ the command $C$ is well-formed. 
+The third states that a declaration produces the output context $\Gamma'$.
 
 \par
 Using the judgement rule we can easily define the fist few typing rules for base 
@@ -1183,12 +1263,15 @@ type checker.
 For a function call, we use the type judgement above. We use  
 first order logic to write $f(e_1...e_n)$ as an n-nary function of 
 type $T_1$ to $T_n$, then the arguments $e_1$ to $e_n$ must be of same type. 
-Evaluation of the function will then satisfy the return type $T_0$.
+Evaluation of the function will then satisfy the return type $T_0$. Type checking 
+a function requires the function signature, we define 
+a mapping \textit{fts} $: f \mapsto T_1,T_2...T_n \longrightarrow T_0$ 
+that allows us to retrieve the signature of a function. 
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {f : T_1,T_2...T_n \longrightarrow T_0 \\ 
+      \inference {fts(f) = T_1,T_2...T_n \longrightarrow T_0 \\ 
       \Gamma \vdash e_1 : T_1 & \Gamma \vdash e_2 : T_2 &...& \Gamma \vdash e_n : T_n}
         {\Gamma \vdash f(e_1...e_n): T_0}[(Func)]
     \end{tabular}
@@ -1201,10 +1284,24 @@ Finally we define typing rules for a refinement types. A refinement type
 is represented in our system as $\{\upsilon : T\text{ }|\text{ }e\}$ and is 
 constructed by a base type $T$ and a refinement predicate $e$ which may contain 
 the free variable $\upsilon$ and any free variables in the program. A refinement 
-type represent all values of $T$ where the expression $e[u/\upsilon]$ holds. 
+type represent all values $\upsilon$ of $T$ where the expression $e[u/\upsilon]$ holds. 
 
 \par
-We define the typing rule for refinement types using the idea of 
+Recall that in section \ref{section:htc_ref} that we stated that the refinement 
+predicate in general is undecideable at compile time and one requires dynamic 
+checks for refinement types. However, we proposed that there are certain 
+properties that can be checked statically such as a value must at least 
+type checks against the base type for a chance of success. 
+
+\par
+We adopted a type checking approach that validates as much as possible 
+statically and defers complicated type 
+checking until runtime. In this section we will focus on static refinement type 
+checking, we will discuss runtime type checking later in section 
+\ref{section:runtime_refine}.
+
+\par
+We first define the typing rule for refinement types using the idea of 
 \textit{universes} \cite{martinLof} in type theory, using the 4th judgement form 
 $\Gamma \vdash A : Type$ to represent that $A$ is a type. 
 
@@ -1220,30 +1317,9 @@ We begin by defining the formation rule for a refinement type.
   \caption{Typing Rules for Refinement Types in Simple-$R$}
 \end{figure}
 
-
 \par
-While functional languages such as Liquid Haskell has shown the ability of type 
-checking refinement types statically at compile time, with the presence of 
-mutation in our language it turns out to be difficult. The refinement predicate 
-may contains variables whose value is only available at runtime or could have 
-changed since declaration. To mitigate this, we adopted a type checking approach 
-that validates as much as possible statically and defers complicated type 
-checking until runtime. In this section we will focus on static refinement type 
-checking, we will discuss runtime type checking later in the text.
-
-\par
-Statically, we would not be able to verify that a value satisfy a refinement 
-predicate, however we are able to verify some important properties. Consider the 
-following example, $4 : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$, we 
-cannot check the validity statically as the value of $x$ is not available. 
-However, we can verify that there is a possibility for success. Similarly, we 
-can verify some properties that will not succeed at all such as 
-$\textit{false} : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$. We observe that in 
-order for a value to have a chance of being a valid refinement type, it has to 
-type check against the base type. 
-
-\par
-We define an \emph{unsound} typing judgement to capture this behaviour statically. 
+We then define an \emph{unsound} typing judgement to capture this 
+behaviour statically, soundness will be regained further on using dynamic checks.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
@@ -1254,9 +1330,8 @@ We define an \emph{unsound} typing judgement to capture this behaviour staticall
   \label{tj:unsound-refine}
 \end{figure}
 
-Additionally, we defining the typing rule for a subtypes, 
-we express $A$ is a subtype of $B$ as $A \preceq B$. 
-
+Additionally, we defining the typing rule for a subtypes, we express $A$ is 
+a subtype of $B$ as $A \preceq B$. 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
@@ -1451,12 +1526,13 @@ the alternative would be to model an explicit call stack, which complicates the
 formulas and syntax.
 
 \par
-Multiple declarations are handled by evaluating the declarations in order 
-starting from the first. The rule (Begin-D-Concat-V) and (Begin-D-Concat-E) 
-formalise the behaviour, note that since the rules for a single declaration and 
-concatenated declaration appears similar, in the rest of the chapter we only 
-specify operational semantics for the former. The corresponding rule for 
-concatenation can be formalised easily. 
+Concatenated declarations are handled by evaluating the declarations in order 
+starting from the first. The rules (Begin-D-Concat-V) and (Begin-D-Concat-E) 
+formalise the behaviour. To increase readability, in future text when we 
+introduced new form of \textit{Declarations}, we will only 
+be formalising the rules where only a single declaration is present. The 
+concetenation rules which can be derived easily using the same semantics in 
+figure \ref{scoping_rules} are omitted.
 
 \subsection{Functions} \label{section:functions_sos}
 Functions in almost all imperative language operates in their own scope. In many 
@@ -1476,7 +1552,6 @@ configuration and can be consider as a static context.
 
 \par
 We can then evaluate the function body which using the multi-step evaluation.
-
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
@@ -1511,7 +1586,8 @@ It cannot change the caller's state.
 The second rule (Func-$D$) allows one to declare new variables in the function 
 body that can be used in the final return value. The operational semantics 
 evaluates the command using the semantics for \textbf{begin end}, however, we 
-retain the modified state and evaluates the expression with the new values. 
+retain the modified state and evaluates the expression to return with the latest 
+state. 
 
 \par
 The third rule (Func-$E$) evaluates the expression passed into the 
@@ -1528,25 +1604,12 @@ there are cases when the type of some data cannot be determined statically as
 discussed in section \ref{section:hybrid_type_checking}.
 
 \par
-The refinement predicate in general proves to be undecidable 
-at compile time, one might require access to program state for values 
-of variables in order to evaluate it. In many cases, 
-only constants and constant expressions are available at compile time. 
-Interestingly, Cormac Flanagan proposed a similar idea dubbed \textit{Hybrid Type 
-Checking} \cite{hybridTypeChecking} to verify the correctness of 
-Dependent Types and Refinement Types in a $\lambda$-calculus. The paper 
-inspired our idea by proposing a type checker that is 
-``a synthesis of these two approaches that enforces precise interface 
-specifications, via static analysis where possible, but also via 
-dynamic checks where necessary''.
-
-\par
 In section \ref{section:ref_type_check} we demonstrated how basic properties 
 of refinement types are checked statically in Simple-$R$ using 
 the unsound typing judgement (Refine-Base-US), now we show 
-how these refinement types are validated dynamically. 
-We define a special form of typing judgement to type check 
-refinement types dynamically.
+how these refinement types are validated dynamically in order to regain soundness. 
+We define a special form of typing judgement to type check refinement types 
+dynamically.
 
 \begin{figure}[H]
   \begin{center}
@@ -1694,8 +1757,9 @@ During runtime, the type is validated using the following rule.
 \end{figure}
 
 \par
-In our operational semantics, our configurations is updated from $\langle C, \sigma \rangle$ 
-to $\langle C, \sigma, \tau \rangle$ in order to incorporate this new feature. 
+In our operational semantics, our configurations is updated from 
+$\langle C, \sigma \rangle$ to $\langle C, \sigma, \tau \rangle$ in order to 
+incorporate this new feature. 
 All previous operational semantics should be updated consistently.
 
 \begin{figure}[H]
@@ -1767,8 +1831,8 @@ variable, using the \textbf{const} $x : T = e$ statement. We establish the follo
 rules for immutable variables. 
 
 \par
-The typing judgement which parallels to that of variable declaration using $\textbf{var}$. 
-
+The typing judgement appears in analogous to that of variable declaration 
+using $\textbf{var}$. 
 \begin{center}
   \begin{tabular} {c}
     \inference {\Gamma \vdash e_1: T_1} 
@@ -1894,11 +1958,11 @@ immutable variable but still want the ability to define a refinement type.
 \subsection{Type Closure}
 If we further analyse our design, we notice that our main concern is for the 
 refinement predicate to stay static, any changes in the program context should 
-not change its definition. In this section, we propose a design based in closures 
-which allows us to keep variables in a refinement predicate constant without 
-the need of defining the variables immutable. We define a new variant of 
-Simple-$R$ named Simple-$R_{C}$ that extends the former utilises this mechanisms 
-for handling refinement types. 
+not change its definition. In this section, we propose a design based on closures 
+which allows us to ensure the values of variables in a refinement predicate remain 
+constant without the need of declaring constant variables. We define a new variant of 
+Simple-$R$ named Simple-$R_{C}$ that extends the former and implements this 
+technique to handle refinement types. 
 
 \par
 Recall in section \ref{section:closures} we introduced the idea of closures, a 
@@ -1906,8 +1970,9 @@ closure is simply a function enclosed with an environment. Closures have access 
 variables from the calling context, even if the original variable goes out of 
 scope. A value is bound to the variable in the closure such that changes does 
 not reflect within. In order to make free variables in a predicate independent, 
-we designed a similar approach where we \emph{bind free variables with a value}, 
-i.e. snapshotting. The resulting mechanisms is named \emph{Type Closure}.
+we designed a similar approach where we \emph{snapshot} variables, i.e. 
+bind free variables to a value. We name this approach of closing 
+variables used in types as \emph{Type Closure}.
 
 \par
 Taking the example program in figure \ref{fig:amb_refinement_vars} if the 
@@ -1950,7 +2015,7 @@ $\tau$ and attach this to the type.
 \par
 In order to type check refinement types with closures, we update our typing 
 judgement for refinement type. Notice that we would only require type 
-closures for named types; if one declares a refinement type without a name e.g.  
+closures for named types; if one declares a refinement type without a name i.e.  
 $\textbf{var }x : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$, then the rule 
 (Refine-Runtime) defined in section \ref{section:runtime_refine} that evaluates 
 the predicate using the current environment will hold. 
@@ -2027,9 +2092,9 @@ We introduce a new variant of Simple-$R$ called Simple-$R^{*}$ that supports
 dynamic memory allocation.
 
 \subsubsection{Syntax Extension}
-First we will have to extend our syntax to accommodate these new features, we define 
+First we extend our language syntax to accommodate these new features, we define 
 the new syntax in figure \ref{fig:ptr_syntax}. For simplicity and safety, 
-we have omitted the need for manual memory management and we 
+we have omitted the obligation to use manual memory management and we 
 assume that \textit{Automatic Garbage Collection} \cite{GC} is present in 
 the language. 
 
@@ -2069,8 +2134,8 @@ value. The command $!e_1 := e_2$ changes the value at heap address $h_1$ to the
 value after evaluating $e$.
 
 \paragraph{Values}
-We added two new values to the language, $h$ is simply a heap address in the set 
-$\{h_0, h_1, h_2...\}$.
+We add new values into the language, $h$ is an element in the set 
+$\{h_0, h_1, h_2...\}$ and repesents a heap address.
 
 \paragraph{Heap}
 Finally, we define a heap context $\Delta$ as a mapping from heap address to values.  
@@ -2085,8 +2150,8 @@ We first define the typing judgement for the base types for references.
 \end{center}
 
 \par
-We define the rest of the typing judgement as shown below. 
-The typing judgements are straightforward, 
+We define the rules for this typing judgement as shown below. 
+The typing rules are straightforward, 
 dereferencing a heap address of type $T \textit{ref}$ yields a value of type $T$ and 
 allocating a new heap address with type $T$ gets a reference of the same type.
 
@@ -2153,7 +2218,7 @@ not currently present, assigns it the value $v$ and returns the address. The
 value can be retrieved and modified through dereferencing, shown in the first two 
 rules. 
 
-\subsection{Ambiguity of Refinement Types and Pointers}
+\subsection{Ambiguity of Refinement Types involving Pointers}
 The introduction of pointers provides the programmer with multiple new tools. 
 Features such as pass-by-reference and aliasing are now at their disposal. 
 However with the introduction of new features, the feature interaction problem 
@@ -2187,9 +2252,10 @@ refinement predicate to be constant however this is not sufficient for pointers.
 A constant pointer variable simply restrict the address held by the pointer to be 
 changed, manipulating the underlying value is still very much possible. 
 Moreover, using closures also fails to prevent the ambiguity as one can easily 
-modify the heap address and have he changes reflect within the closure. Our  
-semantics resemble Java's \textit{final} mechanics discussed in section \ref{section:const_immutable}, 
-whereby while the reference variable cannot change, the underlying value can.
+modify the heap address and have the changes reflect within the closure. Our  
+semantics resemble Java's \textit{final} mechanics discussed in section 
+\ref{section:const_immutable}, whereby while the reference variable 
+cannot change, the underlying value can.
 
 \par
 In order to address this case, our previously proposed semantics has to be 
@@ -2209,7 +2275,13 @@ to an immutable. The latter allows the pointer variable to change. In order to
 concretely differentiate the two in a definite manner, we introduce 
 a new predicate $is\_immutable\_heap(h)$ to specify if the value held at a 
 specific memory address is immutable. The $is\_immutable\_heap(h)$ predicate 
-holds if and only if the heap address $h$ is a constant and cannot be modified. 
+holds if and only if the heap address $h$ is a constant and cannot be modified.
+
+\par 
+The same predicate applies if a heap address has the value of 
+another heap address, e.g. \verb|int **p| in C. If a heap address $h_1$ has the 
+value of another heap address $h_2$ then $is\_immutable\_heap(h_1) \Leftrightarrow 
+is\_immutable\_heap(h_2)$.  
 
 \par
 While this predicate behaves exactly as the $is\_immutable(x)$ predicate defined 
@@ -2248,9 +2320,10 @@ typing rules for this new expression.
 \par
 Notice that unlike C/C++, Simple-$R^{*}$ does not have the notion of 
 \textit{address taking}, the only way to obtain a pointer is through the use of 
-\textbf{new} or \textbf{newconst}. This form of semantic avoids pitfalls in C/C++ 
-where one gives a pointer to a constant the address of a mutable variable as 
-demonstrated in section \ref{section:const_immutable}.
+\textbf{new} or \textbf{newconst}. Recall from section \ref{section:const_immutable}, 
+this form avoids pitfalls in C/C++ where one gives a pointer to a 
+constant the address of a mutable variable which allow the value to be 
+modified in a different manner.
 
 \par
 The lack of address taking allows us to define semantics that completely forbid 
@@ -2327,7 +2400,7 @@ specified in figure \ref{fig:sos_const_ptr}.
 \par
 The example program showed previously in figure \ref{fig:amb_refinement_pointers} 
 is now an invalid program. To make it valid we adapted the newly defined rules 
-and rewrote it as in figure \ref{fig:valid_ptr_program}.
+and rewrite it as in figure \ref{fig:valid_ptr_program}.
 
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
@@ -2386,7 +2459,7 @@ previously. The syntax and semantics of our
 language resembles C/C++, enhancing the accessibility of our work.
 
 \par
-Throughout the chapter we demonstrated how type checking refinement types 
+Throughout the chapter we demonstrated how type-checking refinement types 
 statically proves to be undecidable in our system, we drew parallels by comparing 
 type checking mechanics of established languages such as downcasting in Java 
 where the validity of types cannot be checked at compile time. 
