@@ -264,7 +264,7 @@ dependent types and refinement types in existing programming languages.
 We explore different languages with varying paradigms and summarise their 
 differences in order to have a better understanding of how they 
 support these advanced type systems. The languages that are studied include 
-Agda, Haskell, Idris, Scala, TypeScript and Xanadu. Finally, we extensively studied 
+Agda, Haskell, Idris, Scala, TypeScript and Xanadu. Finally, we studied 
 C++ and how one can construct a limited form of refinement type using the 
 template engine. 
 
@@ -298,15 +298,20 @@ into our languages and how it can further complicate the language in chapter
 \ref{chapter:further_work}. 
 
 \chapter{Background Research} \label{chapter:background}
-In this chapter we will provide a formal introduction to the theory of dependent 
-types and refinement types. We follow up by reviewing the current knowledge 
-in the area, we analyse different programming languages and how they can 
-be made to support for the two types system and note interesting design 
-decisions. Finally, we summarise our finding and identify the novelty of our 
-project. 
- 
-\section{Dependent Types}
+In this chapter we provide a formal introduction to the theory of dependent 
+types and refinement types. Building on the definition, we identify how the two 
+advanced type system differ. As functional languages proves to be more 
+commonly associated with these type systems, we review the programming languages 
+Agda, Haskell and Idris to understand the natural behaviour of dependent types 
+and refinement types. During our research, we noted several academic projects  
+that bring these type systems to imperative programming languages, we review 
+the project \textit{Xanadu} \cite{xanadu}, \textit{Ynot} \cite{ynot} and 
+\textit{RSC} \cite{rts}. Open-source programmers have also made strides in 
+the area, we review a Scala library, \textit{refined} \cite{refinedScala}, 
+that brings refinement type to the language. Finally, we study the C++ 
+templating engine identify its similarity to refinement types. 
 
+\section{Dependent Types}
 \subsection{Definition of Dependent Types}
 At a very high level dependent types are types that depend on the value of 
 another type. For example, we can define a type that captures only the even 
@@ -579,7 +584,6 @@ programming, this paradigm emphasises \textit{how} a program will operate
 by using a series of statements to change the program state.
 
 \par
-
 Imperative languages can be further broken down into different categories, 
 mainly Procedural and Object-Oriented. Many of the world's most popular languages 
 fall into this two categories, C, FORTRAN, COBOL are examples of procedural 
@@ -594,28 +598,58 @@ However, previous research has look at creating languages with these
 capabilities or extending existing languages. In this section we will survey 
 two previous work at the area. 
 
+
+\subsubsection{Ynot}
+\textit{Ynot} is an axiomatic extension to the \textit{Coq Proof Assistant} 
+\cite{coq} created by Aleksandar Nanevski, et al \cite{ynot}. It adds 
+support for writing and reasoning about dependently-typed 
+programs with side-effects, i.e. written in an imperative manner. 
+
+\par
+The formal aspects of Ynot is based on \textit{Hoare Type Theory} \cite{htt}, 
+a previous work by the authors and the concept of Monads, specifically 
+the monadic system of Haskell. This allows Ynot to write 
+ML or Haskell-style programs and still be able to formally 
+reason about their values and effects.
+
+\par
+Ynot is publicly available for download on the homepage of the 
+project \cite{theYnotProject} however it suffers from the same issues as 
+Agda, Coq is a niche language and conventionally used as a theorem prover. 
+Furthermore, the paper written on Ynot is theoretically complex, 
+requiring prerequisite knowledge of advanced concepts such as Hoare 
+Logic, Hoare Type Theory and Monads, making the paper inaccessible 
+to new readers seeking to understand the concept of dependent types 
+or refinement types in imperative languages. 
+
 \subsubsection{Xanadu}
 \textit{Xanadu} \cite{xanadu} is a dependently typed imperative language 
-created by a team at 
-the University of Cincinnati. The language was implemented in OCaml and was 
-said to be available online in the original paper, however the original cited 
-location looks to have been taken offline. It is safe to conclude that 
-the language itself is also no longer in active development 
+created by a team at the University of Cincinnati. The language was implemented 
+in OCaml and is based on a previous project by the 
+authors named \textit{Dependent ML} (DML) where the authors used a 
+\textit{restricted form of dependent types} which essentially takes the 
+form of refinement types.
+
+\par
+One aspect we found appealing in the paper is the use of real-world examples to 
+show the concept of dependent types. The authors used examples such as binary 
+search trees, array bound checking, etc to introduce the concepts, allowing new 
+readers to more easily understand these type systems. Furthremore, the language 
+syntax resembles many imperative programming languages that many are familiar 
+with, making it a much easier read. 
 
 \par
 There are no examples of the actual language available online except some code 
 snippets shown by the author in the original paper. As such we are unable to 
-provide any analysis on the language itself.
+provide any analysis on the language itself. Xanadu was stated to be available 
+online in the original paper, however the original cited webpage  
+appears to have been taken offline. It is safe to conclude that the 
+language itself is also no longer in active development 
 
 \par
 However, the language is worth a mention here as it shows the feasibility of 
 imperative languages having full dependent typing. The research by the authors 
 are impressive and it serves as inspiration for our project. 
-
-\par
-Our project complements the work by Xi by providing analysis on the problem at 
-hand. The original paper merely demonstrated the development and semantics of 
-Xanadu, our project aims to discuss more on the topic. 
 
 \subsubsection{Refined TypeScript}
 \textit{TypeScript} is a superset of JavaScript that brings static typing to the 
@@ -772,7 +806,6 @@ We see glimpses of refinement typing in C++, while it is still far from full
 refinement types. We are able to take note of certain mechanics such as ensuring 
 variables associated with types are constant and the use of immutability. 
 
-
 \section{Summary}
 In this chapter we formally introduced dependent types and refinement types, 
 these two type systems are similar in many aspect but are formally very 
@@ -783,8 +816,8 @@ to imperative programming, these projects have been successful but the languages
 that are created is not widespread. 
 
 \par
-Some open-source projects has attempted to bring refinement types to mainstream 
-languages. We analyse \textit{refined}, a Scala based library that 
+We found several open-source projects has attempted to bring refinement 
+types to mainstream languages. We analyse \textit{refined}, a Scala based library that 
 introduces refinement types to the language in a restrictive manner. We find the 
 project interesting however it remains informal and lacks formal documentation. 
 Finally, we studied C++ templates and notice the potential of introducing 
@@ -802,10 +835,10 @@ formal semantics for refinement types in a real-world imperative language.
 
 \chapter{Key Concepts in Programming Languages} \label{chapter:key_concepts}
 Throughout our research, we observe certain ideas that commonly appear across 
-different language constructs. In this chapter, we introduce three key concepts, 
+different language constructs. In this chapter, we introduce three concepts, 
 immutability, closures and hybrid type checking. We discuss these concepts 
-in depth, identifying how they relate to refinement types and how they 
-can be incorporated into our project.
+in depth and identify how they relate to refinement types. These key ideas will 
+be critical in the development of our language.
 
 \section{Immutable Objects in Programming}
 In this section we analyse the crucial differences between an immutable object   
@@ -897,7 +930,7 @@ variables in the outer scope even if these variables have gone out of scope.
 Closures are present in many languages with first-class functions such as 
 JavaScript, Python and Ruby. 
 
-\begin{figure}[H]
+\begin{figure}[h]
   \begin{center}
     \begin{lstlisting}[language=C]
       function outer_function(x) {
@@ -1024,14 +1057,19 @@ refinement predicate holds. This idea is incorporated into our language
 and discussed in details further in the next chapter. 
 
 \section{Summary}
-In this chapter we introduced several key ideas in programming languages and 
-explained the meaning behind them. We note the difference between a constant and 
+In this chapter we introduced several key ideas in programming languages, 
+explained the meaning behind them and how they relates to refinement types. 
+We identified the difference between a constant and 
 immutabile object which is key in the study of refinement types in 
 imperative languages. We introduced the concept of closures and showed examples 
-of it in action using JavaScript. Finally, we explained the difference in static 
-and dynamic type checking. We followed up by observing how these two type 
+of it in action using JavaScript, we propsed a way of using closures 
+in types that enables refinement types in imperative programming. 
+We explained the difference in static 
+and dynamic type checking, we followed up by observing how these two type 
 checking mechanisms are combined in feature-rich langauges like Java in order to 
-verify the correctness of complicated operations such as downcasting. 
+verify the correctness of complicated operations such as downcasting. Finally, 
+we note that refinement types is difficult to verify statically and proposed 
+using hybrid type checking to verify its safety. 
 
 \chapter{The Simple-$R$ Language} \label{chapter:simple_r}
 We propose Simple-$R$, a basic procedural language with support for refinement 
