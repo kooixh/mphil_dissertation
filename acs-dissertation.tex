@@ -153,7 +153,7 @@ expect from refinement types and the benefits of using refinement types.
     ...
   }
   \end{lstlisting}
-  \caption{Example of Refinement Types in Programming}
+  \caption{Example of Refinement Types}
   \label{code:refine}
 \end{figure}
 
@@ -500,7 +500,7 @@ Using the power of GADT one could define dependent types as so
       Nil  :: Vec a 0
       (:>) :: a -> Vec a n -> Vec a (n + 1)
   \end{lstlisting}
-  \caption{Dependent Types in Haskell}
+  \caption{GADTs in Haskell}
 \end{figure}
 
 \par
@@ -753,7 +753,7 @@ the \textit{constant expression} requirements \cite{cppConstExpr}.
       }
     };
   \end{lstlisting}
-  \caption{LessThanN with Compile Time Type Checking in C++}
+  \caption{Compile Time Type Checking in C++}
   \label{code:compileLTN}
 \end{figure}
 
@@ -790,7 +790,7 @@ figure \ref{code:compileLTN}:
     LessThanN<n, 3> ltf = LessThanN<n, 3>();
     n = 2;
   \end{lstlisting}
-  \caption{Mutating the Dependent Variable for LessThanN in C++}
+  \caption{Mutating the Refinement Variable in C++}
 \end{figure}
 
 \par
@@ -866,7 +866,7 @@ that is not \verb|final|.
       \verb|n.value = 12;|
     \end{tabular}
   \end{center}
-  \caption{Modifying References held by a Constant in Java}
+  \caption{Modifying Constant Reference in Java}
   \label{code:java_const}
 \end{figure}
 
@@ -892,7 +892,7 @@ modified in a different manner. The value pointed to by
       \verb|x = 5;|&
     \end{tabular}
   \end{center}
-  \caption{Modifying Values of a Constant in C++}
+  \caption{Modifying Pointer to Constant in C++}
   \label{code:cpp_const}
 \end{figure}
 
@@ -1070,8 +1070,12 @@ we note that refinement types is difficult to verify statically and proposed
 using hybrid type checking to verify its safety. 
 
 \chapter{The Simple-$R$ Language} \label{chapter:simple_r}
-We propose Simple-$R$, a basic procedural language with support for refinement 
-types. In this chapter we will describe the mechanics of the language in details.
+In this chapter we describe Simple-$R$, a basic procedural language 
+with support for refinement types. We 
+introduce certain ambiguous behaviour relating to refinment types and mutation. 
+We extend the Simple-$R$ language with new variants that address these 
+ambiguities using two approaches. Finally, we introduce dynamically  
+allocated memory and discuss how this feature interacts with refinement types. 
 
 \section{Language Syntax}
 \begin{figure}[h]
@@ -1101,16 +1105,14 @@ types. In this chapter we will describe the mechanics of the language in details
 \end{figure}
 
 \par
-Figure \ref{fig:simple_r_syntax} shown above is the syntax of Simple-$R$, the paragraphs below 
+Figure \ref{fig:simple_r_syntax} is the syntax of Simple-$R$, the paragraphs below 
 explains the language in details. In contrast to other literature in this area, 
 Simple-$R$ is a \textit{First Order Programming Language} \cite{FOL} modeled 
 after the WHILE \cite{whileLanguage} programming language but with functions.
 Rather than building it on the $\lambda$-calculus as one would in 
 a Higher Order Language, we opted for a ``C-like'' syntax, with concepts such as 
-expressions, commands and top-level functions.
-
-\par
-In order to achieve simplicity and observe the core behaviour of dependent 
+expressions, commands and top-level functions. 
+In order to achieve simplicity and observe the core behaviour of refinement 
 types, the language is kept at a minimum with only the necessary construct. 
 
 \paragraph{Types} The Simple-$R$ language has support the following four data types. 
@@ -1174,7 +1176,7 @@ actions. Simple-$R$ supports the following commands,
   \textbf{end}, the variable is out of scope and deallocated. 
 \end{itemize}
 
-\paragraph{Declaration} Declarations are the method one use declare new construct 
+\paragraph{Declarations} Declarations are the method one use declare new construct 
 in the program. We start the language off having the most basic variable declaration 
 $\textbf{var }x : T = e$ which declare a new variable $x$ of type $T$ and 
 initialise it the resulting value of expression $e$. Multiple declarations can 
@@ -1687,7 +1689,7 @@ In the next section we will put forward certain ambiguities with the
 design and discuss different choices one can make to address them.
 
 \section{Refinement Types and Variables}
-\subsection{Ambiguity of Refinement Types with Mutation}
+\subsection{Ambiguity of Refinement Types involving Mutation}
 Programming languages often have a wide range of features, often the team behind 
 the language have to put extensive thought into the design decisions. As there 
 are often multiple way to handle a certain feature, rarely is there a definite 
