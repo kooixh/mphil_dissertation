@@ -598,8 +598,7 @@ However, previous research has look at creating languages with these
 capabilities or extending existing languages. In this section we will survey 
 two previous work at the area. 
 
-
-\subsubsection{Ynot}
+\subsubsection{Ynot} \label{section:ynot}
 \textit{Ynot} is an axiomatic extension to the \textit{Coq Proof Assistant} 
 \cite{coq} created by Aleksandar Nanevski, et al \cite{ynot}. It adds 
 support for writing and reasoning about dependently-typed 
@@ -2529,8 +2528,85 @@ conclude the chapter by extending Simple-$R_{I}$ and Simple-$R_{C}$ with our new
 idea. 
 
 \chapter{Related Work} \label{chapter:related_work}
+In this chapter we review existing literature and discuss their  
+contributions to the field. We categorised past research in two  
+groups, those focusing on purely the theoretical aspects of refinement types in 
+imperative languages and those relating to refinement types in mainstream 
+programming. 
 
-\chapter{Conclusions and Further Work} \label{chapter:further_work}
+\paragraph{Theory of Refinement Types in Imperative Language} Research into 
+refinement types in an imperative language often appears in the name of 
+dependent types. Although these projects are investigating dependent types 
+in imperative languages, the dependent types described in the projects are 
+often restricted such that it takes the form of refinement types 
+\cite{objOritentedDependentType, dynamicInDep}. 
+
+\par
+A notable example is the type system \textit{DML(C)} described by 
+Hongwei Xi and Frank Pfenning in this 1999 paper \cite{dml}. In the paper, the 
+authors described a dependent type system that is restricted over a 
+domain of constraints $C$, the addition of $C$ allows type checking to 
+be decidable. This paper is significant as it was the first type system that 
+introduce dependent types in a general purpose language. The DML(C) type system 
+is later adapted into different dependently typed imperative language such as 
+\textit{Xanadu} \cite{xanadu} and \textit{ATS} \cite{ATS}.
+
+\par
+\textit{Hoare Type Theory (HTT)} is another notable approach to 
+dependent types in an imperative setting. Proposed by Aleksandar Nanevski, 
+Greg Morrisett and Lars Birkedal in a 2006 paper \cite{htt}, HTT 
+combines Hoare Logic with dependent types to create a new form of monadic Hoare Triple that encodes 
+effective computation involving dependent types and imperative commands. Type 
+checking in HTT is performed in two phases. The first phase is basic type-checking 
+and verification-condition checking which can be fully automatic. The second 
+phase involves checking the validity of the generated verification-conditions 
+which is done by an automated theorem provers, manually or even ignored. The two 
+phase type checking used in HTT resembles the two phase type checking we 
+employed in Simple-$R$. Hoare Type Theory is implemented in \textit{Ynot} which 
+we have covered in detail in section \ref{section:ynot}.
+
+\paragraph{Refinement Types in Mainstream Programming} DML(C) and Hoare Type 
+Theory represents the theoretical aspects of refinement types and dependent 
+types where the authors created a new type system to interact with imperative 
+program. However, a substantial number of research have attempted to introduce 
+refinement types to a mainstream programming language. 
+
+\par
+Refinement Types was first introduced in the \textit{ML} programming 
+language in 1991 by Tim Freeman and Frank Pfenning \cite{refInML}. The paper 
+introduce a system of subtypes for ML that preserves decideable type inference 
+and compile-time checking. Although the authors only considered refinement types 
+in Mini-ML where imperative code is not possible, the paper introduced a 
+new form of types that would prove to be popular.
+
+\par
+\textit{LiquidHaskell} was introduced in 2014 by Niki Vazou, Eric L. Seidel and 
+Ranjit Jhala as an extension to Haskell to enable refinement types \cite{liqHaskell}. 
+The programmer specifies refinement types and properties using annotations which 
+will be checked by LiquidHaskell. The authors made contributions by showing how 
+one could extend a mainstream language such as Haskell with refinement types, 
+introducing the concept of refinement types to more programmers. 
+
+\par
+In 2016 Panagiotis Vekris, Benjamin Cosman and Ranjit Jhala wrote a paper that introduced refinement types into the TypeScript 
+programming language \cite{rts}. Unlike LiquidHaskell which operates 
+on a purely functional language, the authors presented \textit{Refined TypeScript} 
+which showed how refinement types would behave in a mainstream imperative language. 
+
+\par
+Our project complements the existing literature by serving as a link between 
+the two areas described in this chapter. We provide a simple theoretical 
+foundation for refinement types in a C-Style imperative programming language 
+while relating the theoretical concepts to different design choices in existing 
+real-world languages. 
+
+\chapter{Conclusions and Future Work} \label{chapter:further_work}
+
+\section{Future Work}
+Simple-$R$ serves as a simple foundation for introducing refinement types 
+into an imperative programming language and it can be extended with 
+different ideas. In this section we outline three possible areas for future work. 
+
 
 
 \appendix
