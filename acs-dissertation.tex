@@ -1261,24 +1261,24 @@ type checker.
   \begin{center}
     \begin{tabular} {c}
       \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int}
-        {\Gamma \vdash e_1 + e_2 : int}[(\textbf{op} $+$)] \text{ }
+        {\Gamma \vdash e_1 + e_2 : int}[(Op-Add] \text{ }
       \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int} 
-        {\Gamma \vdash e_1 - e_2 : int}[(\textbf{op} $-$)] & \\
+        {\Gamma \vdash e_1 - e_2 : int}[(Op-Minus)] & \\
       \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int}
-        {\Gamma \vdash e_1 < e_2 : bool}[(\textbf{op} $<$)] \text{ }
+        {\Gamma \vdash e_1 < e_2 : bool}[(Op-Less)] \text{ }
       \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int} 
-        {\Gamma \vdash e_1 > e_2 : bool}[(\textbf{op} $>$)] & \\
+        {\Gamma \vdash e_1 > e_2 : bool}[(Op-Greater)] & \\
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool}
-        {\Gamma \vdash e_1 \wedge e_2 : bool}[(\textbf{op} $\wedge$)] \text{ }
+        {\Gamma \vdash e_1 \wedge e_2 : bool}[(Op-And)] \text{ }
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool} 
-        {\Gamma \vdash e_1 \vee e_2 : bool}[(\textbf{op} $\vee$)] & \\
+        {\Gamma \vdash e_1 \vee e_2 : bool}[(Op-Or)] & \\
       \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
-        {\Gamma \vdash_{C} x := e_1 : void} [($:=$)] \text{ }
+        {\Gamma \vdash_{C} x := e_1 : void} [(Assign)] \text{ }
       \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash C_1: void & \Gamma \vdash C_2: void}
         {\Gamma \vdash_{C} \text{\textbf{if }} e_1 \text{\textbf{ then }} 
-        C_1 \text{\textbf{ else }} C_2: void}[(\textbf{if else})] & \\
+        C_1 \text{\textbf{ else }} C_2: void}[(If-Else)] & \\
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash C_1: void}
-        {\Gamma \vdash_{C} \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1 : void} [(\textbf{while do})] \text{ }
+        {\Gamma \vdash_{C} \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1 : void} [(While-Do)] \text{ }
       \inference {\Gamma \vdash C_0: void & \Gamma \vdash C_1 : void} 
         {\Gamma \vdash_{C} C_0;C_1 : T_2} [($C$-Concat)] 
         & \\
@@ -1289,7 +1289,7 @@ type checker.
         {\Gamma \vdash_{D} D_0;D_1 \dashv \Gamma''} [($D$-Concat)] \text{ }  
       & \\
       \inference {\Gamma \vdash D_1 \dashv \Gamma' & \Gamma' \vdash_{C} C_1 : void} 
-        {\Gamma \vdash_{C} \textbf{begin }D_1;C_1\textbf{ end} : void} [(Begin scope)]     
+        {\Gamma \vdash_{C} \textbf{begin }D_1;C_1\textbf{ end} : void} [(Begin)]     
     \end{tabular}
   \end{center}
 \caption{Basic Typing Rules for Simple-$R$}
@@ -1460,10 +1460,10 @@ using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rule
         {\langle C_1;C_2, \sigma \rangle \longrightarrow \langle C_2, \sigma' \rangle}[(Cmd-Concat)]
       & \\
       $\langle \text{\textbf{if }\textit{true}} \text{\textbf{ then }} C_1 \text{\textbf{ else }} 
-        C_2, \sigma \rangle \longrightarrow \langle C_1, \sigma\rangle$ (IF-True)
+        C_2, \sigma \rangle \longrightarrow \langle C_1, \sigma\rangle$ (If-True)
       & \\
       $\langle \text{\textbf{if }\textit{false}} \text{\textbf{ then }} C_1 \text{\textbf{ else }} 
-        C_2, \sigma \rangle \longrightarrow \langle C_2, \sigma\rangle$ (IF-False)
+        C_2, \sigma \rangle \longrightarrow \langle C_2, \sigma\rangle$ (If-False)
       & \\
       \inference {\langle e_1, \sigma \rangle\Longrightarrow\langle e_1', \sigma \rangle}
         {\langle \text{\textbf{if }} e_1 \text{\textbf{ then }} C_1 \text{\textbf{ else }} 
@@ -1472,7 +1472,7 @@ using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rule
       & \\
       $\langle \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1, \sigma \rangle \longrightarrow \langle 
         \text{\textbf{if }} e_1 \text{\textbf{ then }} C_1;
-        (\text{\textbf{while }} e_1 \text{\textbf{ do }} C_1) \text{\textbf{ else }} \textbf{skip}, \sigma \rangle$ (WHILE)      
+        (\text{\textbf{while }} e_1 \text{\textbf{ do }} C_1) \text{\textbf{ else }} \textbf{skip}, \sigma \rangle$ (While)      
       & \\
       \inference {x \in \textbf{dom}(\sigma)} 
       {\langle x := v, \sigma \rangle \longrightarrow \sigma[x \mapsto v]} [(Assign-$V$)] \text{ }
