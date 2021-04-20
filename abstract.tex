@@ -2,10 +2,7 @@
 {\Huge \bf Abstract}
 \vspace{24pt} 
 
-
-Write a summary of the whole thing. Make 
-sure it fits in one page. 
-
+\emph{Refinement Types} provides a more expressive type checking and allow more errors to be caught automatically. However, they are not a feature general programmers are aware of. The existing research in the area focused predominantly on the theoretical aspects of refinement types. While there are certain programming languages available that support refinement types, these languages are often research projects that are no longer maintained or simply open-source libraries that simulate a restricted form of refinement types. Our project aims to present refinement types with an emphasis on their behaviour in a real-world programming language. We achieve this by describing an imperative language named Simple-$R$ which strongly resembles C. The introduction of refinement types in an imperative setting is difficult because of features like mutation. Refinement types are able to make use of free variables in the program, this means that a change in the program state might affect the meaning of types, making type checking ambiguous. Furthermore, in general showing that a predicate holds is undecidable, making static type checking of refinement types hard. We address this problem by adapting multiple well-known concepts in programming languages such as immutable variables, closures and hybrid type checking. Using a combining these techniques we formalise the rules for variables and pointers in Simple-$R$ in order to make the behaviour of refinement types clear. 
 
 \newpage
 \vspace*{\fill}

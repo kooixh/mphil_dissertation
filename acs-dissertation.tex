@@ -2601,13 +2601,72 @@ while relating the theoretical concepts to different design choices in existing
 real-world languages. 
 
 \chapter{Conclusions and Future Work} \label{chapter:further_work}
+Dependent Types and Refinement Types provide a more expressive type-checking 
+however their applications in real-world programming is not often studied. 
+Existing research mostly focus on the theoretical aspects and study how 
+these types would behave in an imperative language without relating it to 
+real-world programming. Our research presented a novel approach to 
+introducing refinement types in an imperative programming language that 
+closely resembles real-world programming languages, allowing our work to be more 
+accessible to more readers. 
+
+\par
+We adapted three key ideas from real-world programming languages, 
+immutable variables, closures and hybrid type checking. Combining these 
+ideas, we proposed Simple-$R$, an imperative style programming language 
+built on the WHILE language and supports refinement types. Validating the 
+typing rules for refinement types is difficult as in general predicates are 
+undecideable. To overcome this, Simple-$R$ employs a hybird 
+type checking approach that statically checks certain basic typing 
+properties and defers complicated checks to be done dynamically. 
+
+\par
+The presence of mutation brings certain complications to refinement types. As 
+the refinement predicate can make use of free variables in the program, changes 
+to these variables will effectively change the meaning of the type. We extended 
+Simple-$R$ with two variants Simple-$R_I$ and Simple-$R_C$. The former restricts 
+the sort of free variables that can appear in the refinement predicate by allowing 
+only immutable variable, similar to Java's restriction on variables in Anonymous 
+Functions. The latter introduces a concept called Type Closures which snapshots 
+the program state when a type is declared, subsequent type checks use this copied 
+state and ensures a change in the program state does not impact the type. We 
+conclude our research by extending two new variants Simple-$R^{*}_{I}$ and 
+Simple-$R^{*}_{C}$ which introduce pointers into the two previous variants. The 
+addition of pointers means that the simple notion of constant is now inadequate 
+to handle refinement types as the underlying value can still be modified. We 
+address this problem by adapting the concept of pointers to constant in C/C++.
 
 \section{Future Work}
 Simple-$R$ serves as a simple foundation for introducing refinement types 
 into an imperative programming language and it can be extended with 
-different ideas. In this section we outline three possible areas for future work. 
+different ideas. In this section we outline some possible areas for future work. 
 
+\paragraph{Advanced Language Features} One could imagine extending Simple-$R$ 
+with advanced language features. We observed how introducing new form of 
+variables such as pointers can complicate refinement types, an interesting 
+outlet would be to study how static and global variables will change the 
+behaviour of the language. In a paper \cite{objOritentedDependentType} published 
+in 2012, Joana Campos and Vasco Vasconcelos presented an 
+object-oriented language with dependent types. An interesting extension would be to extend Simple-$R$ 
+with classes and study how refinement types interacts with them. Lastly, 
+refinement types in an concurrent environment would be a novel extension that 
+has not been studied previously. 
 
+\paragraph{Formal Verifications and Modelling} In our project we focused on the construction 
+of our language and discuss how it fits into real-world programming. As such we 
+have ommited certain formal verifications such as the checks for \emph{soundness} 
+and \emph{completeness}. A potential outlet for future work would be to 
+perform these verifications for Simple-$R$. One can even take it further 
+by modelling the Simple-$R$ language in an automated theorem prover to 
+ensure future modifications keeps the integrity of the language. 
+
+\paragraph{Full Dependent Types Support} An obvious future work would be to 
+introduce full dependent type support in Simple-$R$. Dependent types are 
+significantly more powerful than refinement types and their introduction 
+will allow the programmer even more expressive typing. 
+Like refinement types, past research on the topic of dependent types focused on 
+the theoretical aspects, a similar project of presenting 
+dependent types in real-world programming would be interesting and novel. 
 
 \appendix
 \singlespacing
