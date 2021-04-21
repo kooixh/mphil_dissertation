@@ -1840,7 +1840,7 @@ variable is a value or a type.
 \par
 The typing judgement has to be updated to accommodate type checking using a 
 declared type. All typing judgements are updated from $\Gamma \vdash e : T$ to 
-$\Gamma, \tau \vdash e : T$.
+$\Gamma, \tau \vdash e : T$ and the typing rule for typedef is defined below. 
 
 \begin{center}
   \begin{tabular} {c}
@@ -1851,19 +1851,20 @@ $\Gamma, \tau \vdash e : T$.
 \end{center}
 
 \par
-As a declared type is only ever a refinement type, we established that they cannot 
-be type checked statically. However, we must still validate the 
-static refinement type (Refine-Base-US) rule using the following judgement.
-
+We now define the rules for type checking an expression against a declared type, 
+as a declared type is only ever a refinement type, we have established 
+that they cannot be type checked statically. However, we must 
+still validate the \emph{Refine-Base-US} rule. 
 \begin{center}
   \begin{tabular} {c}
-    \inference{\Gamma, \tau \vdash y : Type & \Gamma, \tau \vdash x : \tau(y)}
-    {\Gamma, \tau \vdash x : y} [(Refine-Base-Vars-US)]
+    \inference{\Gamma, \tau \vdash y : Type & \Gamma, \tau \vdash e : \tau(y)}
+    {\Gamma, \tau \vdash e : y} [(Refine-Base-Vars-US)]
   \end{tabular}
 \end{center}
 
 \par
-During runtime, the type is validated using the following rule.
+During runtime, the refinement predicate has to be validated using the 
+\emph{Refine-Runtime} rule.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
