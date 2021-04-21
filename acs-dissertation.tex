@@ -31,6 +31,8 @@
 \usepackage{listings}
 \usepackage{semantic}
 \usepackage{float}
+\usepackage[margin=2.8cm]{geometry}
+
 
 \usepackage{tabto}
 
@@ -140,7 +142,7 @@ expect from refinement types and the benefits of using refinement types.
 
 \begin{figure}[h] 
   \begin{lstlisting}[mathescape=true] 
-  type EvenInt = {v : int | 4 % 2 == 0}
+  type EvenInt = {v : int | v % 2 == 0}
   
   function f(int x) {
     if (x % 2 != 0) 
@@ -1260,7 +1262,7 @@ type checker.
   \begin{center}
     \begin{tabular} {c}
       \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int}
-        {\Gamma \vdash e_1 + e_2 : int}[(Op-Add] \text{ }
+        {\Gamma \vdash e_1 + e_2 : int}[(Op-Add)] \text{ }
       \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int} 
         {\Gamma \vdash e_1 - e_2 : int}[(Op-Minus)] & \\
       \inference {\Gamma \vdash e_1: int & \Gamma \vdash e_2: int}
@@ -1296,23 +1298,57 @@ type checker.
 \end{figure}
 
 \subsubsection{Functions}
-For a function call, we use the type judgement above. We use  
-first order logic to write $f(e_1...e_n)$ as an n-nary function of 
-type $T_1$ to $T_n$, then the arguments $e_1$ to $e_n$ must be of same type. 
-Evaluation of the function will then satisfy the return type $T_0$. Type checking 
-a function requires the function signature, we define 
+In order to type check a function we require access to the function signature, we define 
 a mapping \textit{fts} $: f \mapsto T_1,T_2...T_n \longrightarrow T_0$ 
-that allows us to retrieve the signature of a function. 
+that allows us to retrieve the signature of a function. We first type check the 
+function definition using the following new judgements.
+\begin{center}
+    $\Gamma \vdash_{f} (x_0,x_1...x_n) \longrightarrow C;e$\\
+    $\Gamma \vdash_{f} (x_0,x_1...x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}$
+\end{center}
+
+\par
+Using the judgements, we check that the function definition matches the function 
+signature using the rules in figure \ref{fig:type_check_f_def}.
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference{fts(f) = T_1,T_2...T_n \longrightarrow T_0 \\ 
+      \Gamma \vdash x_0 : T_1 & \Gamma \vdash x_1 : T_1 & ... & \Gamma \vdash x_n : T_n \\
+      \Gamma \vdash_{C} C : void & \Gamma \vdash e : T_0}{\Gamma \vdash_{f} (x_0,x_1...x_n) \longrightarrow C;e} [(Func-Def-$C;e$)]
+      & \\
+      \inference{fts(f) = T_1,T_2...T_n \longrightarrow T_0 \\ 
+      \Gamma \vdash x_0 : T_1 & \Gamma \vdash x_1 : T_1 & ... & \Gamma \vdash x_n : T_n \\
+      \Gamma \vdash_{D} D \dashv \Gamma' & \Gamma' \vdash_{C} C : void & \Gamma' \vdash e : T_0}
+      {\Gamma \vdash_{f} (x_0,x_1...x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}} [(Func-Def-$D;C;e$)]
+    \end{tabular}
+  \end{center}
+  \caption{Typing Rules for Function Definitions}
+  \label{fig:type_check_f_def}
+\end{figure}
+
+\par
+We use first order logic to check that a $n$-nary function that takes 
+the parameters $x_1$ to $x_n$ has the same types that is specified in the 
+signature. Furthermore, we check that the function body is well formed and 
+the returned expression matches the return type in the signature. 
+
+\par
+For a function call, we use the typing rule in figure \ref{fig:type_check_f_call}. 
+If $f(e_1...e_n)$ is a $n$-nary function of type $T_1$ to $T_n$, 
+then the arguments $e_1$ to $e_n$ must be of same type. 
+Evaluation of the function will then satisfy the return type $T_0$ in the signature. 
 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
       \inference {fts(f) = T_1,T_2...T_n \longrightarrow T_0 \\ 
       \Gamma \vdash e_1 : T_1 & \Gamma \vdash e_2 : T_2 &...& \Gamma \vdash e_n : T_n}
-        {\Gamma \vdash f(e_1...e_n): T_0}[(Func)]
+        {\Gamma \vdash f(e_1...e_n): T_0}[(Func-Call)]
     \end{tabular}
   \end{center}
-  \caption{Typing Rules for Functions in Simple-$R$}
+  \caption{Typing Rules for Function Call}
+  \label{fig:type_check_f_call}
 \end{figure}
 
 \subsubsection{Refinement Types} \label{section:ref_type_check}
@@ -1386,7 +1422,7 @@ a subtype of $B$ as $A \preceq B$.
 \end{figure}
 
 \par
-The four subtype judgement defined above allows us to perform perform basic 
+The four subtype rules defined above allows us to perform perform basic 
 polymorphism. (Subtype Base 1 & 2) defines the basic definition of subtype. The 
 first states that a refinement type of $T$ is trivially a subtype of $T$ and the 
 second states that a refinement type $A$ is a subtype of another 
@@ -1421,7 +1457,12 @@ section we will analyse the dynamic behaviour of the language.
 \section{Operational Semantics}
 In this section we will define the \textit{Operational Semantics} 
 \cite{operationalSemantics} for the Simple-$R$ language 
-using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rules.
+using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rules. 
+\par
+Figure \ref{fig:sos_expr} defines the reduction rules for the expressions in 
+Simple-$R$. The rules for functions call will be covered in section 
+\ref{section:functions_sos} as it semantics is more complicated and requires us 
+to discuss it in more details. 
 
 \begin{figure}[H]
   \begin{center}
@@ -1438,7 +1479,7 @@ using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rule
       \inference {\langle e_1, \sigma\rangle \Longrightarrow \langle e_1', \sigma \rangle}
         {\langle e_1\text{ }op\text{ }e_2, \sigma  
         \rangle \Longrightarrow \langle e_1'\text{ }op\text{ }e_2, \sigma \rangle}[(Op-$E$ 1)]
-      & \\
+      \text{ }
       \inference {\langle e_2, \sigma\rangle \Longrightarrow \langle e_2', \sigma \rangle}
         {\langle v\text{ }op\text{ }e_2, \sigma  
         \rangle \Longrightarrow \langle v\text{ }op\text{ }e_2', \sigma \rangle}[(Op-$E$ 2)]
@@ -1450,7 +1491,13 @@ using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rule
   \label{fig:sos_expr}
 \end{figure}
 
-\begin{figure}[h]
+\par
+Figure \ref{fig:sos_commands} defines the operational semantics for the 
+basic commands in the language. The semantics for $\textbf{begin }D;C \textbf{ end}$ 
+is complicated compared to the other commands and thus will be covered with more 
+details in section \ref{section:scope_sos}.
+
+\begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
       $\langle \text{\textbf{skip}}, \sigma \rangle \longrightarrow \sigma$ (Skip)
@@ -1483,13 +1530,6 @@ using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rule
   \label{fig:sos_commands}
 \end{figure}
 
-\par
-Figure \ref{fig:sos_expr} defines the reduction rules for expressions, the 
-rules for functions will be covered in section \ref{section:functions_sos}. 
-Figure \ref{fig:sos_commands} defines the operational semantics for the 
-basic commands in the language. The semantics for $\textbf{begin }D;C \textbf{ end}$ 
-is covered in the next section.
-
 \subsection{Scoping} \label{section:scope_sos}
 Scoping has an important role in programming languages, variables can be defined 
 in scopes and are unavailable once outside. While there are many different 
@@ -1511,7 +1551,7 @@ until there is no evaluation rules to apply.
 Using a multi step evaluation, We can easily define the scoping rules as shown 
 in figure \ref{fig:scoping_rules}.
   
-\begin{figure}[H]
+\begin{figure}[h]
   \begin{center}
     \begin{tabular}{c}
       \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) 
@@ -1571,9 +1611,9 @@ corresponding concetenation rules, which can be derived easily using
 similar semantics to the ones used in in figure \ref{fig:scoping_rules}, 
 are omitted.
 
-\subsection{Functions} \label{section:functions_sos}
-Functions in almost all imperative language operates in their own scope. In many 
-cases they do not have the access to the local variables out of their scope however 
+\subsection{Function Calls} \label{section:functions_sos}
+Functions in imperative language often operates in their own scope, they 
+do not have the access to the local variables out of their scope however 
 one can pass data using arguments. Functions in Simple-$R$ are call by values, 
 changing the value of an argument in the function does not change the value in 
 the outside scope. Our multi-step evaluation rule defined previously helps us 
@@ -1582,13 +1622,16 @@ evaluate functions in their own scope.
 \par
 In order to define the operational semantics of a function we will need to 
 specify the function body. We define a mapping 
-\textit{fns} $: f \mapsto ((x_1, x_2...x_n), f_{body})$, 
-using this mapping allows us to retrieve the body of a function. Since functions 
+\textit{fns} $: f \mapsto ((x_1, x_2...x_n), f_{body})$ where $f_{body}$ can either 
+be $C;e$ or $\textbf{begin }D;C;e\textbf{ end}$, 
+using this mapping we can retrieve the body of a function. Since functions 
 definition cannot be changed at runtime, this does not need to be part of the 
 configuration and can be consider as a static context.
 
 \par
-We can then evaluate the function body which using the multi-step evaluation.
+We first define the rules for the simple case where the function body is simply 
+$C;e$, the rules for $\textbf{begin }D;C;e\textbf{ end}$ will be defined later 
+in the section. 
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
@@ -1597,40 +1640,70 @@ We can then evaluate the function body which using the multi-step evaluation.
         \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \langle e, \sigma'' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
       {\langle f(v_1...v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(Func-$V$)]
       & \\
-      \inference {
-      \textit{fns}(f) = ((x_1..x_n),\textbf{begin }D;C;e\textbf{ end}) \\
-      \langle \textbf{begin }D;C;\textbf{ end}, \sigma' \rangle \longrightarrow^{*} \sigma'' \setminus \{\alpha, \beta, ...\}
-      \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\}  & \langle e, \sigma'' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
-      {\langle f(v_1...v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(Func-$D$)]
-      & \\
       \inference {\langle e_k, \sigma \rangle \Longrightarrow \langle e_k', \sigma' \rangle}
       {\langle f(v_0...v_{k - 1},e_k...e_n), \sigma \rangle \Longrightarrow \langle f(v_0...v_{k - 1}, e_{k}'...e_n), \sigma \rangle} [(Func-$E$)]
     \end{tabular}
   \end{center}
-  \caption{Functions Semantics for Simple-$R$}
+  \caption{Basic Functions Semantics for Simple-$R$}
+  \label{fig:basic_functions}
 \end{figure}
 
 \par
-The first rule (Func-$V$) resembles the evaluation rule for 
-variable declaration but it differs in a crucial way, in the new context for a 
-function call, none of the variables from the previous scope transfer over, only 
-the argument values are copied. We then evaluates the function body until it 
+Figure \ref{fig:basic_functions} shows the basic evaluation rules for functions,  
+the first rule (Func-$V$) creates a new state where only 
+the argument values are available. We then evaluates the function body until it 
 evaluates to a value which is then returned to the caller's context. Unlike 
 scopes, functions only update its local state which is dellalocated upon return. 
 It cannot change the caller's state. 
 
 \par
-The second rule (Func-$D$) allows one to declare new variables in the function 
-body that can be used in the final return value. The operational semantics 
-evaluates the command using the semantics for \textbf{begin end}, however, we 
-retain the modified state and evaluates the expression to return with the latest 
-state. 
+The second rule (Func-$E$) evaluates the expression passed into the 
+function as arguments. Our language defines a strict behaviour that all 
+arguments are evaluated in the order they are passed in the order they are listed, 
+i.e. from left to right and arguments are call-by-value as in languages like 
+Java and ML but not like C or Haskell. 
 
 \par
-The third rule (Func-$E$) evaluates the expression passed into the 
-function as arguments. Our language defines a strict behaviour that all 
-arguments are evaluated in the order they are passed in, i.e. from left to right 
-and arguments are call-by-value.
+In certain cases one might declare new local variables in functions and 
+subsequently use these local variables in the return expression. Figure 
+\ref{fig:declaration_functions} defines the rules for this behaviour. 
+
+\begin{figure}[h]
+  \begin{center}
+    \begin{tabular} {c}
+      \inference {
+      \langle C, \sigma \rangle \longrightarrow^{*} \sigma' & \langle e, \sigma' \rangle \Longrightarrow^{*} v}
+      {\langle \textbf{begin }C;e\textbf{ end}, \sigma \rangle \Longrightarrow \langle v, \sigma' \rangle} [(Func-Body)]
+      & \\
+      \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) \\
+      \langle \textbf{begin }C;e\textbf{ end}, \sigma' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
+      {\langle \textbf{begin }x : T = v_0;C;e\textbf{ end}, \sigma \rangle \Longrightarrow \langle v, \sigma'' \rangle} [(Func-Body-$D$)]
+      & \\
+      \inference {
+      \sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) \\
+      \langle \textbf{begin }D;C;e\textbf{ end}, \sigma' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
+      {\langle \textbf{begin }x : T = v_0;D;C;e\textbf{ end}, \sigma \rangle \Longrightarrow \langle v, \sigma' \rangle} [(Func-Body-$D$-Concat)]
+      & \\
+      \inference {
+      \textit{fns}(f) = ((x_1..x_n),\textbf{begin }D;C;e\textbf{ end}) 
+      \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & 
+      \langle \textbf{begin }D;C;e\textbf{ end}, \sigma' \rangle \Longrightarrow^{*} v}
+      {\langle f(v_1...v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(Func-$D$)]
+    \end{tabular}
+  \end{center}
+  \caption{Semantics for Declarations in Functions}
+  \label{fig:declaration_functions}
+\end{figure}
+
+\par
+The first three rules in the figure behave similar to the 
+operational semantics for \textbf{begin end}, however, instead of simply 
+returning the state, we return the value of the return expression. 
+Note that in order to minimise space, we ommited the rule where an expression 
+is used in the declaration, however one can easily derived the rule using 
+(Begin-E) and (Begin-D-Concat-E) from figure \ref{fig:scoping_rules}. 
+Finally, the rule (Func-$D$) ties everything together by specifying the rules 
+for evaluating a function where the body contains new variable declarations. 
 
 \subsection{Runtime Refinement Type Checking} \label{section:runtime_refine}
 A declaration of a variable that is a refinement type requires specific 
