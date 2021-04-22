@@ -1078,12 +1078,12 @@ we note that refinement types are difficult to verify statically and proposed
 using hybrid type checking to verify its safety. 
 
 \chapter{The Simple-$R$ Language} \label{chapter:simple_r}
-In this chapter we describe Simple-$R$, a basic procedural language 
-with support for refinement types. We 
-introduce certain ambiguous behaviour relating to refinment types and mutation. 
-We extend the Simple-$R$ language with new variants that address these 
-ambiguities using two approaches. Finally, we introduce dynamically  
-allocated memory and discuss how this feature interacts with refinement types. 
+In this chapter we describe Simple-$R$, a procedural language 
+with support for refinement types. We introduce certain unclear behaviour 
+relating to refinment types and mutation. We extend the language with different 
+variants that address these unclear behaviour using two approaches. Finally, 
+we introduce heap allocated memory and discuss how this feature interacts 
+with refinement types. 
 
 \section{Language Syntax}
 \begin{figure}[h]
@@ -1091,9 +1091,9 @@ allocated memory and discuss how this feature interacts with refinement types.
     \begin{tabular}{l l l}
       \textit{Types} & $T$ & $:\text{ }int\text{ }|\text{ }bool\text{ }|
       \text{ }\{x: T\text{ }|\text{ }e\}$\\
-      \textit{Function Type} &  & $:\text{ }T_1, T_2,T_3...T_n\longrightarrow T_0$\\
-      \textit{Function Definition} & $f$ & $:$ $(x_0,x_1,...x_n) \longrightarrow C;e$ $|$ \\ 
-      & & \; $(x_0,x_1,...x_n) \longrightarrow \textbf{begin } D;C;e\textbf{ end}$\\
+      \textit{Function Type} &  & $:\text{ }T_1, T_2,T_3,\text{ }...\text{ },T_n\longrightarrow T_0$\\
+      \textit{Function Definition} & $f$ & $:$ $(x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow C;e$ $|$ \\ 
+      & & \; $(x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow \textbf{begin } D;C;e\textbf{ end}$\\
       \textit{Operators} & $ops$ & $:$ $+$ $|$ $-$ $|$ $\wedge$ $|$ $\vee$ $|$ $<$ $|$ $>$ \\
       \textit{Expressions} & $e$ & $:$ $vals$ $|$ $x$ $|$ $e_1$ $ops$ $e_2$ 
       $|$ $f(e_1...e_n)$ \\
@@ -1123,7 +1123,7 @@ expressions, commands and top-level functions.
 In order to achieve simplicity and observe the core behaviour of refinement 
 types, the language is kept at a minimum with only the necessary construct. 
 
-\paragraph{Types} The Simple-$R$ language has support the following four data types. 
+\paragraph{Types} The Simple-$R$ language has support the following data types. 
 \begin{itemize}
   \item The basic integer type \textit{int}
   \item The basic boolean type \textit{bool}
@@ -1132,17 +1132,17 @@ types, the language is kept at a minimum with only the necessary construct.
 \end{itemize}
 
 \paragraph{Functions}
-Functions Type are defined as $(T_1, T_2,T_3...T_n \longrightarrow T_0)$, 
-it takes a up to $n$ types and returning a type. Note that functions are 
+Function Typse are of the form $(T_1, T_2,T_3,\text{ }...\text{ },T_n \longrightarrow T_0)$, 
+it takes up to $n$ types and returning a type. Note that functions are 
 not first-class in this language, unlike a higher order 
 language, functions types are its own entity and are distinct from the regular 
 types. This distinction ensures that functions cannot be passed to 
 other functions, nor can it return a function as a result. One can compare 
-functions in Simple-$R$ to functions in C or Java. The function body is a 
+functions in Simple-$R$ to functions in Java. The function body is a 
 command however it must end in an expression as the return value. Note that the 
 return keyword is omitted. Functions return can be difficult to represent, in many 
 languages functions can be terminated in certain branches using the 
-return keyword. In order to achieve a simply model for functions, we came to 
+return keyword. In order to achieve a simple model for functions, we came to 
 the decision to disallow return in the middle of the function, values can 
 only be returned at the very end of the function.
 
@@ -1164,8 +1164,8 @@ The language supports the following built in operators.
   \item Variables and values represents the most basic form of an expression.
   \item The six operators which operates on two other expressions $e_1$ 
   and $e_2$ and return an expression.
-  \item The function call $f(e_1..e_n)$ invokes function $f$ with arguments 
-  $e_1..e_n$ and return the result. Functions are classified as expression as 
+  \item The function call $f(e_1,...,e_n)$ invokes function $f$ with arguments 
+  $e_1,...,e_n$ and return the result. Functions are classified as expression as 
   one can utilise the computed result in other expressions. 
 \end{itemize}
 
@@ -1180,7 +1180,7 @@ actions. Simple-$R$ supports the following commands,
   does not perform any meaningful action. 
   \item The \textbf{begin ... end} command allows one to open a new scope. A 
   begin statement is followed by a variable declaration $D$, the declared 
-  variable would then me accessible in the scope of command $C_1$. Upon reaching 
+  variable would then be accessible in the scope of command $C_1$. Upon reaching 
   \textbf{end}, the variable is out of scope and deallocated. 
 \end{itemize}
 
@@ -1241,7 +1241,7 @@ This first judgement represents that expression $e$
 under the context $\Gamma$ has the type $T$. For a more consistent syntax, 
 we use a pseudotype $void$ to represent that a command, the second judgement 
 states that under environment $\Gamma$ the command $C$ is well-formed. 
-The third states that a declaration produces the output context $\Gamma'$.
+The third states that a declaration produces the output context $\Gamma'$. 
 
 \par
 Using the judgement rule we can easily define the fist few typing rules for base 
@@ -1264,7 +1264,8 @@ The remaining typing rules for the operators, statements and function
 calls are presented below. First we define the 
 basic rules in figure \ref{fig:basic_typecheck}, 
 most of the typing rule are straightforward and what one would expect from the 
-type checker. 
+type checker. The typing rules for refinement types and functions are covered in 
+the later subsections.
 
 \begin{figure}[H]
   \begin{center}
@@ -1311,8 +1312,8 @@ a mapping \textit{fts} $: f \mapsto T_1,T_2...T_n \longrightarrow T_0$
 that allows us to retrieve the signature of a function. We first type check the 
 function definition using the following new judgements.
 \begin{center}
-    $\Gamma \vdash_{f} (x_0,x_1...x_n) \longrightarrow C;e$\\
-    $\Gamma \vdash_{f} (x_0,x_1...x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}$
+    $\Gamma \vdash_{f} (x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow C;e$\\
+    $\Gamma \vdash_{f} (x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}$
 \end{center}
 
 \par
@@ -1321,14 +1322,14 @@ signature using the rules in figure \ref{fig:type_check_f_def}.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference{fts(f) = T_1,T_2...T_n \longrightarrow T_0 \\ 
+      \inference{fts(f) = T_1,T_2,\text{ }...\text{ },T_n \longrightarrow T_0 \\ 
       \Gamma \vdash x_0 : T_1 & \Gamma \vdash x_1 : T_1 & ... & \Gamma \vdash x_n : T_n \\
-      \Gamma \vdash_{C} C : void & \Gamma \vdash e : T_0}{\Gamma \vdash_{f} (x_0,x_1...x_n) \longrightarrow C;e} [(Func-Def-$C;e$)]
+      \Gamma \vdash_{C} C : void & \Gamma \vdash e : T_0}{\Gamma \vdash_{f} (x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow C;e} [(Func-Def-$C;e$)]
       & \\
-      \inference{fts(f) = T_1,T_2...T_n \longrightarrow T_0 \\ 
+      \inference{fts(f) = T_1,T_2,\text{ }...\text{ },T_n \longrightarrow T_0 \\ 
       \Gamma \vdash x_0 : T_1 & \Gamma \vdash x_1 : T_1 & ... & \Gamma \vdash x_n : T_n \\
       \Gamma \vdash_{D} D \dashv \Gamma' & \Gamma' \vdash_{C} C : void & \Gamma' \vdash e : T_0}
-      {\Gamma \vdash_{f} (x_0,x_1...x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}} [(Func-Def-$D;C;e$)]
+      {\Gamma \vdash_{f} (x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}} [(Func-Def-$D;C;e$)]
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Function Definitions}
@@ -1350,9 +1351,9 @@ Evaluation of the function will then satisfy the return type $T_0$ in the signat
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {fts(f) = T_1,T_2...T_n \longrightarrow T_0 \\ 
+      \inference {fts(f) = T_1,T_2,\text{ }...\text{ },T_n \longrightarrow T_0 \\ 
       \Gamma \vdash e_1 : T_1 & \Gamma \vdash e_2 : T_2 &...& \Gamma \vdash e_n : T_n}
-        {\Gamma \vdash f(e_1...e_n): T_0}[(Func-Call)]
+        {\Gamma \vdash f(e_1,\text{ }...\text{ },e_n): T_0}[(Func-Call)]
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Function Call}
@@ -1463,13 +1464,11 @@ of the dynamic behaviour when evaluating the refinement predicate. In the next
 section we will analyse the dynamic behaviour of the language. 
 
 \section{Operational Semantics}
-In this section we will define the \textit{Operational Semantics} 
-\cite{operationalSemantics} for the Simple-$R$ language 
-using the \textit{Structural Operational Semantics} \cite{plotkinSOS} (SOS) rules. 
-\par
-Figure \ref{fig:sos_expr} defines the reduction rules for the expressions in 
-Simple-$R$. The rules for functions call will be covered in section 
-\ref{section:functions_sos}.
+In this section we define the \textit{Operational Semantics} 
+\cite{operationalSemantics} for Simple-$R$ using the \textit{Structural Operational Semantics} 
+\cite{plotkinSOS} (SOS) rules. Figure \ref{fig:sos_expr} defines the 
+reduction rules for expressions. The rules for functions 
+call will be covered in section \ref{section:functions_sos}.
 
 \begin{figure}[H]
   \begin{center}
@@ -1599,7 +1598,7 @@ in the set $\{x\}$ from the domain of $\sigma$.
 
 \par
 This is necessary as it is possible to modify the range of $\sigma$ through 
-assignments but not the domain. Upon exiting a scope the alteration to the program 
+assignments but not the domain. Upon exiting a scope the alteration to the variables  
 should still be visible, the only difference is that the variable $x$ is no longer in 
 the state, i.e. has ran out of scope.
 
@@ -1629,8 +1628,8 @@ evaluate functions in their own scope.
 \par
 In order to define the operational semantics of a function we will need to 
 specify the function body. We define a mapping 
-\textit{fns} $: f \mapsto ((x_1, x_2...x_n), f_{body})$ where $f_{body}$ can either 
-be $C;e$ or $\textbf{begin }D;C;e\textbf{ end}$, 
+\textit{fns} $: f \mapsto ((x_1, x_2,\text{ }...\text{ },x_n), f_{body})$, 
+$f_{body}$ can either be $C;e$ or $\textbf{begin }D;C;e\textbf{ end}$, 
 using this mapping we can retrieve the body of a function. Since functions 
 definition cannot be changed at runtime, this does not need to be part of the 
 configuration and can be consider as a static context.
@@ -1642,13 +1641,15 @@ in the section.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\textit{fns}(f) = ((x_1..x_n), C;e) & \langle C, \sigma' 
+      \inference {\textit{fns}(f) = ((x_1,\text{ }...\text{ },x_n), C;e) & \langle C, \sigma' 
       \rangle \longrightarrow^{*} \sigma''
-        \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & \langle e, \sigma'' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
-      {\langle f(v_1...v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(Func-$V$)]
+        \\ \sigma' = \{x_1 \mapsto v_1,\text{ }...\text{ },x_n \mapsto v_n\} & \langle e, \sigma'' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
+      {\langle f(v_1,\text{ }...\text{ },v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(Func-$V$)]
       & \\
       \inference {\langle e_k, \sigma \rangle \Longrightarrow \langle e_k', \sigma' \rangle}
-      {\langle f(v_0...v_{k - 1},e_k...e_n), \sigma \rangle \Longrightarrow \langle f(v_0...v_{k - 1}, e_{k}'...e_n), \sigma \rangle} [(Func-$E$)]
+      {\langle f(v_0,\text{ }...\text{ },v_{k - 1},e_k,\text{ }...\text{ },e_n), 
+      \sigma \rangle \Longrightarrow \langle f(v_0,\text{ }...\text{ },v_{k - 1}, e_{k}',
+      \text{ }...\text{ },e_n), \sigma \rangle} [(Func-$E$)]
     \end{tabular}
   \end{center}
   \caption{Basic Functions Semantics for Simple-$R$}
@@ -1664,11 +1665,12 @@ scopes, functions only update its local state which is dellalocated upon return.
 It cannot change the caller's state. 
 
 \par
-The second rule (Func-$E$) evaluates the expression passed into the 
-function as arguments. Our language defines a strict behaviour that all 
-arguments are evaluated in the order they are passed in the order they are listed, 
-i.e. from left to right and arguments are call-by-value as in languages like 
-Java and ML but not like C or Haskell. 
+The second rule (Func-$E$) evaluates the arguments passed into the 
+function in order to get their values. Our language defines a strict 
+behaviour that all arguments are evaluated in the order they are written in, 
+i.e. from left to right and all arguments are call-by-value. This design parallels 
+that of Java and ML but not like C where arguments can be evaluated out of order 
+or Haskell where lazy evaluation is applied. 
 
 \par
 In certain cases one might declare new local variables in functions and 
@@ -1692,10 +1694,10 @@ subsequently use these local variables in the return expression. Figure
       {\langle \textbf{begin }x : T = v_0;D;C;e\textbf{ end}, \sigma \rangle \Longrightarrow \langle v, \sigma' \rangle} [(Func-Body-$D$-Concat)]
       & \\
       \inference {
-      \textit{fns}(f) = ((x_1..x_n),\textbf{begin }D;C;e\textbf{ end}) 
-      \\ \sigma' = \{x_1 \mapsto v_1 ... x_n \mapsto v_n\} & 
+      \textit{fns}(f) = ((x_1,\text{ }...\text{ },x_n),\textbf{begin }D;C;e\textbf{ end}) 
+      \\ \sigma' = \{x_1 \mapsto v_1,\text{ }...\text{ },x_n \mapsto v_n\} & 
       \langle \textbf{begin }D;C;e\textbf{ end}, \sigma' \rangle \Longrightarrow^{*} v}
-      {\langle f(v_1...v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(Func-$D$)]
+      {\langle f(v_1,\text{ }...\text{ },v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(Func-$D$)]
     \end{tabular}
   \end{center}
   \caption{Semantics for Declarations in Functions}
@@ -1708,8 +1710,9 @@ operational semantics for \textbf{begin end}, however, instead of simply
 returning the state, we return the value of the return expression. 
 Note that in order to minimise space, we ommited the rule where an expression 
 is used in the declaration, however one can easily derived the rule using 
-(Begin-E) and (Begin-D-Concat-E) from figure \ref{fig:scoping_rules}. 
-Finally, the rule (Func-$D$) ties everything together by specifying the rules 
+semantics similar to (Begin-E) and (Begin-D-Concat-E) from 
+figure \ref{fig:scoping_rules}. Finally, the rule (Func-$D$) ties 
+everything together by specifying the rules 
 for evaluating a function where the body contains new variable declarations. 
 
 \subsection{Runtime Refinement Type Checking} \label{section:runtime_refine}
@@ -1721,7 +1724,7 @@ there are cases when the type of some data cannot be determined statically as
 discussed in section \ref{section:hybrid_type_checking}.
 
 \par
-In section \ref{section:ref_type_check} we demonstrated how basic properties 
+In section \ref{section:ref_type_check} we demonstrated how some basic properties 
 of refinement types are checked statically in Simple-$R$ using 
 the unsound typing judgement (Refine-Base-US), now we show 
 how these refinement types are validated dynamically in order to regain soundness. 
@@ -1812,8 +1815,8 @@ in the example above we used the statement
 (\textbf{typedef} $x = \{\upsilon : T\text{ }|\text{ }e\}$) to denote a 
 new refinement type $\{\upsilon : T\text{ }|\text{ }e\}$ with the name $x$. It is 
 important to note that a \textbf{typedef} can only declare a new refinement type, one is 
-not able to use \textbf{typedef} to provide an alias for a base type, the type 
-definition $\textbf{typedef } x = int$ is forbidden, however one is able to achieve the 
+not able to use \textbf{typedef} to provide an alias for a base type, i.e. the type 
+definition $\textbf{typedef } newint = int$ is forbidden, however one is able to achieve the 
 same effect by declaring $\textbf{typedef }newint = \{\upsilon : int\text{ }|\text{ }true\}$.
 
 \par
@@ -1832,10 +1835,10 @@ the new form of declaration.
 \end{figure}
 
 \par
-In our syntax, we have a context mapping $vars$ to $vals$, We now need to 
-add a similar mapping for types, We use $\tau$ to represent the type name map. 
-We modified our Variable Types Context so that we can identify if a certain 
-variable is a value or a type. 
+In our syntax, we have a context that maps $vars$ to $vals$, we now need to 
+add a similar mapping for types which we will use $\tau$ to represent the new 
+Type Name Context. In addition, we modified our Variable Types Context 
+so that we can identify if a certain variable is a value or a type. 
 
 \par
 The typing judgement has to be updated to accommodate type checking using a 
@@ -1851,10 +1854,12 @@ $\Gamma, \tau \vdash e : T$ and the typing rule for typedef is defined below.
 \end{center}
 
 \par
-We now define the rules for type checking an expression against a declared type, 
-as a declared type is only ever a refinement type, we have established 
-that they cannot be type checked statically. However, we must 
-still validate the \emph{Refine-Base-US} rule. 
+We now have to define the rules for type checking an expression 
+against a declared type. As a declared type is only ever a refinement type, 
+we have established that they cannot be type checked statically. 
+However, we must still validate the basic properties using the 
+\emph{Refine-Base-US} rule. 
+
 \begin{center}
   \begin{tabular} {c}
     \inference{\Gamma, \tau \vdash y : Type & \Gamma, \tau \vdash e : \tau(y)}
@@ -1865,6 +1870,7 @@ still validate the \emph{Refine-Base-US} rule.
 \par
 During runtime, the refinement predicate has to be validated using the 
 \emph{Refine-Runtime} rule.
+
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
