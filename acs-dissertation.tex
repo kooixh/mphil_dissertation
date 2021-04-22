@@ -89,18 +89,19 @@
 \pagenumbering{arabic} 
 \setcounter{page}{1} 
 
-\textit{Type systems} \cite{typesystem} have been one of the most extensively researched field in 
-Programming Languages. They act as a way of improving the reliability of a 
+\textit{Type systems} \cite{typesystem} have been one of the most extensively 
+researched field in programming languages theory. They act as a way of 
+improving the reliability of a 
 language by enforcing rules, preventing operations being applied on 
 incompatible data. Type systems can be broken down into various categories but 
 two of the most well known are \textit{Static} \cite{staticTyping} and 
 \textit{Dynamic} \cite{dynamicTyping} typing. Mainstream programming 
 languages such as \textit{Java} \cite{java}, \textit{C} \cite{c} and \textit{C++} \cite{cpp} 
-uses the former while languages like \textit{Python} \cite{python} and 
+use the former while languages like \textit{Python} \cite{python} and 
 \textit{JavaScript} \cite{js} use the latter. 
 Over the years, programming languages have included more powerful and flexible 
 type systems, languages like \textit{C\#} \cite{cSharp} and \textit{Go} 
-\cite{goInferenceType} allow \textit{type inference} \cite{inferenceType}.
+\cite{goInferenceType} for example allow \textit{type inference} \cite{inferenceType}.
 
 \par
 Types are a fundamental way of showing a program's correctness, the use of types 
@@ -113,7 +114,7 @@ even a well-typed program still leaves room for various errors such as
   \item {\textbf{Arithmetic errors}} An arithmetic operation can type check that it is 
   indeed operating on numerical values however it is unable to verify the 
   legality. Forbidden arithmetic operations such as as zero divisors or square 
-  root of a negative number cannot be type checked. 
+  root of a negative number cannot be caught by the type checker. 
   \item {\textbf{Logical error}} Finally, a type checker cannot verify any logical 
   mistakes made by the programmer. Mistakes are inevitable, while the programmer 
   can ensures that the arguments passed to a function are two integers, there is 
@@ -123,7 +124,7 @@ even a well-typed program still leaves room for various errors such as
 \par
 \textit{Dependent Types} \cite{depenTypeAtWork} appears to be a potential solution 
 to the problem, dependent types allow the programmer to create types whose 
-definition depends on values, e.g. a type of vector that is length $n$. 
+definition depends on values, e.g. a type of vector that is of length $n$. 
 A type system that provides such refined control over the values it 
 can take unlocks possibility that are previously unavailable such as 
 domain-specific type checking.
@@ -132,7 +133,7 @@ domain-specific type checking.
 A slight restriction on dependent types can be found in \textit{Refinement 
 Types} \cite{refinementTypes} where one is allowed to define specify subtypes 
 of existing types, e.g. a type of non-zero integers. 
-A refinement types is constrained by a decidable predicate, 
+A refinement type is constrained by a decidable predicate, 
 bringing a better ease of programming. While dependent types are significantly 
 more powerful than refinement types, the latter provides a good balance between 
 expressiveness and ease of use.
@@ -163,21 +164,20 @@ expect from refinement types and the benefits of using refinement types.
 Consider the pseudo-code in figure \ref{code:refine} and assume that the function 
 \textit{f} is an arbitrary function that requires the argument $x$ to be even.
 The implementation first checks if the value provided is indeed even, if it 
-is not then it throws a runtime error. Alternative, the function \textit{refined\_f} 
+is not then it throws a runtime error. Alternatively, the function \textit{refined\_f} 
 achieves the same through the use of refinement types. \textit{EvenInt} is a 
 integer type whose value is guaranteed to be even. If one passes an odd integer 
 to the function it will be caught automatically either at compile time or 
-runtime. 
+runtime by the type checker. 
 
 \par
-Refinement types allows programmer to define much richer and expressive types 
-which can be type checked at run time if not compile time. The addition 
-of refinement types allows for safer code as it is able to guarantee certain 
-properties. Furthermore, using refinement types eliminates the need for many 
-trivial error handling code. Around 4\% of code in every program is 
-dedicated to error handling \cite{errorHandlingCode}, refinement types 
-can reduce the numbers of checks needed and allow the programmer more time to 
-focus on writing the logical part of the code, indirectly 
+Refinement types allows programmer to define much richer and expressive types, 
+they allow for safer code as it is able to guarantee more properties are 
+checked by the type checker. Furthermore, using refinement types 
+eliminates the need for many trivial error handling code. Around 4\% of 
+code in every program is dedicated to error handling \cite{errorHandlingCode}, 
+refinement types can reduce the numbers of checks needed and allow the 
+programmer more time to focus on writing the logical part of the code, indirectly 
 leading to more robust codebases \cite{elimArrayCheck}.
 
 \section{Motivation}
@@ -202,8 +202,8 @@ in an imperative programming languages is the presence of mutation. Imperative
 languages rely on statements that change the state of the program, these 
 changes has the potential making the semantics of refinement types unclear. 
 For instance, if one defined a refinement type as 
-$\{\upsilon : int\text{ }|\text{ }\upsilon < N\}$, what is the 
-behaviour if the value of $N$ changes?
+$\{\upsilon : int\text{ }|\text{ }\upsilon < N\}$ where their values have to be 
+less than $N$, what is the behaviour if the value of $N$ changes?
 
 \par
 Past research has studied and shown the feasibility of a dependently typed 
@@ -215,7 +215,7 @@ they fail to capture how these types systems could relate to
 mainstream programming languages.
 
 \par
-We argue that the the research in the area of dependent types and refinement 
+We argue that the research in the area of dependent types and refinement 
 types can be made more accessible. Research in the area often assumes full 
 knowledge of \textit{The Lambda Calculus} \cite{lambdaCalculus} and uses 
 the concept of \textit{Monads} \cite{monads} for state changes. The semantics 
@@ -225,7 +225,7 @@ imperative programming by extending the calculus, we begin to lose the simple
 nature. 
 
 \par
-Our project is motivated by the apparent lack of accessible literature on the 
+Our project is motivated by this apparent lack of accessible literature on the 
 theory of refinement types especially involving mainstream languages 
 with features such as mutation. We aim to present a simple, restricted framework that 
 captures the essence of refinement types. The said framework will be presented as 
@@ -245,9 +245,9 @@ At the end of the project we achieved the following,
   \item Survey the state of dependent and refinement types in 
   real-world programming languages and analyse their differences.
   \item Construct Simple-$R$, an imperative language with refinement types 
-  based on the WHILE language resembling C. 
-  \item Explore the ambiguity of refinement types in a mutable environment 
-  and propose a solution to resolve the ambiguity.
+  based on the WHILE language and resembles C. 
+  \item Explore the ambiguities of refinement types in a mutable environment 
+  and propose solutions to resolve these ambiguities.
   \item Discuss how the strategies used to handle refinement types in 
   Simple-$R$ are closely tied to concepts in real-world languages.  
   \item Discuss how our work complements the existing literature and possible 
@@ -272,10 +272,10 @@ C++ and how one can construct a limited form of refinement type using the
 template mechanism. 
 
 \par
-In chapter \ref{chapter:key_concepts} we identify several key concepts in 
-programming language that are relevant to our project. We explain 
-and show examples of these concepts in action. Some mechanics are in programming 
-languages are non-trivial, we explain and clarify some of these behaviours. 
+In chapter \ref{chapter:key_concepts} we identify three key concepts in 
+programming language that are relevant to our project. These concepts include 
+immutability, closures and hybrid type checking. Their mechanics in programming 
+languages are non-trivial, we explain and clarify some of their behaviours. 
 Finally, we explained how these concepts can be used to implement refinement 
 types in an imperative language.
 
@@ -287,7 +287,7 @@ highly resembles the C programming language. Our aim with the language is to
 capture the core behaviour of refinement types, for the pursuit 
 of simplicity, the language is kept at a minimal with only the fundamental features. 
 In this chapter, we raise multiple scenarios where refinement types 
-causes ambiguity when mutatio is possible. We address this problem by starting 
+causes ambiguity when mutation is possible. We address this problem by starting 
 with a simple approach where mutation is restricted on variables associated with 
 refinement types. We then propose a solution based on closures that allows 
 variables in types to be independent from program variables. Finally we tackle 
@@ -298,8 +298,8 @@ implemented in established languages such as C++ and Java.
 \par
 In chapter \ref{chapter:related_work} we discuss our work with regards to the 
 existing research in the area and how our project complements the literature.
-Finally, we will conclude by summarising our project and discuss future work. 
-\ref{chapter:further_work}. 
+Finally, we will conclude by summarising our project and discuss future work in 
+chapter \ref{chapter:further_work}. 
 
 \chapter{Background Research} \label{chapter:background}
 In this chapter we provide a formal introduction to the theory of dependent 
