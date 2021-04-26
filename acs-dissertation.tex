@@ -303,16 +303,16 @@ chapter \ref{chapter:further_work}.
 
 \chapter{Background Research} \label{chapter:background}
 In this chapter we provide a formal introduction to the theory of dependent 
-types and refinement types. Building on the definition, we identify how the two 
+types and refinement types. Building on the definition, we identify how these two 
 advanced type system differ. As functional languages prove to be more 
-commonly associated with these type systems, we review the programming languages 
-Agda, Haskell and Idris to understand the natural behaviour of dependent types 
-and refinement types. During our research, we noted several academic projects  
+commonly associated with these type systems, we review theAgda, Haskell and Idris 
+programming languages to understand the natural behaviour of dependent types 
+and refinement types. During our research, we noted several research projects  
 that bring these type systems to imperative programming languages, we review 
-the project \textit{Xanadu} \cite{xanadu}, \textit{Ynot} \cite{ynot} and 
+the projects \textit{Xanadu} \cite{xanadu}, \textit{Ynot} \cite{ynot} and 
 \textit{RSC} \cite{rts}. Open-source programmers have also made strides in 
 the area, we review a Scala library, \textit{refined} \cite{refinedScala}, 
-that brings refinement type to the language. Finally, we study the C++ 
+which brings refinement type to the Scala language. Finally, we study the C++ 
 templating mechanism and identify its similarity to refinement types. 
 
 \section{Dependent Types}
@@ -367,7 +367,7 @@ the expression is $\Sigma x:A.B$. Consider the following example,
 
 $\Sigma x: Int.\{y:Int\text{ }|\text{ } y = x * 2\}$, then the type would 
 contain values like $\langle 1,2 \rangle$ and $\langle 4,8 \rangle$ where the 
-second pair is doubled the first.
+second element in the pair is doubled the first.
 
 \par
 Like the dependent product type, the dependent sum type correspond to a 
@@ -377,10 +377,7 @@ thus $\Sigma x:A.F(x)$ corresponds to $\exists x: A. P(x)$.
 
 \par
 While both dependent product types and dependent sum types are important to the 
-literature, the project itself will mainly focus on the former. we believe that 
-the the notion of pair in dependent sum types prove to be redundant in 
-the construction a programming language and does not provide any additional 
-value. The dependent product type is largely adequate for our goal.
+literature, the project itself will mainly focus on the former.
 
 \section{Refinement Types}
 \textit{Refinement Types}, sometimes referred to as \textit{Subset Types} 
@@ -403,20 +400,20 @@ the former only restrict using a decideable predicate.
 In many cases refinement types and dependent types can achieve the same thing, 
 $\{\upsilon : int \text{ }|\text{ }\upsilon < x\}$ and 
 $\Pi x:int.\text{ }\{ i:int\text{ }|\text{ }i < x\}$ effectively define the 
-same types, a bounded integer whose value cannot be greater than $x$. The differ 
+same types, a bounded integer whose value cannot be greater than $x$. They differ 
 only in the way $x$ is provided, in a refinement type $x$ is a free variable 
 whereas in a dependent type $x$ is a parameter. 
 
 \par
-However, there a many scenarios where a type is possible in dependent types 
+However, there a certain scenarios where a type is possible in dependent types 
 but not in refinement types. Consider the type $\Pi$\verb+n : int.{ v : Vec<int> | len(v) = n}+
 where given an integer $n$ one gets a type that is a vector of length $n$. This 
 is not possible in a refinement type system as the base type $int$ is not 
-the same as the refined type $Vec<int>$.
+the same as the refined type \verb|Vec<int>|.
 
 \par
-While in many cases dependent types prove to be 
-more powerful, refinement types for all intents and purposes does the job in 
+Dependent types prove to be more powerful but 
+refinement types for all intents and purposes does the job in 
 providing the improved expressivity for general programming. For this reason, we 
 base our project on refinement types. 
 
@@ -425,15 +422,15 @@ The decidability of refinement types allows one to have a high level of automati
 provides a simpler understanding. In various refinement type systems, the authors  
 restrict the refinement predicate to be a SMT decidable, this allows many 
 properties to be checkable at compile time through the use of theorem provers. 
-However, this is only possible in cases where values are known at compile time, 
-in many cases this is limited to functional languages where mutation is not possible. 
+However, this is only possible in cases where values are known at compile time 
+which limits it to functional languages where mutation is not possible. 
 
 \section{Functional Languages}
 In this section we examine three functional languages with 
 dependent typing. Functional languages 
 use the \textit{functional programming} \cite{overviewFP} paradigm which 
 is a programming paradigm whose evaluation consists of using a series of function 
-applications. Many functional languages has the notion of purity, i) 
+applications. Many functional languages has the notion of purity which states that i) 
 a function will always return the same value when given the same arguments,  
 ii) the evaluation of a function has no side effects (changes to the state of the program).
  In this paradigm, functions return values as opposed to 
@@ -447,7 +444,7 @@ will accomplish rather than \textit{how} it accomplish it.
 1999 however the first appearance the current version known as Agda 2 is in 
 2007. Agda has all the necessary constructs one would expect in a functional 
 language such as first-class functions, inductive definitions, pattern matching, 
-etc. In addition to being a functional language, Agda also serves an automated theorem prover. 
+etc. In addition to being a functional language, Agda also serves as an automated theorem prover. 
 Agda is one of the few programming language with native dependent type support. 
 
 \par
@@ -477,16 +474,16 @@ the reason being its paradigm, Agda is \textit{purely functional} \cite{purelyFP
 all functions are pure (i.e. not relying on the program state or other mutable 
 data). Functional languages are generally considered harder to learn and grasp 
 compared to other paradigms \cite{fpHarder}. Furthermore, the general lack of 
-awareness and competent users who can program dependent types contribute to Agda 
-being a niche language in the programming world and is 
+awareness and experienced users who can program with dependent types 
+contribute to Agda's niche in the programming world and is 
 predominantly used for theorem proving.
 
 \subsection{Haskell and LiquidHaskell}
 \textit{Haskell} \cite{haskell} is a purely functional programming language first appeared in 1990. In 
 contrast to Agda, Haskell is often considered a more general purpose programming 
 language. Haskell is among the most popular programming languages and argubly 
-the most popular ``pure'' language in the world \cite{pypl}. 
-Haskell has even been adopted by software companies such as Facebook \cite{haskellFB}.
+the most popular ``pure'' language in the world \cite{pypl}, even 
+being adopted by software companies such as Facebook \cite{haskellFB}.
 
 \par
 Haskell is not a language that supports dependent types natively however many 
@@ -496,7 +493,7 @@ algebraic data types, GADTs allow the programmer to
 explicitly write down the types of the constructors \cite{haskellGADT}. 
 
 \par
-Using the power of GADT one could define dependent types as so
+Using the power of GADT one could define some dependent types as so
 
 \begin{figure}[H]
   \begin{lstlisting}      
@@ -547,22 +544,23 @@ type errors are reported with along with the line it occurs.
 Static refinement type checking is made possible in Haskell because of the lack 
 of assignment statements. Once a variable $x$ is declared in a scope, its value 
 cannot be changed. This allows SMT solvers to know precisely the value of $x$ 
-and prove the refinement predicate statically. While I/O is possible in 
-Haskell, their properties cannot be verified using LiquidHaskell.
+and prove the refinement predicate statically. In the case of I/O 
+their properties cannot be verified using LiquidHaskell.
 
 \subsection{Idris}
 \textit{Idris} \cite{idris} is a dependently typed functional language which first 
 appeared in 2007. Idris bears similarity with Agda, both in terms of paradigm 
-and type system. However they differ in one crucial way, Idris is designed to 
+and type system. However they differ in one crucial way, Idris was designed to 
 emphasise general purpose programming rather than theorem proving. In section 
-\ref{section:agda}we stated that one of the less desirable property of 
-Agda was its niche because of its emphasis in theorem proving. Idris provides 
+\ref{section:agda} we stated that one of the less desirable property of 
+Agda was its niche because of the emphasis on theorem proving. Idris provides 
 interoperability with systems libraries and C programs, 
 as well as language constructs for domain specific language 
 implementation \cite{gpIdris}. 
 
 \par
-Syntactically Idris is very similar to Agda, dependent types are defined as so: 
+Syntactically Idris is very similar to Agda, dependent types are defined as so 
+ 
 \begin{figure}[H]
   \begin{lstlisting}      
     data EvenNat :  Nat -> Type where
@@ -581,21 +579,20 @@ While Idris offers interoperability with multiple mainstream programming
 languages such as C and JavaScript, Idris remain predominantly a research tool. 
 Idris is not production ready \cite{gpIdris} as it is missing certain libraries 
 and more importantly nobody is working on Idris full time. Furthermore Idris is 
-still a functional language, hence suffering from the limitation stated earlier. 
+still a functional language, hence suffering from the limitations stated earlier. 
 
 \section{Imperative Languages}
-
-In this section we discuss dependent typing with regards to imperative 
+In this section we discuss dependent and refinement typing with regards to imperative 
 languages. Imperative languages use the \textit{imperative programming} 
 \cite{imperativeOverview} paradigm, in contrast to the functional 
-programming, this paradigm emphasises \textit{how} a program will operate 
+paradigm, this paradigm emphasises \textit{how} a program will operate 
 by using a series of statements to change the program state.
 
 \par
 Imperative languages can be further broken down into different categories, 
 mainly Procedural and Object-Oriented. Many of the world's most popular languages 
 fall into this two categories, C, FORTRAN, COBOL are examples of procedural 
-languages while Java, C#, Kotlin are Object-Oriented Languages. Some languages such 
+languages while Java, C#, Kotlin are object-oriented Languages. Some languages such 
 as C++, Python are multi-paradigm and allows the programmer to write code both 
 in a procedural manner or object-oriented manner. 
 
@@ -603,7 +600,7 @@ in a procedural manner or object-oriented manner.
 Currently there are no production imperative programming language with 
 native support for dependent types or refinement types. 
 However, previous research has looked at creating languages with these 
-capabilities or extending existing languages. In this section we will survey 
+capabilities or extending existing languages. In this section we survey 
 previous works in the area. 
 
 \subsubsection{Ynot} \label{section:ynot}
@@ -663,9 +660,9 @@ in 2016 showcasing Refined TypeScript (RSC), a lightweight refinement type
 system for TypeScript. 
 
 \par
-The key observation of RSC behaves like LiquidHaskell, it serves as a program 
+The key observation is that RSC behaves like LiquidHaskell, it serves as a program 
 verifier that verifies the refinement predicate using an SMT solver. However, 
-unlike Haskell, Typescript is an imperative language and mutable is possible. 
+unlike Haskell, Typescript is an imperative language and mutation is possible. 
 The authors handled the mutable code in two ways, i) refinements are 
 restricted to immutable variables and ii) reassignment is handled using 
 Static single assignment (SSA) translation.
@@ -703,7 +700,7 @@ for us to identify and discuss multiple interesting design.
 \par
 The first interesting observation we made is that the library does not allow 
 refinement types with any arbitrary refinement predicate. Instead,  
-the library has a set of predefined predicates one is able to associate 
+the library has a set of predefined predicates that one is able to associate 
 with refinement types. In the example provided in figure \ref{code:refined-scala} 
 we use the predicate \verb|Less[N]| to refine the integer type such that its value 
 is always less than \verb|N|. As Scala is an imperative language where mutation 
@@ -714,13 +711,14 @@ literal and not a form of variable.
 Furthermore, in order to have compile time refinement type checking, one must 
 initialise the variable of refinement type with a literal. Using the example 
 in figure \ref{code:refined-scala}, the statement 
-\verb|val l: Int Refined Less[10] = x| is forbidden as one tries to assign a 
+\verb|val l: Int Refined Less[10] = x| would be forbidden as one tries to assign a 
 refinement type a non-literal. 
 
 \par
 If one wishes to initialise a refinement type using a variable or function, one 
 must use the \verb|refineV[P](v)| function, where \verb|P| is a predicate and 
-\verb|v| is a value. The function will either give an error if \verb|v| does not 
+\verb|v| is a value. This function tells refined to perform type check 
+at runtime and will either give an error if \verb|v| does not 
 satisfy \verb|P| or it gives the value \verb|v| which is refined using \verb|P|. 
 An example of this use case in shown in figure \ref{code:refined-scala}.
 
@@ -740,10 +738,9 @@ sorting function multiple times for different data types.
 \par
 Templates are often compared to Java's \textit{Generics} \cite{javaGenerics} 
 as the C++ equivalent. While this statement is mostly true, C++ templates 
-differ in a big way. 
-Generics only allow the template parameter to be a class, templates on the other 
-hand allow the parameter to be a class, values or pointers. This feature allows 
-one to create types that resembles refinement types. 
+has an additional feature. Generics only allow the template parameter to be a 
+class, templates on the other hand allow the parameter to be a class, values 
+or pointers. This feature allows one to create types that resembles refinement types. 
 
 \par
 C++ 11 introduced the notion of 
@@ -814,20 +811,20 @@ variables associated with types are constant and the use of immutability.
 
 \section{Summary}
 In this chapter we formally introduced dependent types and refinement types, 
-these two type systems are similar in many aspect but are formally very 
+these two type systems are similar on the surface but are formally very 
 different. Certain functional languages such as Agda and Idris have native support for 
-dependent types however we observed that there is no imperative language with 
+dependent types however we observed that there are no imperative language with 
 the same support. Research has attempted to bring dependent types and refinement types 
 to imperative programming; these projects have been successful but the languages 
-that are created is not widespread. 
+that were created are not widespread. 
 
 \par
-We found several open-source projects taht have attempted to bring refinement 
+We found several open-source projects that attempted to bring refinement 
 types to mainstream languages. We analysed \textit{refined}, a Scala based library that 
 introduces refinement types to the language in a restrictive manner. We found the 
 project interesting however it remains informal and lacks formal documentation. 
-Finally, we studied C++ templates and notice the potential of introducing 
-types that resembles refinement types.
+Finally, we studied C++ templates and notice the potential of creating  
+types that simulate refinement types.
 
 \par
 We identify that work in the area are missing in certain aspects, dependent types 
@@ -836,8 +833,9 @@ because of the lack of mutation. Previous research that attempts to bring the mo
 advanced type system to imperative languages remains mainly theoretical and 
 does not relate to real-world languages. Practical projects that address 
 these form of typing in real-world languages remains informal and are 
-mainly documented as online articles. Our project will be focused on providing 
-formal semantics for refinement types in a real-world imperative language. 
+mainly documented as online articles. Our project will address these gaps by 
+providing formal semantics for refinement types and relating them to 
+real-world imperative languages. 
 
 \chapter{Key Concepts in Programming Languages} \label{chapter:key_concepts}
 Throughout our research, we observe certain ideas that commonly appear across 
