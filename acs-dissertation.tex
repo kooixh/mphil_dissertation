@@ -1225,6 +1225,7 @@ definitions.
     \end{itemize}
   \item $\langle e, \sigma \rangle \Longrightarrow \langle e', \sigma \rangle$ as the transition relation for expression.
   \item $\langle C, \sigma \rangle \longrightarrow \langle C', \sigma' \rangle$ and $\langle C, \sigma \rangle \longrightarrow \sigma'$ as the transition relation for commands.
+  \item $\langle f_{body}, \sigma \rangle \dashrightarrow \langle e, \sigma \rangle$ as the transition relation for function body.
 \end{itemize}
 
 \par
@@ -1320,11 +1321,11 @@ signature using the rules in figure \ref{fig:type_check_f_def}.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference{fts(f) = T_1,T_2,\text{ }...\text{ },T_n \longrightarrow T_0 \\ 
+      \inference{fts((x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow C;e) = T_1,\text{ }...\text{ },T_n \longrightarrow T_0 \\ 
       \Gamma \vdash x_0 : T_1 & \Gamma \vdash x_1 : T_1 & ... & \Gamma \vdash x_n : T_n \\
       \Gamma \vdash_{C} C : void & \Gamma \vdash e : T_0}{\Gamma \vdash_{f} (x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow C;e} [(Func-Def-$C;e$)]
       & \\
-      \inference{fts(f) = T_1,T_2,\text{ }...\text{ },T_n \longrightarrow T_0 \\ 
+      \inference{fts((x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}) = T_1,\text{ }...\text{ },T_n \longrightarrow T_0 \\ 
       \Gamma \vdash x_0 : T_1 & \Gamma \vdash x_1 : T_1 & ... & \Gamma \vdash x_n : T_n \\
       \Gamma \vdash_{D} D \dashv \Gamma' & \Gamma' \vdash_{C} C : void & \Gamma' \vdash e : T_0}
       {\Gamma \vdash_{f} (x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}} [(Func-Def-$D;C;e$)]
@@ -1673,28 +1674,30 @@ or Haskell where lazy evaluation is applied.
 \par
 In certain cases one might declare new local variables in functions and 
 subsequently use these local variables in the return expression. Figure 
-\ref{fig:declaration_functions} defines the rules for this behaviour. 
+\ref{fig:declaration_functions} defines the rules, recall the 
+notation $\dashrightarrow$ is the transition relation for function body 
+$\textbf{begin }D;C;e\textbf{ end}$.
 
 \begin{figure}[h]
   \begin{center}
     \begin{tabular} {c}
       \inference {
       \langle C, \sigma \rangle \longrightarrow^{*} \sigma' & \langle e, \sigma' \rangle \Longrightarrow^{*} v}
-      {\langle \textbf{begin }C;e\textbf{ end}, \sigma \rangle \Longrightarrow \langle v, \sigma' \rangle} [(Func-Body)]
+      {\langle \textbf{begin }C;e\textbf{ end}, \sigma \rangle \dashrightarrow \langle v, \sigma' \rangle} [(Func-Body)]
       & \\
       \inference {\sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) \\
-      \langle \textbf{begin }C;e\textbf{ end}, \sigma' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
-      {\langle \textbf{begin }x : T = v_0;C;e\textbf{ end}, \sigma \rangle \Longrightarrow \langle v, \sigma'' \rangle} [(Func-Body-$D$)]
+      \langle \textbf{begin }C;e\textbf{ end}, \sigma' \rangle \dashrightarrow^{*} \langle v, \sigma'' \rangle}
+      {\langle \textbf{begin }x : T = v_0;C;e\textbf{ end}, \sigma \rangle \dashrightarrow \langle v, \sigma'' \rangle} [(Func-Body-$D$)]
       & \\
       \inference {
       \sigma' = \sigma + \{x \mapsto v_0\} & x \notin \textbf{dom}(\sigma) \\
-      \langle \textbf{begin }D;C;e\textbf{ end}, \sigma' \rangle \Longrightarrow^{*} \langle v, \sigma'' \rangle}
-      {\langle \textbf{begin }x : T = v_0;D;C;e\textbf{ end}, \sigma \rangle \Longrightarrow \langle v, \sigma' \rangle} [(Func-Body-$D$-Concat)]
+      \langle \textbf{begin }D;C;e\textbf{ end}, \sigma' \rangle \dashrightarrow^{*} \langle v, \sigma'' \rangle}
+      {\langle \textbf{begin }x : T = v_0;D;C;e\textbf{ end}, \sigma \rangle \dashrightarrow \langle v, \sigma' \rangle} [(Func-Body-$D$-Concat)]
       & \\
       \inference {
       \textit{fns}(f) = ((x_1,\text{ }...\text{ },x_n),\textbf{begin }D;C;e\textbf{ end}) 
       \\ \sigma' = \{x_1 \mapsto v_1,\text{ }...\text{ },x_n \mapsto v_n\} & 
-      \langle \textbf{begin }D;C;e\textbf{ end}, \sigma' \rangle \Longrightarrow^{*} v}
+      \langle \textbf{begin }D;C;e\textbf{ end}, \sigma' \rangle \dashrightarrow^{*} \langle v, \sigma'' \rangle}
       {\langle f(v_1,\text{ }...\text{ },v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(Func-$D$)]
     \end{tabular}
   \end{center}
