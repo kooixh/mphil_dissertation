@@ -838,10 +838,10 @@ providing formal semantics for refinement types and relating them to
 real-world imperative languages. 
 
 \chapter{Key Concepts in Programming Languages} \label{chapter:key_concepts}
-Throughout our research, we observe certain ideas that commonly appear across 
+Throughout our research, we observed certain ideas that commonly appear across 
 different language constructs. In this chapter, we introduce three concepts, 
 immutability, closures and hybrid type checking. We discuss these concepts 
-in depth and identify how they relate to refinement types. These key ideas will 
+in depth and identify how they relate to refinement types which will 
 be critical in the development of our language.
 
 \section{Immutable Objects in Programming}
@@ -921,8 +921,8 @@ bringing dependent types and refinement types into imperative programming. A
 good understanding the difference between constant and immutable proves to be a 
 critical in the development of our language. Furthermore, we see how different 
 imperative languages enforce constancy and immutability in areas where changes 
-to variables are problematic. We identify the same idea can be incoporated into 
-our language, enforcing immutable variables in refinement types. 
+to variables are problematic. We identify that the same idea can be 
+incoporated into our language, enforcing immutable variables in refinement types. 
 
 \section{Closures} \label{section:closures}
 In this section we introduce the concept of closures using practical examples. 
@@ -970,11 +970,10 @@ imperative language is the presence of mutation. We propose that using the idea
 of closure one can prevent mutation to variables in a refinement type. For 
 example, given the refinement type 
 $\{\upsilon : int \text{ }|\text{ }\upsilon > x\}$, one can close $x$ within the 
-type and independent of any changes to a different variable $x$ in the program. 
+type and make it independent of any changes to a different variable $x$ in the program. 
 This idea is explored in depth further in the project.
 
 \section{Hybrid Type Checking} \label{section:hybrid_type_checking}
-Type checking can be difficult in programming languages with advanced features. 
 In this section we introduce \emph{Hybrid Type Checking} \cite{hybridTypeChecking} 
 as a combination of static and dynamic type checking. We show practical example 
 of hybrid type checking in mainstream languages. Finally we propose a way of 
@@ -1044,12 +1043,12 @@ predicate, however we are able to verify some important properties. Consider the
 following example, $4 : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$, we 
 cannot check the validity statically as the value of $x$ is not available. 
 However, we can verify that there is a possibility for success. Similarly, we 
-can verify some properties that will not succeed at all such as 
+can those that will not succeed at all such as 
 $\textit{false} : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$. This 
 property can be easily checked by type checking the value against the base type. 
 Interestingly, in certain cases refinement types can be completely checked 
 statically. For example, $x : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$ 
-does not type check, however in order to verify this statically one 
+obviously does not type check, however in order to verify this statically one 
 requires the help of automated theorem provers. In our project we have not 
 consider these cases and left them as future work. 
 
