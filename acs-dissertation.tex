@@ -1129,14 +1129,15 @@ types, the language is kept at a minimum with only the necessary construct.
 \end{itemize}
 
 \paragraph{Functions}
-Function Typse are of the form $(T_1, T_2,T_3,\text{ }...\text{ },T_n \longrightarrow T_0)$, 
+Function Types are of the form $(T_1, T_2,T_3,\text{ }...\text{ },T_n \longrightarrow T_0)$, 
 it takes up to $n$ types and returning a type. Note that functions are 
 not first-class in this language, unlike a higher order 
 language, functions types are its own entity and are distinct from the regular 
-types. This distinction ensures that functions cannot be passed to 
+types. This distinction means that functions cannot be passed to 
 other functions, nor can it return a function as a result. One can compare 
-functions in Simple-$R$ to functions in Java. The function body is a 
-command however it must end in an expression as the return value. Note that the 
+functions in Simple-$R$ to functions in Java. The function body is either a 
+command or declarations followed by command and it must end in an 
+expression that is the return value. Note that the 
 return keyword is omitted. Functions return can be difficult to represent, in many 
 languages functions can be terminated in certain branches using the 
 return keyword. In order to achieve a simple model for functions, we came to 
@@ -1148,8 +1149,8 @@ The language supports the following built in operators.
 \begin{itemize}
   \item Integer addition using the $+$ operator written in an infix notation.
   \item Integer subtraction using the $-$ operator written in an infix notation.
-  \item Integer inequality $<$ as the less than operator.
-  \item Integer inequality $>$ as the greater than operator.
+  \item Integer inequality $<$ as the less than operator written in an infix notation..
+  \item Integer inequality $>$ as the greater than operator written in an infix notation..
   \item Logical conjunction using the $\wedge$ operator written in an infix 
   notation.
   \item Logical disjunction using the $\vee$ operator written in an infix 
@@ -1211,7 +1212,7 @@ definitions.
 
 \renewcommand\labelitemii{$\blacksquare$}
 \begin{itemize}
-  \item The metavariable $op$ as one of a range of operators. 
+  \item The metavariable $op$ to range over all operators. 
   \item The metavariable $v$ to range over all values.
   \item The uppercase letter $T$ to range over all types.
   \item Greek letters ($\alpha$, $\pi$, $\upsilon$) to define local variables in 
@@ -1239,11 +1240,11 @@ This first judgement represents that expression $e$
 under the context $\Gamma$ has the type $T$. For a more consistent syntax, 
 we use a pseudotype $void$ to represent that a command, the second judgement 
 states that under environment $\Gamma$ the command $C$ is well-formed. 
-The third states that a declaration produces the output context $\Gamma'$. 
+The third states that a well-formed declaration produces the output context $\Gamma'$. 
 
 \par
 Using the judgement rule we can easily define the fist few typing rules for base 
-values \textit{int}, \textit{bool}, $nil$ and variables.
+values \textit{int}, \textit{bool}, \textbf{skip} and variables.
 
 \begin{figure}[H]
   \begin{center}
@@ -1282,12 +1283,12 @@ the later subsections.
         {\Gamma \vdash e_1 \vee e_2 : bool}[(Op-Or)] & \\
       \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
         {\Gamma \vdash_{C} x := e_1 : void} [(Assign)] \text{ }
-      \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash C_1: void & \Gamma \vdash C_2: void}
+      \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash_{C} C_1: void & \Gamma \vdash_{C} C_2: void}
         {\Gamma \vdash_{C} \text{\textbf{if }} e_1 \text{\textbf{ then }} 
         C_1 \text{\textbf{ else }} C_2: void}[(If-Else)] & \\
-      \inference {\Gamma \vdash e_1: bool & \Gamma \vdash C_1: void}
+      \inference {\Gamma \vdash e_1: bool & \Gamma \vdash_{C} C_1: void}
         {\Gamma \vdash_{C} \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1 : void} [(While-Do)] \text{ }
-      \inference {\Gamma \vdash C_0: void & \Gamma \vdash C_1 : void} 
+      \inference {\Gamma \vdash_{C} C_0: void & \Gamma \vdash_{C} C_1 : void} 
         {\Gamma \vdash_{C} C_0;C_1 : T_2} [($C$-Concat)] 
         & \\
       \inference {\Gamma \vdash e_1: T_1} 
@@ -1359,7 +1360,7 @@ Evaluation of the function will then satisfy the return type $T_0$ in the signat
 \end{figure}
 
 \subsubsection{Refinement Types} \label{section:ref_type_check}
-Finally we define typing rules for a refinement types. A refinement type 
+Finally we define typing rules for a refinement types, a refinement type 
 is represented in our system as $\{\upsilon : T\text{ }|\text{ }e\}$ and is 
 constructed by a base type $T$ and a refinement predicate $e$ which may contain 
 the free variable $\upsilon$ and any free variables in the program. A refinement 
@@ -1383,8 +1384,6 @@ checking, we will discuss runtime type checking later in section
 We first define the typing rule for refinement types using the idea of 
 \textit{universes} \cite{martinLof} in type theory, using the 4th judgement form 
 $\Gamma \vdash A : Type$ to represent that $A$ is a type. 
-
-\par
 We begin by defining the formation rule for a refinement type. 
 \begin{figure}[H]
   \begin{center}
@@ -1393,7 +1392,7 @@ We begin by defining the formation rule for a refinement type.
         {\Gamma \vdash \{\upsilon : T\text{ }|\text{ }e\}: Type}[(Refine-Type-Form)]
     \end{tabular}
   \end{center}
-  \caption{Typing Rules for Refinement Types in Simple-$R$}
+  \caption{Refinement Types Formation Rule}
 \end{figure}
 
 \par
@@ -1406,12 +1405,21 @@ behaviour statically, soundness will be regained further on using dynamic checks
       {\Gamma \vdash e_1 : \{\upsilon : T\text{ }|\text{ }e\}} [(Refine-Base-US)]
     \end{tabular}
   \end{center}
+  \caption{Static Refinement Type-Checking Rule}
   \label{tj:unsound-refine}
 \end{figure}
 
 Additionally, we defining the typing rule for a subtypes, we express $A$ is 
-a subtype of $B$ as $A \preceq B$. 
-\begin{figure}[H]
+a subtype of $B$ as $A \preceq B$. The subtype rules defined in \ref{fig:subtype_rules} 
+allow us to perform perform basic 
+polymorphism. (Subtype-Base 1 and 2) defines the basic definition of subtype. The 
+first states that a refinement type of $T$ is trivially a subtype of $T$ and the 
+second states that a refinement type $A$ is a subtype of another 
+refinement type $B$ if the set of values in $A$ is a subset of or equal 
+the values in $B$. (Subtype Trans) defines the transitivity of subtype and 
+(Subtype Reflex) defines the reflexivity. 
+
+\begin{figure}[h]
   \begin{center}
     \begin{tabular} {c}
       
@@ -1424,40 +1432,25 @@ a subtype of $B$ as $A \preceq B$.
       {\Gamma \vdash T_1 \preceq T_2} [(Subtype-Trans)]
       & \\
       $\Gamma \vdash T_1 \preceq T_1$ (Subtype-Reflex)
+      & \\
+      \inference {\Gamma \vdash T_1 \preceq T_2 & \Gamma \vdash e : T_1} 
+      {\Gamma \vdash e : T_2} [(Subtype)]
     \end{tabular}
   \end{center}
+  \caption{Refinement Types Subtyping Rules}
+  \label{fig:subtype_rules}
 \end{figure}
-
-\par
-The four subtype rules defined above allows us to perform perform basic 
-polymorphism. (Subtype Base 1 & 2) defines the basic definition of subtype. The 
-first states that a refinement type of $T$ is trivially a subtype of $T$ and the 
-second states that a refinement type $A$ is a subtype of another 
-refinement type $B$ if the set of values in $A$ is a subset of or equal 
-the values in $B$. (Subtype Trans) defines the transitivity of subtype and 
-(Subtype Reflex) defines the reflexivity. 
 
 \par
 One should be able to use a value of type $T_1$ in a context 
 expecting type $T_2$ provided $T_1$ is a subtype of $T_2$. For example, an 
 expression $e$ of type containing all even natural numbers $EvenNat$ when passed 
 to a context expecting a type $Nat$ should be valid. 
+We enable this behaviour using the (Subtype) rule.
 
 \par
-We enable this behaviour using the judgement below.
-\begin{figure}[H]
-  \begin{center}
-    \begin{tabular} {c}
-       \inference {\Gamma \vdash T_1 \preceq T_2 & \Gamma \vdash e : T_1} 
-      {\Gamma \vdash e : T_2} [(Subtype)]
-    \end{tabular}
-  \end{center}
-\end{figure}
-
-\par
-In this section we covered the typing rules for Simple-$R$, typing rules are a 
-way of allowing us to statically check the correctness of our program with 
-regards to typing rules. Refinement types are hard to verify statically because 
+In this section we covered the typing rules for Simple-$R$ and how 
+refinement types are hard to verify statically because 
 of the dynamic behaviour when evaluating the refinement predicate. In the next 
 section we will analyse the dynamic behaviour of the language. 
 
@@ -1550,10 +1543,19 @@ evaluate the expression $e$ one or more times until it evaluates to a value $v$.
 The same applies for a multistep evaluation for commands, 
 $\langle C, \sigma \rangle \longrightarrow^{*} \sigma'$ execute the command $C$ 
 until there is no evaluation rules to apply. 
+\par
+The multi-step evaluation provides us to easily express scoping rules, 
+the alternative would be to model an explicit call stack, which complicates the 
+formulas and syntax.
 
 \par
 Using a multi step evaluation, We can easily define the scoping rules as shown 
-in figure \ref{fig:scoping_rules}.
+in figure \ref{fig:scoping_rules}. The \textbf{begin in} 
+command opens a new scope $\sigma'$ which 
+assigns $x$ the value $v$, this scope allows the command $C_1$ to be evaluated 
+using a multi step evaluation. Notice that the resulting state 
+uses the $\setminus$ operator which removes all the variables 
+in the set $\{x\}$ from the domain of $\sigma$. 
   
 \begin{figure}[h]
   \begin{center}
@@ -1588,22 +1590,10 @@ in figure \ref{fig:scoping_rules}.
 \end{figure}
 
 \par
-The \textbf{begin in} statement opens a new scope $\sigma'$ which 
-assigns $x$ the value $v$, this scope allows the command $C_1$ to be evaluated 
-using a multi step evaluation. Notice that the resulting state 
-uses the $\setminus$ operator which removes all the variables 
-in the set $\{x\}$ from the domain of $\sigma$. 
-
-\par
 This is necessary as it is possible to modify the range of $\sigma$ through 
-assignments but not the domain. Upon exiting a scope the alteration to the variables  
+assignments. Upon exiting a scope the alteration to the variables  
 should still be visible, the only difference is that the variable $x$ is no longer in 
 the state, i.e. has ran out of scope.
-
-\par
-The multi-step evaluation provides us to easily express scoping rules, 
-the alternative would be to model an explicit call stack, which complicates the 
-formulas and syntax.
 
 \par
 Concatenated declarations are handled by evaluating the declarations in order 
@@ -1784,9 +1774,8 @@ features would modify the behaviours of each others. The same applies to
 refinement types, which can be seen as a feature. For instance, the inclusion 
 of refinement types would modify the behaviour of assignments and vice versa. 
 This section will cover the different ways of handling refinement types and how 
-they interact with other features.
-Consider these few ambiguity of using variables to define dependent types. For 
-instance: 
+they interact with other features. Consider the ambiguity of using variables 
+in refinement types in figure \ref{fig:amb_refinement_vars}.
 
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
@@ -1811,8 +1800,7 @@ discusses the problem in detail.
 
 \subsection{Type Declaration}
 First we need to introduce a new declaration statement for type declaration, 
-in the example above we used the statement 
-(\textbf{typedef} $x = \{\upsilon : T\text{ }|\text{ }e\}$) to denote a 
+in the example above we used a \textbf{typedef} statement to denote a 
 new refinement type $\{\upsilon : T\text{ }|\text{ }e\}$ with the name $x$. It is 
 important to note that a \textbf{typedef} can only declare a new refinement type, one is 
 not able to use \textbf{typedef} to provide an alias for a base type, i.e. the type 
@@ -1836,8 +1824,8 @@ the new form of declaration.
 
 \par
 In our syntax, we have a context that maps $vars$ to $vals$, we now need to 
-add a similar mapping for types which we will use $\tau$ to represent the new 
-Type Name Context. In addition, we modified our Variable Types Context 
+add a similar mapping for types which we will use $\tau$ to represent, we call this 
+the Type Name Context. In addition, we modified our Variable Types Context 
 so that we can identify if a certain variable is a value or a type. 
 
 \par
@@ -1868,8 +1856,8 @@ However, we must still validate the basic properties using the
 \end{center}
 
 \par
-During runtime, the refinement predicate has to be validated using the 
-\emph{Refine-Runtime} rule.
+During runtime, the refinement predicate has to be validated to regain soundness 
+using the \emph{Refine-Runtime} rule.
 
 \begin{figure}[H]
   \begin{center}
@@ -1906,7 +1894,7 @@ variables, types cannot change after declaration. The new type simply goes
 out of scope, hence the new type context will simply be our initial one. 
 
 \par
-The operational semantic above simply adds a new type definition with name $x$ 
+The operational semantics above simply add a new type definition with name $x$ 
 into the Type Name context $\tau$. Importantly, the variable $x$ cannot have 
 already been defined as a value variable in $\sigma$ and a type of the same name 
 can not already be defined. Logically it is equivalent to the semantics for 
@@ -1914,12 +1902,12 @@ variable declaration.
 
 \subsection{Complete Immutability}
 The main issue one encounters when associating refinement types with imperative 
-languages is the presence of mutability and assignments. The obvious way to 
+languages is the presence of mutation and assignments. The obvious way to 
 work around this problem is to remove the ability to make changes to the state 
 of the program, all variables declared are final.
 
 \par
-Using this approach does definitely resolves the uncertainty the usability of 
+Using this approach does definitely resolves the uncertainty but the usability of 
 the language is poor. Imperative programming relies on state changes, forbidding 
 that goes against the paradigm. However, if we strategically enforce immutability 
 we can resolve the ambiguity while preserving a flexible imperative style 
@@ -1929,9 +1917,9 @@ variables.
 
 \subsection{Immutability in Refinement Types}
 In order to avoid feature interaction between refinement types and assignments, we 
-observe that it is suffice to require free variables appearing in a refinement 
+observe that it is suffice to require all free variables appearing in a refinement 
 predicate to be immutable. This approach improves flexibility of our language as 
-one will still be able to have mutability in context irrelevant to refinement 
+one will still be able to have mutation in context irrelevant to refinement 
 types. In this section we extends Simple-$R$ with this functionality and dubbed 
 the new variant Simple-$R_{I}$.
 
@@ -1959,8 +1947,8 @@ The typing judgement appears in analogous to that of variable declaration
 using $\textbf{var}$. 
 \begin{center}
   \begin{tabular} {c}
-    \inference {\Gamma \vdash e_1: T_1} 
-        {\Gamma \vdash_{D} \textbf{const } x : T_1 = e_1 \dashv \Gamma + \{x \mapsto T_1\}} [(Const-$D$)]
+    \inference {\Gamma,\tau \vdash e_1: T_1} 
+        {\Gamma,\tau \vdash_{D} \textbf{const } x : T_1 = e_1 \dashv \Gamma + \{x \mapsto T_1\}, \tau} [(Const-$D$)]
   \end{tabular}
 \end{center}
 
@@ -1986,12 +1974,6 @@ statement to only accept the latter.
       [(Begin-Const-E)]
       \normalsize
       & \\
-      \inference {
-      \langle \textbf{begin }D_1;C_1\textbf{ end}, \sigma', \tau \rangle \longrightarrow^{*} \langle \sigma'', \tau' \rangle 
-      \\ \sigma' = \sigma + \{x \mapsto v\} & x \notin \textbf{dom}(\sigma)} 
-      {\langle \textbf{begin const }x : T = v;D_1;C_1\textbf{ end}, \sigma, \tau \rangle 
-      \longrightarrow \langle \sigma'' \setminus \{x\}, \tau' \rangle} [(Begin-Concat-$C$)] 
-      & \\
       \inference {x \in \textbf{dom}(\sigma) & \neg is\_immutable(x)} 
       {\langle x := v, \sigma, \tau \rangle \longrightarrow \langle \sigma[x \mapsto v], 
       \tau \rangle} [(Assign-$C$)]
@@ -2007,7 +1989,7 @@ our type definition. First we refine our specification for \textbf{typedef}
 with regards to refinement types using the evaluation rules.
 
 \par
-We require a new notation to capture all the variables that appear in an 
+We require a new notation to capture all the free variables that appear in an 
 expression $e$, we use the notation \textit{free\_vars}$(e)$ to give the set of all 
 variables that appear in an expression $e$.
 
@@ -2047,8 +2029,8 @@ without using the \textbf{typedef} command.
 \end{figure}
 
 \par
-We now address the ambiguity brought up using this semantic. The program in figure 
-\ref{fig:amb_refinement_vars} is no longer a valid program as 
+We have now address the ambiguity brought up using this semantics, 
+the program in figure \ref{fig:amb_refinement_vars} is no longer a valid program as 
 $y$ is a mutable variable and is forbidden from appearing in a refinement type. 
 One would have to rewrite the declaration of $y$ using \textbf{const} which 
 forbids it from being assigned to after initialisation. 
@@ -2058,7 +2040,7 @@ complications regarding mutation.
 
 \par
 The approach laid out here is a simple approach to dealing with the ambiguity of 
-having mutability and refinement types. Interestingly, C++ utilises the same 
+having mutability and refinement types. Recall that C++ utilises the same 
 strategy for templates values, where a value passed into a template must be a 
 constant expression. 
 
@@ -2156,7 +2138,7 @@ and evaluates appropriate, the new rule is defined in figure \ref{fig:runtime_re
       \inference{
       \langle e[e_1/\upsilon], \sigma_1, \tau_1 \rangle \Longrightarrow^{*} \langle \textit{true}, \sigma_1, \tau_1 \rangle  
       \\
-      \Gamma,\sigma, \tau \vdash x : Type & (\{\upsilon : T\text{ }|e\text{ }\}, \sigma_1, \tau_1) = \tau(x)}
+      \Gamma,\sigma, \tau \vdash x : Type & (\{\upsilon : T\text{ }|\text{ }e\}, \sigma_1, \tau_1) = \tau(x)}
       {\Gamma,\sigma,\tau \vdash_{R} e_1 : x } [(Refine-Runtime-Closure)]
     \end{tabular}
   \end{center}
@@ -2167,8 +2149,8 @@ and evaluates appropriate, the new rule is defined in figure \ref{fig:runtime_re
 \par
 The typing judgement behaves similar to our initial judgement, the only 
 exception here is the context being evaluated in. When type checking against a 
-refinement type, the evaluation context is retrieved from $\tau$, the 
-predicate $e[e_1/\upsilon]$ is then evaluated under the context.
+refinement type, the evaluation context $\sigma_1, \tau_1$ is retrieved 
+from $\tau$, the predicate $e[e_1/\upsilon]$ is then evaluated under these context.
 
 \par
 It address the ambiguity in figure \ref{fig:amb_refinement_vars} by specifying 
@@ -2183,7 +2165,7 @@ snapshotting the value of variables at the time of type definition.
 \subsection{Summary}
 In this section, we gave a scenario where our refinement type system is 
 underspecified in the presence of mutation. We proposed two different approaches 
-to complete our specification, approach one utilise constants and immutable 
+to complete our specification, approach one utilises constants and immutable 
 variables to disallow modification of free variables used in a refinement 
 predicate. The second utilises closures and value bindings to ensure 
 consistency. 
@@ -2201,7 +2183,7 @@ types with regards to local variables and we learn that we can keep behaviour
 consistent if we restrict changes to the variable. However, our solution does 
 not accommodate reference variables and pointers. If a refinement type 
 relies on pointers in the refinement predicate then the simple act of declaring 
-them immutable is not enough. Pointer values can be altered through aliasing. 
+them immutable is not enough as pointer values can be altered through aliasing. 
 
 \par
 In this section we will first extend our syntax with the notion of dynamically 
@@ -2313,15 +2295,15 @@ Lastly, we define the operational semantics for the new expressions in figure
       \sigma, \tau, \Delta \rangle} [(Deref-V)]
       & \\
       \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
-        {\langle !e_1 := e_2, \sigma, \tau, \Delta \rangle \Longrightarrow \langle !e_1' := e_2, 
+        {\langle !e_1 := e_2, \sigma, \tau, \Delta \rangle \longrightarrow \langle !e_1' := e_2, 
         \sigma, \tau, \Delta' \rangle} [(P-Assign-$E$ 1)]
       & \\
       \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
-        {\langle !h_1 := e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle !h_1 := e_1', 
+        {\langle !h_1 := e_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle !h_1 := e_1', 
         \sigma, \tau, \Delta' \rangle} [(P-Assign-$E$ 2)]
       & \\
       \inference {h_1 \in \textbf{dom}(\Delta) & \Delta' = \Delta[h_1 \mapsto v_1]}
-        {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle void, 
+        {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle 
         \sigma, \tau, \Delta' \rangle} [(P-Assign)]
       & \\
       \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
@@ -2354,6 +2336,11 @@ between mutation and refinement types using immutability or closures. This appea
 not to be the case with pointers, to show that consider the code snippet in figure
 \ref{fig:amb_refinement_pointers}. 
 
+\par
+In this scenario, we declare a constant $y$ as a pointer to an int, 
+initialised with the value 10. The expression $!y := 5$ indirectly modifies 
+the definition of the type $BoundedIntY$, making $z$ ill-typed. 
+
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
     \textbf{begin const }$y\text{ }:\text{ } int\textit{ ref} = \textbf{new}(int, 10);$\\
@@ -2366,10 +2353,6 @@ not to be the case with pointers, to show that consider the code snippet in figu
   \label{fig:amb_refinement_pointers}
 \end{figure}
 
-\par
-In this scenario, we declare a constant $y$ as a pointer to an int, 
-initialised with the value 10. The expression $!y := 5$ indirectly modifies 
-the definition of the type $BoundedIntY$, making $z$ ill-typed. 
 
 \par
 Our previously defined semantics proves to be underspecified and does not 
@@ -2403,16 +2386,16 @@ a new predicate $is\_immutable\_heap(h)$ to specify if the value held at a
 specific memory address is immutable. The $is\_immutable\_heap(h)$ predicate 
 holds if and only if the heap address $h$ is a constant and cannot be modified.
 
-\par 
-The same predicate applies if a heap address has the value of 
-another heap address, e.g. \verb|int **p| in C. If a heap address $h_1$ has the 
-value of another heap address $h_2$ then $is\_immutable\_heap(h_1) \Leftrightarrow 
-is\_immutable\_heap(h_2)$.  
-
 \par
 While this predicate behaves exactly as the $is\_immutable(x)$ predicate defined 
 previously, we made the distinction between the two as the one operates on variables 
 and the other operates on heap addresses. 
+
+\par 
+The $is\_immutable\_heap(h)$ predicate also applies if a heap address has the value of 
+another heap address, e.g. \verb|int **p| in C. If a heap address $h_1$ has the 
+value of another heap address $h_2$ then $is\_immutable\_heap(h_1) \Leftrightarrow 
+is\_immutable\_heap(h_2)$.  
 
 \par
 In order for one to define an immutable pointer we added a new expression 
@@ -2498,13 +2481,13 @@ is proposed in figure \ref{fig:immu_pointer_typedef}.
   \begin{center}
     \begin{tabular}{c}
       \inference {
-      a \notin \text{\textbf{dom}}(\sigma) & a \notin \textbf{dom}(\tau) \\
+      x \notin \text{\textbf{dom}}(\sigma) & x \notin \textbf{dom}(\tau) \\
       \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_immutable(\alpha)
       \\
       \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_ref(\alpha) \Rightarrow is\_immutable\_heap(\sigma(\alpha))
-      \\ \langle C_1, \sigma, \tau + \{a \mapsto \{\upsilon :T\text{ }|\text{ }e\} 
+      \\ \langle C_1, \sigma, \tau + \{x \mapsto \{\upsilon :T\text{ }|\text{ }e\} 
       \rangle \longrightarrow \langle \sigma', \tau \rangle}
-      {\langle \textbf{begin typedef } a = \{\upsilon :T\text{ }|\text{ }e\};C_1\textbf{ end}, 
+      {\langle \textbf{begin typedef } x = \{\upsilon :T\text{ }|\text{ }e\};C_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow 
         \langle \sigma', \tau \rangle}[(Refine-Typedef-Immu-P)]
     \end{tabular}
@@ -2546,7 +2529,7 @@ Recall that previously we proposed Simple-$R_{C}$ which uses closures to handle
 refinement type, this approach can easily be modified to work with pointers using a 
 similar strategy. If one declares a refinement type $T$, then in addition to 
 the context being copied, we require any pointer variables in the refinement 
-predicate to be constant. This variant, extended from Simple-$R{*}$, is 
+predicate to be constant. This variant, extended from Simple-$R^{*}$, is 
 named Simple-$R^{*}_{C}$
 
 \begin{figure}[H]
@@ -2566,7 +2549,7 @@ named Simple-$R^{*}_{C}$
 \par
 In this section we extended our language to include advanced features such 
 as pointers and aliasing. We observed how introducing new form of 
-variables brings new types of mutation into the language and therefore 
+variables brings new form of mutation into the language and therefore 
 requires us to adapt new strategies in our specification. We presented  
 a new system that characterised the behaviour of pointers in the context of 
 refinement types. Our system forbids mutation on heap locations used in types 
@@ -2601,19 +2584,18 @@ types in a mutable environment. Our first approach is based on the
 idea of immutable variables and forbidding mutation on variables associated 
 with the refinement predicate. The second approach utilises the notion of closures, 
 a snapshot of the state is made at the time of type declaration and the copied 
-state is used for type checking. The the base language is extended into two 
+state is always used for type checking. The the base language is extended into two 
 new variants, Simple-$R_{I}$ and Simple-$R_{C}$ incorporates the first 
 and second approach respectively.
 
 \par
 Finally, we explored the idea of adding dynamically allocated memory into the 
-language and how it leads to further ambiguity. We discussed the difference between 
-immutable reference variable and an immutable object using practical examples in 
-Java. Furthermore, we discussed the subtle difference between const and 
-immutable C/C++ and how it might affect the behaviour of refinement types. We 
-showed how our variant avoid these pitfalls by disallowing address taking. We 
-conclude the chapter by extending Simple-$R_{I}$ and Simple-$R_{C}$ with our new  
-idea. 
+language and how it leads to further ambiguity. We discussed the 
+difference between immutable reference variable and an immutable object, we 
+showed how our variant avoid certain pitfalls in C/C++ by disallowing 
+address taking. We conclude the chapter by extending Simple-$R_{I}$ 
+and Simple-$R_{C}$ with two new variants Simple-$R^{*}_{I}$ and Simple-$R^{*}_{C}$ 
+which provide the semantics for pointers in refinement types. 
 
 \chapter{Related Work} \label{chapter:related_work}
 In this chapter we review existing literature and discuss their  
