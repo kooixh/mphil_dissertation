@@ -20,7 +20,7 @@
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
 \def\dissertationtitle{Refinement Types in Real-World Programming}
-\def\wordcount{0}
+\def\wordcount{14,590}
 
 
 %\usepackage[dvips]{epsfig,graphics} 
@@ -2601,12 +2601,12 @@ which provide the semantics for pointers in refinement types.
 \chapter{Related Work} \label{chapter:related_work}
 In this chapter we review existing literature and discuss their  
 contributions to the field. We categorised past research in two  
-groups, those focusing on purely the theoretical aspects of refinement types in 
-imperative languages and those relating to refinement types in mainstream 
+groups, those focusing on the theoretical aspects of refinement types in 
+imperative languages and those relating refinement types to mainstream 
 programming. 
 
 \paragraph{Theory of Refinement Types in Imperative Language} Research into 
-refinement types in an imperative language often appears in the name of 
+refinement types in imperative languages often appears under the name of 
 dependent types. Although these projects are investigating dependent types 
 in imperative languages, the dependent types described in the projects are 
 often restricted such that it takes the form of refinement types 
@@ -2634,21 +2634,22 @@ phase involves checking the validity of the generated verification-conditions
 which is done by an automated theorem provers, manually or even ignored. The two 
 phase type checking used in HTT resembles the two phase type checking we 
 employed in Simple-$R$. Hoare Type Theory is implemented in \textit{Ynot} which 
-we have covered in detail in section \ref{section:ynot}.
+we covered in section \ref{section:ynot}.
 
 \paragraph{Refinement Types in Mainstream Programming} DML(C) and Hoare Type 
-Theory represents the theoretical aspects of refinement types and dependent 
+Theory represent the theoretical aspects of refinement types and dependent 
 types where the authors created a new type system to interact with imperative 
-program. However, a substantial number of research have attempted to introduce 
-refinement types to a mainstream programming language. 
+program. However, a substantial number of research have attempted to bring  
+refinement types to mainstream programming languages. 
 
 \par
-Refinement Types was first introduced in the \textit{ML} programming 
-language in 1991 by Tim Freeman and Frank Pfenning \cite{refInML}. The paper 
-introduce a system of subtypes for ML that preserves decideable type inference 
-and compile-time checking. Although the authors only considered refinement types 
-in Mini-ML where imperative code is not possible, the paper introduced a 
-new form of types that would prove to be popular.
+The concept of refinement types was first introduced by Tim Freeman and Frank 
+Pfenning \cite{refInML} in 1991 as an extension to the \textit{ML} programming 
+language. The paper introduce a system of subtypes for ML that preserves 
+decideable type inference and compile-time checking. Although the authors 
+only considered refinement types in Mini-ML where imperative code is 
+not possible, the paper introduced a brand new type that would prove to be popular 
+research area. 
 
 \par
 \textit{LiquidHaskell} was introduced in 2014 by Niki Vazou, Eric L. Seidel and 
@@ -2673,7 +2674,7 @@ real-world languages.
 
 \chapter{Conclusions and Future Work} \label{chapter:further_work}
 Dependent Types and Refinement Types provide a more expressive type-checking 
-however their applications in real-world programming is not often studied. 
+however their applications in real-world programming are not often studied. 
 Existing research mostly focus on the theoretical aspects and study how 
 these types would behave in an imperative language without relating it to 
 real-world programming. Our research presented a novel approach to the 
@@ -2713,7 +2714,7 @@ Simple-$R$ serves as a simple foundation for introducing refinement types
 into an imperative programming language and it can be extended with 
 different ideas. In this section we outline some possible areas for future work. 
 
-\paragraph{Advanced Language Features} One could imagine extending Simple-$R$ 
+\paragraph{Advanced Language Features} One could extend Simple-$R$ 
 with advanced language features. We observed how introducing new form of 
 variables such as pointers can complicate refinement types, an interesting 
 outlet would be to study how static and global variables will change the 
