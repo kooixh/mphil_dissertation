@@ -20,7 +20,7 @@
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
 \def\dissertationtitle{Refinement Types in Real-World Programming}
-\def\wordcount{14,594}
+\def\wordcount{14,803}
 
 
 %\usepackage[dvips]{epsfig,graphics} 
@@ -1753,7 +1753,7 @@ evaluates to true under state $\sigma$.
 \par
 Our type check rule looks to capture the behaviour of refinement type however it 
 turns out the current definition is underspecified in the presence of mutation. 
-In the next section we will put forward certain ambiguities with the 
+In the next section we put forward certain ambiguities with the 
 design and discuss different choices one can make to address them.
 
 \section{Refinement Types and Variables}
@@ -2496,9 +2496,10 @@ is proposed in figure \ref{fig:immu_pointer_typedef}.
 \par
 The new specification retains all constraints present and make a crucial 
 new addition. In addition to all variables being immutable, a new rule states 
-that all pointer variables in the expression must to be pointing to a constant. 
+that all pointer variables in the expression must to be pointing to a constant.  
 This ensures that the value pointed 
-to by the pointer would not change throughout the type's existence. Furthermore, 
+to by the pointer would not change throughout the type's existence, 
+this also applies to a pointer pointing to another pointer. Furthermore, 
 we can be sure that any aliases to the heap 
 address will not be able to modify the memory address because of the rules 
 specified in figure \ref{fig:sos_const_ptr}.
@@ -2521,10 +2522,14 @@ and rewrite it as in figure \ref{fig:valid_ptr_program}.
 \end{figure}
 
 
-\subsubsection{Refinement Type Closure and Pointers}
-Recall that previously we proposed Simple-$R_{C}$ which uses closures to handle 
-refinement type, this approach can easily be modified to work with pointers using a 
-similar strategy. If one declares a refinement type $T$, then in addition to 
+\subsection{Pointers in Type Closures}
+In this section we discuss how the Simple-$R_{C}$ variant introduced previously 
+can be adapted to include pointers. 
+
+\subsubsection{Immutable Heap Locations in Type Closures}
+The approach of using Type Closures in Simple-$R_{C}$ 
+can easily be modified to work with pointers using immutable heap locations. 
+If one declares a refinement type $T$, then in addition to 
 the context being copied, we require any pointer variables in the refinement 
 predicate to be constant. This variant, extended from Simple-$R^{*}$, is 
 named Simple-$R^{*}_{C}$
@@ -2543,7 +2548,24 @@ named Simple-$R^{*}_{C}$
   \caption{Evaluation of Refinement Type with Closures}
 \end{figure}
 
-\subsubsection{Summary}
+\subsubsection{Deep Copy Pointers}
+An alternative solution which enhances the flexibility of the language is 
+snapshotting pointers using a deep copy method. We observe that pointers in 
+refinement types simply behaves like local constant variables as 
+their values cannot be modified. One can easily snapshot the values held by pointers 
+and store them in local variables, for example, if a 
+refinement type takes the form $\{\upsilon \text{ }|\text{ }\upsilon < !!!p\}$, 
+then the potential type system would snapshot the value of $p$ and rewrite the type as 
+$\{\upsilon \text{ }|\text{ }\upsilon < p_{val}\}$ where $p_{val}$ is a local variables 
+in the Type Closure that has the value of dereferecing the multi-level pointer $p$.
+
+\par
+Using a deep copy appraoch improves flexibility as one does not need to declare 
+pointers to immutable in order to use them in refinement types. Due to the 
+limits of time, we propose this as an interesting idea and left the formal 
+semantics as future work. 
+
+\subsection{Summary}
 \par
 In this section we extended our language to include advanced features such 
 as pointers and aliasing. We observed how introducing new form of 
@@ -2602,7 +2624,7 @@ groups, those focusing on the theoretical aspects of refinement types in
 imperative languages and those relating refinement types to mainstream 
 programming. 
 
-\paragraph{Theory of Refinement Types and Imperative Features} Research into 
+\paragraph{Theory of Refinement Types} Research into 
 refinement types in imperative languages often appears under the name of 
 dependent types. Although these projects are investigating dependent types 
 in imperative languages, the dependent types described in the projects are 
@@ -2670,7 +2692,9 @@ Our project complements the existing literature by serving as a link between
 the two areas described in this chapter. We provide a simple theoretical 
 foundation for refinement types in a C-Style imperative programming language 
 while relating the theoretical concepts to different design choices in existing 
-real-world languages. 
+real-world languages. Another area our work relates closely with is the study of 
+hybrid type checking, we have discuss some of the work in the area in section 
+\ref{section:hybrid_type_checking}.
 
 \chapter{Conclusions and Future Work} \label{chapter:further_work}
 Dependent Types and Refinement Types provide a more expressive type-checking 
@@ -2709,7 +2733,7 @@ Simple-$R^{*}_{C}$ which introduce pointers into the two previous variants. The
 addition of pointers means that the simple notion of constant is now inadequate 
 to handle refinement types as the underlying value can still be modified. We 
 address this problem by adapting the concept of multi-level pointers to 
-immutable in C/C++ where a pointer reference is immutable. 
+immutable in C/C++, highlighting the key differences between constant and immutable. 
 
 \section{Future Work}
 Simple-$R$ serves as a simple foundation for introducing refinement types 
@@ -2722,10 +2746,12 @@ variables such as pointers can complicate refinement types, an interesting
 outlet would be to study how static and global variables will change the 
 behaviour of the language. In a paper \cite{objOritentedDependentType} published 
 in 2012, Joana Campos and Vasco Vasconcelos presented an 
-object-oriented language with dependent types. An interesting extension would be to extend Simple-$R$ 
-with classes and study how refinement types interacts with them. Lastly, 
-refinement types in an concurrent environment would be a novel extension that 
-has not been studied previously. 
+object-oriented language with dependent types. An interesting 
+extension would be to extend Simple-$R$ with classes and study how refinement 
+types interacts with them. We previously proposed using deep copy semantics to 
+handle pointers in Simple-$R$, a potential future work is to formalise 
+the semantics. Lastly, refinement types in an concurrent 
+environment would be a novel extension that has not been studied previously. 
 
 \paragraph{Formal Verifications and Modelling} In our project we focused on the construction 
 of our language and discuss how it fits into real-world programming. As such we 
