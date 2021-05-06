@@ -20,7 +20,7 @@
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
 \def\dissertationtitle{Refinement Types in Real-World Programming}
-\def\wordcount{14,803}
+\def\wordcount{14,823}
 
 
 %\usepackage[dvips]{epsfig,graphics} 
@@ -618,10 +618,12 @@ ML or Haskell-style programs and still be able to formally
 reason about their values and effects.
 
 \par
-Ynot is publicly available for download on the homepage of the 
-project \cite{theYnotProject} however it suffers from the same issues as 
-Agda, Coq is a niche language and conventionally used as a theorem prover. 
-Furthermore, the paper written on Ynot is theoretically complex, 
+Ynot is publicly available for download \cite{theYnotProject} however it 
+suffers from the same issues as Agda, Coq is a niche language and 
+conventionally used as a theorem prover. Furthermore, in order to take advantage 
+of dependent types in Ynot, one has to write monadic program as one would in 
+Haskell which most programmers are unfamiliar with. 
+Finally, the paper written on Ynot is theoretically complex, 
 requiring prerequisite knowledge of advanced concepts such as Hoare 
 Logic, Hoare Type Theory and Monads, making the paper challenging  
 to new readers seeking to understand the concept of dependent types 
@@ -2550,14 +2552,15 @@ named Simple-$R^{*}_{C}$
 
 \subsubsection{Deep Copy Pointers}
 An alternative solution which enhances the flexibility of the language is 
-snapshotting pointers using a deep copy method. We observe that pointers in 
+snapshotting pointers using a \emph{deep copy} method. We observe that pointers in 
 refinement types simply behaves like local constant variables as 
 their values cannot be modified. One can easily snapshot the values held by pointers 
-and store them in local variables, for example, if a 
-refinement type takes the form $\{\upsilon \text{ }|\text{ }\upsilon < !!!p\}$, 
-then the potential type system would snapshot the value of $p$ and rewrite the type as 
-$\{\upsilon \text{ }|\text{ }\upsilon < p_{val}\}$ where $p_{val}$ is a local variables 
-in the Type Closure that has the value of dereferecing the multi-level pointer $p$.
+and store them in a new local variables, for example, if a 
+refinement type has the form $\{\upsilon \text{ }|\text{ }\upsilon < !!!p\}$, 
+then the type system would snapshot the value of at the end of the multi-level 
+pointer $p$ and rewrite the type as $\{\upsilon \text{ }|\text{ }\upsilon < p_{val}\}$ 
+where $p_{val}$ is a local variable in the Type Closure that has the 
+value of dereferecing the multi-level pointer $p$.
 
 \par
 Using a deep copy appraoch improves flexibility as one does not need to declare 
@@ -2620,9 +2623,9 @@ which provide the semantics for pointers in refinement types.
 \chapter{Related Work} \label{chapter:related_work}
 In this chapter we review existing literature and discuss their  
 contributions to the field. We categorise past research into two  
-groups, those focusing on the theoretical aspects of refinement types in 
-imperative languages and those relating refinement types to mainstream 
-programming. 
+groups, those focusing on the theoretical aspects of refinement types 
+and those relating refinement types to mainstream programming, i.e. languages 
+with a significant number of users. 
 
 \paragraph{Theory of Refinement Types} Research into 
 refinement types in imperative languages often appears under the name of 
@@ -2711,11 +2714,11 @@ programs in monadic style.
 \par
 We adapted three key ideas from real-world programming languages, 
 immutable variables, closures and hybrid type checking. Combining these 
-ideas, we proposed Simple-$R$, an imperative style programming language 
-built on the WHILE language that supports refinement types. Validating the 
-typing rules for refinement types is difficult as in general predicates are 
+ideas, we proposed Simple-$R$, an imperative programming language 
+built on the WHILE language that supports refinement types. Type checking 
+refinement types is difficult as in general predicates are 
 undecideable. To overcome this, Simple-$R$ employs a hybird 
-type checking approach that statically checks certain basic typing 
+type checking approach that statically checks basic typing 
 properties and defers complicated checks to be done dynamically. 
 
 \par
@@ -2728,11 +2731,11 @@ only immutable variables, similar to Java's restriction on variables in Anonymou
 Functions. The latter introduces a concept called Type Closures which snapshots 
 the program state when a type is declared; subsequent type checks use this copied 
 state and ensures a change in the program state does not impact the type. We 
-conclude our research by extending these languages with two new variants Simple-$R^{*}_{I}$ and 
-Simple-$R^{*}_{C}$ which introduce pointers into the two previous variants. The 
+conclude our research by extending these languages with two new variants 
+Simple-$R^{*}_{I}$ and Simple-$R^{*}_{C}$ which introduce pointers into the two previous variants. The 
 addition of pointers means that the simple notion of constant is now inadequate 
 to handle refinement types as the underlying value can still be modified. We 
-address this problem by adapting the concept of multi-level pointers to 
+address this problem by adapting the concept of pointers to 
 immutable in C/C++, highlighting the key differences between constant and immutable. 
 
 \section{Future Work}
@@ -2740,8 +2743,7 @@ Simple-$R$ serves as a simple foundation for introducing refinement types
 into an imperative programming language and it can be extended with 
 different ideas. In this section we outline some possible areas for future work. 
 
-\paragraph{Advanced Language Features} One could extend Simple-$R$ 
-with advanced language features. We observed how introducing new form of 
+\paragraph{Advanced Language Features} We observed how introducing new form of 
 variables such as pointers can complicate refinement types, an interesting 
 outlet would be to study how static and global variables will change the 
 behaviour of the language. In a paper \cite{objOritentedDependentType} published 
