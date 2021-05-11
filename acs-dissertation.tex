@@ -20,7 +20,7 @@
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
 \def\dissertationtitle{Refinement Types in Real-World Programming}
-\def\wordcount{14,823}
+\def\wordcount{14,824}
 
 
 %\usepackage[dvips]{epsfig,graphics} 
@@ -133,7 +133,7 @@ domain-specific type checking.
 A slight restriction on dependent types can be found in \textit{Refinement 
 Types} \cite{refinementTypes} where one is allowed to define specify subtypes 
 of existing types, e.g. a type of non-zero integers. Refinement Types can be 
-seen as a generalisation of Floyd-Hoare Logic \cite{localRefTyping} assertions,  
+seen as a generalisation of \emph{Floyd-Hoare Logic} assertions \cite{localRefTyping},  
 they are constrained by a decidable predicate which brings a 
 better ease of programming. While dependent types are significantly 
 more powerful than refinement types, the latter provides a good balance between 
@@ -306,7 +306,7 @@ chapter \ref{chapter:further_work}.
 In this chapter we provide a formal introduction to the theory of dependent 
 types and refinement types. Building on the definition, we identify how these two 
 advanced type system differ. As functional languages prove to be more 
-commonly associated with these type systems, we review theAgda, Haskell and Idris 
+commonly associated with these type systems, we review the Agda, Haskell and Idris 
 programming languages to understand the natural behaviour of dependent types 
 and refinement types. During our research, we noted several research projects  
 that bring these type systems to imperative programming languages, we review 
@@ -537,7 +537,7 @@ type errors are reported with along with the line it occurs.
   \begin{center}
     \includegraphics[scale=0.5]{assets/lh_demo_sm.PNG}
   \end{center}
-  \caption{LiquidHaskell Demo using EvenInt}
+  \caption{LiquidHaskell Demo}
   \label{fig:lh_demo}
 \end{figure}
 
@@ -1302,7 +1302,7 @@ the later subsections.
         {\Gamma \vdash_{C} \textbf{begin }D_1;C_1\textbf{ end} : void} [(Begin)]     
     \end{tabular}
   \end{center}
-\caption{Basic Typing Rules for Simple-$R$}
+\caption{Typing Rules for Simple-$R$}
 \label{fig:basic_typecheck}
 \end{figure}
 
@@ -1487,7 +1487,7 @@ calls will be covered in section \ref{section:functions_sos}.
       \inference {x \in \textbf{dom}(\sigma)}{\langle x, \sigma \rangle \Longrightarrow \langle \sigma(x), \sigma \rangle}[(Vars)] 
     \end{tabular}
   \end{center}
-  \caption{Basic Evaluation Rules for Simple-$R$ Expression}
+  \caption{Operational Semantics for Simple-$R$ Expression}
   \label{fig:sos_expr}
 \end{figure}
 
@@ -1638,7 +1638,7 @@ in the section.
       \text{ }...\text{ },e_n), \sigma \rangle} [(Func-$E$)]
     \end{tabular}
   \end{center}
-  \caption{Basic Functions Semantics for Simple-$R$}
+  \caption{Functions Semantics for Simple-$R$}
   \label{fig:basic_functions}
 \end{figure}
 
@@ -2116,7 +2116,7 @@ $\tau$ and attach this to the type.
       \sigma, \tau \rangle \longrightarrow \langle \sigma', \tau \rangle} [(Refine-Typedef-Closure)]
     \end{tabular}
   \end{center}
-  \caption{Evaluation of Refinement Type with Closures}
+  \caption{Operational Semantics for Refinement Type with Closures}
 \end{figure}
 
 \par
@@ -2141,7 +2141,7 @@ and evaluates appropriate, the new rule is defined in figure \ref{fig:runtime_re
       {\Gamma,\sigma,\tau \vdash_{R} e_1 : x } [(Refine-Runtime-Closure)]
     \end{tabular}
   \end{center}
-  \caption{Type Checking a Refinement Type in Simple-$R_{C}$}
+  \caption{Type Checking in Simple-$R_{C}$}
   \label{fig:runtime_refine_closure}
 \end{figure}
 
@@ -2491,7 +2491,7 @@ is proposed in figure \ref{fig:immu_pointer_typedef}.
         \langle \sigma', \tau \rangle}[(Refine-Typedef-Immu-P)]
     \end{tabular}
   \end{center}
-  \caption{Typedef refinement types with pointers}
+  \caption{Declaring Refinement Types with Pointers}
   \label{fig:immu_pointer_typedef}
 \end{figure}
 
@@ -2547,7 +2547,7 @@ named Simple-$R^{*}_{C}$
       \sigma, \tau \rangle \longrightarrow \langle \sigma', \tau \rangle} [(Refine-Typedef-Closure-P)]
     \end{tabular}
   \end{center}
-  \caption{Evaluation of Refinement Type with Closures}
+  \caption{Operational Semantics of Refinement Type in Simple-$R^{*}_{C}$}
 \end{figure}
 
 \subsubsection{Deep Copy Pointers}
