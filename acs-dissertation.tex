@@ -93,7 +93,7 @@
 researched field in programming languages theory. They act as a way of 
 improving the reliability of a 
 language by enforcing rules, preventing operations being applied on 
-incompatible data. Type systems can be broken down into various categories but 
+incompatible data. Type systems can be broken down into various categories, 
 two of the most well known are \textit{Static} \cite{staticTyping} and 
 \textit{Dynamic} \cite{dynamicTyping} typing. Mainstream programming 
 languages such as \textit{Java} \cite{java}, \textit{C} \cite{c} and \textit{C++} \cite{cpp} 
@@ -101,7 +101,7 @@ use the former while languages like \textit{Python} \cite{python} and
 \textit{JavaScript} \cite{js} use the latter. 
 Over the years, programming languages have included more powerful and flexible 
 type systems, languages like \textit{C\#} \cite{cSharp} and \textit{Go} 
-\cite{goInferenceType} for example allow \textit{type inference} \cite{inferenceType}.
+\cite{goInferenceType} for example allow \textit{Type Inference} \cite{inferenceType}.
 
 \par
 Types are a fundamental way of showing a program's correctness, the use of types 
@@ -140,7 +140,7 @@ more powerful than refinement types, the latter provides a good balance between
 expressiveness and ease of use.
 
 \section{Overview of Refinement Types}
-In this section we will discuss at a very high level the behaviour one would 
+In this section we discuss at a very high level the behaviour one would 
 expect from refinement types and the benefits of using refinement types. 
 
 \begin{figure}[h] 
@@ -183,23 +183,15 @@ leading to more robust codebases \cite{elimArrayCheck}.
 
 \section{Motivation}
 Type systems have been studied extensively, however dependent and refinement types 
-are uncommon in real-world programming. While their theory has been 
+remain uncommon in real-world programming. While their theory has been 
 established several decades ago, only a small number of programming languages 
 support these advanced type systems. Furthermore, the languages that do support 
 them are limited to functional languages and theorem provers that are rarely 
 used in real-world programming.
 
 \par
-The expressive nature of dependent types and refinement types allow one to 
-define complex mathematical assertions and hence lends itself to 
-theorem proving systems. Multiple functional languages such as \textit{Epigram} 
-\cite{epigram} and \textit{Agda} \cite{agda} have 
-built in support for dependent typing. However 
-mainstream languages such as Java and C++ do not get the luxury.
-
-\par
 We note that one of the challenges of adopting dependent and refinement types 
-in an imperative programming languages is the presence of mutation. Imperative 
+in imperative programming languages is the presence of mutation. Imperative 
 languages rely on statements that change the state of the program, these 
 changes has the potential making the semantics of refinement types unclear. 
 For instance, if one defined a refinement type as 
@@ -236,8 +228,8 @@ thus we believe it strongly satisfies our requirement of accessibility with
 its simple syntax and semantics. Using the 
 framework, we will study the interactions between mutation and refinement types 
 and relate our findings to concepts in mainstream languages. We believe that 
-imperative languages proves to be the more popular paradigm in modern 
-programming and is more accessible to the majority. 
+imperative programming proves to be the more popular paradigm in modern 
+programming and is therefore more accessible. 
 
 
 \section{Key Contributions}
@@ -246,7 +238,7 @@ At the end of the project we achieved the following,
   \item Survey the state of dependent and refinement types in 
   real-world programming languages and analyse their differences.
   \item Construct Simple-$R$, an imperative language with refinement types 
-  based on the WHILE language and resembles C. 
+  based on the WHILE language that resembles C. 
   \item Explore the ambiguities of refinement types in a mutable environment 
   and propose solutions to resolve these ambiguities.
   \item Discuss how the strategies used to handle refinement types in 
@@ -319,8 +311,8 @@ templating mechanism and identify its similarity to refinement types.
 \section{Dependent Types}
 \subsection{Definition of Dependent Types}
 At a very high level dependent types are types that depend on the value of 
-another type. For example, we can define a type that captures only the even 
-integers using the definition 
+another type. For example, we can define a type that captures the  
+integers less than $x$ using the definition 
 \verb|type BoundedInt := |$\Pi x : int.\{i : int\text{ }|\text{ } i < x\}$. 
 In this case we can say that the type \textit{BoundedInt} depends on the 
 type \textit{int} $x$.
@@ -407,14 +399,14 @@ whereas in a dependent type $x$ is a parameter.
 
 \par
 However, there a certain scenarios where a type is possible in dependent types 
-but not in refinement types. Consider the type $\Pi$\verb+n : int.{ v : Vec<int> | len(v) = n}+
+but not in refinement types. Consider the type $\Pi$\verb+n : int.{v : Vec<int> | len(v) = n}+
 where given an integer $n$ one gets a type that is a vector of length $n$. This 
 is not possible in a refinement type system as the base type $int$ is not 
 the same as the refined type \verb|Vec<int>|.
 
 \par
-Dependent types prove to be more powerful but 
-refinement types for all intents and purposes does the job in 
+Dependent types prove to be more powerful than refinement types but 
+the latter for all intents and purposes does the job in 
 providing the improved expressivity for general programming. For this reason, we 
 base our project on refinement types. 
 
@@ -593,14 +585,14 @@ by using a series of statements to change the program state.
 Imperative languages can be further broken down into different categories, 
 mainly Procedural and Object-Oriented. Many of the world's most popular languages 
 fall into this two categories, C, FORTRAN, COBOL are examples of procedural 
-languages while Java, C#, Kotlin are object-oriented Languages. Some languages such 
+languages while Java, C\#, Kotlin are object-oriented Languages. Some languages such 
 as C++, Python are multi-paradigm and allows the programmer to write code both 
 in a procedural manner or object-oriented manner. 
 
 \subsection{Research Languages}
 Currently there are no production imperative programming language with 
 native support for dependent types or refinement types. 
-However, previous research has looked at creating languages with these 
+However, previous research has looked at creating new languages with these 
 capabilities or extending existing languages. In this section we survey 
 previous works in the area. 
 
