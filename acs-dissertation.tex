@@ -899,7 +899,7 @@ modified in a different manner. The value pointed to by
 
 \subsection{Importance of Immutability}
 The concept of immutability is fundamental and taught to new programmers early 
-in the curriculum. However, the declration of constants are often introduced as 
+in the curriculum. However, the use of constants are often introduced as 
 a good software engineering practice that reduces careless errors in code. 
 While it is a key use case of constants, they are often used to achieve a lot 
 more. 
@@ -976,7 +976,7 @@ type checking refinement types using a hybrid type checking appraoch.
 
 \subsection{Static and Dynamic Type Checking}
 Programming languages handle type checking in two main ways, \textit{statically} 
-and \textit{dynamically}. Static type checking is verifies the type 
+and \textit{dynamically}. Static type checking verifies the type 
 safety of a program by analysing the program's text. Dynamic type checking 
 verifies the same at runtime, after consideration the execution of statements. 
 
@@ -984,7 +984,7 @@ verifies the same at runtime, after consideration the execution of statements.
 One often associates strong and weak typing with static and dynamic type 
 checking. While it is true that most weakly typed languages employ dynamic  
 type checking, strongly typed languages do not exclusively use static typing. 
-Modern programming languages offer complex features and some of which are hard 
+Modern programming languages offer complex features, some of which are hard 
 or impossible to decide statically. In order to accomodate the evolving 
 complexity of programming languages, the two distinct approachs are 
 incorporated together. Gordon Plotkin, et al discussed the 
@@ -1052,13 +1052,13 @@ We propose that we can a use hybrid type checking technique to type check
 refinement types in an imperative language. We first statically verify that 
 a value type checks against the base type, at runtime we verify that the 
 refinement predicate holds. This idea is incorporated into our language 
-and discussed in details further in the next chapter. 
+and discussed further in the next chapter. 
 
 \section{Summary}
 In this chapter we introduced several key ideas in programming languages, 
 explained the meaning behind them and how they relates to refinement types. 
 We identified the difference between a constant and 
-immutabile object which is key in the study of refinement types in 
+immutable object which is key in the study of refinement types in 
 imperative languages. We introduced the concept of closures and showed examples 
 of it in action using JavaScript, we propsed a way of using closures 
 in types that enables refinement types in imperative programming. 
