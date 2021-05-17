@@ -20,7 +20,7 @@
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
 \def\dissertationtitle{Refinement Types in Real-World Programming}
-\def\wordcount{14,716}
+\def\wordcount{14,713}
 
 
 %\usepackage[dvips]{epsfig,graphics} 
@@ -1778,7 +1778,7 @@ in refinement types in figure \ref{fig:amb_refinement_vars}.
 \end{figure}
 
 \par
-The simple program demonstrated in figure \ref{fig:amb_refinement_vars} declares a 
+The simple program shown in figure \ref{fig:amb_refinement_vars} declares a 
 bounded integer type $BoundedIntY$ whose value cannot be greater than another integer $y$, 
 a free variable in the program. A variable $x$ is declared to be of type 
 $BoundedIntY$ with the appropriate value. Later in the program, the value of $y$ 
@@ -1788,8 +1788,8 @@ discusses the problem in detail.
 
 \subsection{Type Declaration}
 First we need to introduce a new declaration statement for types, 
-in our language we use a \textbf{typedef} statement to create a 
-new refinement type $\{\upsilon : T\text{ }|\text{ }e\}$ with the name $x$. It is 
+we use a \textbf{typedef} statement to create a 
+new refinement type with a name $x$. It is 
 important to note that a \textbf{typedef} can only declare a new refinement type, one is 
 not able to use \textbf{typedef} to provide an alias for a base type, i.e. the type 
 definition $\textbf{typedef } newint = int$ is forbidden, however one is able to achieve the 
