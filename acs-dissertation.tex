@@ -1108,8 +1108,8 @@ with refinement types.
 Figure \ref{fig:simple_r_syntax} is the syntax of Simple-$R$, the paragraphs below 
 explain the language in details. In contrast to other literature in this area, 
 Simple-$R$ is a \textit{First Order Programming Language} \cite{FOL} modeled 
-after the WHILE \cite{whileLanguage} programming language but with functions.
-Rather than building it on the $\lambda$-calculus as one would in 
+after the WHILE \cite{whileLanguage} programming language but with functions 
+and refinement types. Rather than building it on the $\lambda$-calculus as one would in 
 a Higher Order Language, we opted for a ``C-like'' syntax, with concepts such as 
 expressions, commands and top-level functions. 
 In order to achieve simplicity and observe the core behaviour of refinement 
@@ -1140,21 +1140,19 @@ the decision to disallow return in the middle of the function, values can
 only be returned at the very end of the function.
 
 \paragraph{Operators}
-The language supports the following built in operators.
+The language supports the following built in infix operators.
 \begin{itemize}
-  \item Integer addition using the $+$ operator written in an infix notation.
-  \item Integer subtraction using the $-$ operator written in an infix notation.
-  \item Integer inequality $<$ as the less than operator written in an infix notation..
-  \item Integer inequality $>$ as the greater than operator written in an infix notation..
-  \item Logical conjunction using the $\wedge$ operator written in an infix 
-  notation.
-  \item Logical disjunction using the $\vee$ operator written in an infix 
-  notation.
+  \item Integer addition using the $+$ operator.
+  \item Integer subtraction using the $-$ operator.
+  \item Integer inequality $<$ as the less than operator.
+  \item Integer inequality $>$ as the greater than operator.
+  \item Logical conjunction using the $\wedge$ operator.
+  \item Logical disjunction using the $\vee$ operator.
 \end{itemize}
 
 \paragraph{Expressions} The following expressions make up the language.
 \begin{itemize}
-  \item Variables and values represents the most basic form of an expression.
+  \item Variables and values represent the most basic form of an expression.
   \item The six operators which operates on two other expressions $e_1$ 
   and $e_2$ and return an expression.
   \item The function call $f(e_1,...,e_n)$ invokes function $f$ with arguments 
@@ -1163,7 +1161,7 @@ The language supports the following built in operators.
 \end{itemize}
 
 \paragraph{Commands} Commands are statements that can be executed to perform an 
-actions. Simple-$R$ supports the following commands,
+action. Simple-$R$ supports the following commands,
 \begin{itemize}
   \item The assignment statement $(:=)$ assigns an expression $e_1$ to variable 
   $x$, note $x$ must have already been declared. 
@@ -1177,11 +1175,11 @@ actions. Simple-$R$ supports the following commands,
   \textbf{end}, the variable is out of scope and deallocated. 
 \end{itemize}
 
-\paragraph{Declarations} Declarations are the method one use declare new construct 
+\paragraph{Declarations} Declarations are the method one use to declare new construct 
 in the program. We start the language off having the most basic variable declaration 
 $\textbf{var }x : T = e$ which declare a new variable $x$ of type $T$ and 
 initialise it the resulting value of expression $e$. Multiple declarations can 
-be declared in a scope by concatenating multiple declaration as $D_0;D_1$.
+be made by concatenating multiple declaration as $D_1;D_2$.
 
 \paragraph{Variables and Values} In Simple-$R$, all variables are allocated 
 locally, we use $x$ to denote a variable. Variables can take values as suggested by the types, all the integer 
@@ -1198,8 +1196,7 @@ in the type context $\Gamma$. Each variable is allowed to only appear once in
 the context. This context will be used to type check the program using the 
 typing judgement in the next section.
 
-\section{Typing Rules}
-This section defines the typing rules for the Simple-$R$ language. 
+\section{Metavariables}
 Throughout the text we will be extending the syntax defined in the 
 previous chapter in order to accommodate more features. 
 We will use the following metavariables and notations throughout our 
@@ -1221,6 +1218,9 @@ definitions.
   \item $\langle f_{body}, \sigma \rangle \dashrightarrow \langle e, \sigma \rangle$ as the transition relation for function body.
 \end{itemize}
 
+\section{Typing Rules}
+This section defines the typing rules for the Simple-$R$ language. 
+
 \par
 We begin by defining the typing judgements. The typing judgements used in 
 Simple-$R$ takes the form of the standard notation. 
@@ -1231,13 +1231,13 @@ Simple-$R$ takes the form of the standard notation.
 \end{center}
 This first judgement represents that expression $e$ 
 under the context $\Gamma$ has the type $T$. For a more consistent syntax, 
-we use a pseudotype $void$ to represent that a command, the second judgement 
+we use a pseudotype $void$ to represent the type of a command, the second judgement 
 states that under environment $\Gamma$ the command $C$ is well-formed. 
 The third states that a well-formed declaration produces the output context $\Gamma'$. 
 
 \par
-Using the judgement rule we can easily define the first few typing rules for base 
-values \textit{int}, \textit{bool}, \textbf{skip} and variables.
+Using these judgements we can easily define the first few typing rules for 
+\textit{int}, \textit{bool}, \textbf{skip} and variables.
 
 \begin{figure}[H]
   \begin{center}
@@ -1274,24 +1274,24 @@ the later subsections.
         {\Gamma \vdash e_1 \wedge e_2 : bool}[(Op-And)] \text{ }
       \inference {\Gamma \vdash e_1: bool & \Gamma \vdash e_2: bool} 
         {\Gamma \vdash e_1 \vee e_2 : bool}[(Op-Or)] & \\
-      \inference {\Gamma \vdash x: T & \Gamma \vdash e_1: T} 
-        {\Gamma \vdash_{C} x := e_1 : void} [(Assign)] \text{ }
-      \inference {\Gamma \vdash e_1: bool \\ \Gamma \vdash_{C} C_1: void & \Gamma \vdash_{C} C_2: void}
-        {\Gamma \vdash_{C} \text{\textbf{if }} e_1 \text{\textbf{ then }} 
+      \inference {\Gamma \vdash x: T & \Gamma \vdash e: T} 
+        {\Gamma \vdash_{C} x := e : void} [(Assign)] \text{ }
+      \inference {\Gamma \vdash e: bool \\ \Gamma \vdash_{C} C_1: void & \Gamma \vdash_{C} C_2: void}
+        {\Gamma \vdash_{C} \text{\textbf{if }} e \text{\textbf{ then }} 
         C_1 \text{\textbf{ else }} C_2: void}[(If-Else)] & \\
-      \inference {\Gamma \vdash e_1: bool & \Gamma \vdash_{C} C_1: void}
-        {\Gamma \vdash_{C} \text{\textbf{while }} e_1 \text{\textbf{ do }} C_1 : void} [(While-Do)] \text{ }
-      \inference {\Gamma \vdash_{C} C_0: void & \Gamma \vdash_{C} C_1 : void} 
-        {\Gamma \vdash_{C} C_0;C_1 : T_2} [($C$-Concat)] 
+      \inference {\Gamma \vdash e: bool & \Gamma \vdash_{C} C: void}
+        {\Gamma \vdash_{C} \text{\textbf{while }} e \text{\textbf{ do }} C : void} [(While-Do)] \text{ }
+      \inference {\Gamma \vdash_{C} C_1: void & \Gamma \vdash_{C} C_2 : void} 
+        {\Gamma \vdash_{C} C_1;C_2 : void} [($C$-Concat)] 
         & \\
-      \inference {\Gamma \vdash e_1: T_1} 
-        {\Gamma \vdash_{D} \textbf{var } x : T_1 = e_1 \dashv \Gamma + \{x \mapsto T_1\}} [(D-$Vars$)] 
+      \inference {\Gamma \vdash e: T} 
+        {\Gamma \vdash_{D} \textbf{var } x : T = e \dashv \Gamma + \{x \mapsto T\}} [(D-$Vars$)] 
       & \\
-      \inference {\Gamma \vdash_{D} D_0 \dashv \Gamma' & \Gamma' \vdash_{D} D_1 \dashv \Gamma''} 
-        {\Gamma \vdash_{D} D_0;D_1 \dashv \Gamma''} [($D$-Concat)] \text{ }  
+      \inference {\Gamma \vdash_{D} D_1 \dashv \Gamma' & \Gamma' \vdash_{D} D_2 \dashv \Gamma''} 
+        {\Gamma \vdash_{D} D_1;D_2 \dashv \Gamma''} [($D$-Concat)] \text{ }  
       & \\
-      \inference {\Gamma \vdash D_1 \dashv \Gamma' & \Gamma' \vdash_{C} C_1 : void} 
-        {\Gamma \vdash_{C} \textbf{begin }D_1;C_1\textbf{ end} : void} [(Begin)]     
+      \inference {\Gamma \vdash D \dashv \Gamma' & \Gamma' \vdash_{C} C : void} 
+        {\Gamma \vdash_{C} \textbf{begin }D;C\textbf{ end} : void} [(Begin)]     
     \end{tabular}
   \end{center}
 \caption{Typing Rules for Simple-$R$}
@@ -1304,8 +1304,8 @@ a mapping \textit{fts} $: f \mapsto T_1,T_2...T_n \longrightarrow T_0$
 that allows us to retrieve the signature of a function. We first type check the 
 function definition using the following new judgements.
 \begin{center}
-    $\Gamma \vdash_{f} (x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow C;e$\\
-    $\Gamma \vdash_{f} (x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}$
+    $\Gamma \vdash_{f} (x_1,x_2,\text{ }...\text{ },x_n) \longrightarrow C;e$\\
+    $\Gamma \vdash_{f} (x_1,x_2,\text{ }...\text{ },x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}$
 \end{center}
 
 \par
@@ -1314,12 +1314,12 @@ signature using the rules in figure \ref{fig:type_check_f_def}.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference{fts((x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow C;e) = T_1,\text{ }...\text{ },T_n \longrightarrow T_0 \\ 
-      \Gamma \vdash x_0 : T_1 & \Gamma \vdash x_1 : T_1 & ... & \Gamma \vdash x_n : T_n \\
+      \inference{fts((x_1,x_2,\text{ }...\text{ },x_n) \longrightarrow C;e) = T_1,\text{ }...\text{ },T_n \longrightarrow T_0 \\ 
+      \Gamma \vdash x_1 : T_1 & \Gamma \vdash x_2 : T_2 & ... & \Gamma \vdash x_n : T_n \\
       \Gamma \vdash_{C} C : void & \Gamma \vdash e : T_0}{\Gamma \vdash_{f} (x_1,x_2,\text{ }...\text{ },x_n) \longrightarrow C;e} [(Func-Def-$C;e$)]
       & \\
-      \inference{fts((x_0,x_1,\text{ }...\text{ },x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}) = T_1,\text{ }...\text{ },T_n \longrightarrow T_0 \\ 
-      \Gamma \vdash x_0 : T_1 & \Gamma \vdash x_1 : T_1 & ... & \Gamma \vdash x_n : T_n \\
+      \inference{fts((x_1,x_2,\text{ }...\text{ },x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}) = T_1,\text{ }...\text{ },T_n \longrightarrow T_0 \\ 
+      \Gamma \vdash x_1 : T_1 & \Gamma \vdash x_2 : T_2 & ... & \Gamma \vdash x_n : T_n \\
       \Gamma \vdash_{D} D \dashv \Gamma' & \Gamma' \vdash_{C} C : void & \Gamma' \vdash e : T_0}
       {\Gamma \vdash_{f} (x_1,x_2,\text{ }...\text{ },x_n) \longrightarrow \textbf{begin }D;C;e\textbf{ end}} [(Func-Def-$D;C;e$)]
     \end{tabular}
@@ -1376,7 +1376,7 @@ checking, we will discuss runtime type checking later in section
 
 \par
 We first define the typing rule for refinement types using the idea of 
-\textit{universes} \cite{martinLof} in type theory, using the 4th judgement form 
+\textit{universes} \cite{martinLof} in type theory, using the judgement form 
 $\Gamma \vdash T : Type$ to represent that $T$ is a valid type. 
 We begin by defining the formation rule for a refinement type. 
 \begin{figure}[H]
@@ -1438,15 +1438,14 @@ the values in $T_2$. (Subtype Trans) defines the transitivity of subtype and
 \par
 One should be able to use a value of type $T_1$ in a context 
 expecting type $T_2$ provided $T_1$ is a subtype of $T_2$. For example, an 
-expression $e$ of type containing all even natural numbers $EvenNat$ when passed 
+expression $e$ of type $EvenNat$ when passed 
 to a context expecting a type $Nat$ should be valid. 
 We enable this behaviour using the (Subtype) rule.
 
 \par
 In this section we covered the typing rules for Simple-$R$ and how 
 refinement types are hard to verify statically because 
-of the dynamic behaviour when evaluating the refinement predicate. In the next 
-section we will analyse the dynamic behaviour of the language. 
+of the dynamic behaviour when evaluating the refinement predicate. 
 
 \section{Operational Semantics}
 In this section we define the \textit{Operational Semantics} 
