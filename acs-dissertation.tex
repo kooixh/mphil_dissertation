@@ -1539,8 +1539,7 @@ formulas and syntax.
 
 \par
 Using a multi step evaluation, We can easily define the scoping rules as shown 
-in figure \ref{fig:scoping_rules}. The \textbf{begin in} 
-command opens a new scope $\sigma'$ which 
+in figure \ref{fig:scoping_rules}. The (Begin-V) rule opens a new scope $\sigma'$ which 
 assigns $x$ the value $v$, this scope allows the command $C_1$ to be evaluated 
 using a multi step evaluation. Notice that the resulting state 
 uses the $\setminus$ operator which removes all the variables 
@@ -1585,8 +1584,8 @@ should still be visible, the only difference is that the variable $x$ is no long
 the state, i.e. has ran out of scope.
 
 \par
-Concatenated declarations are handled by evaluating the declarations in order 
-starting from the first. The rules (Begin-D-Concat-V) and (Begin-D-Concat-E) 
+Concatenated declarations are handled by evaluating the declarations in the 
+order they are written. The rules (Begin-D-Concat-V) and (Begin-D-Concat-E) 
 formalise the behaviour. To minimise space, in future text when we 
 introduce new form of \textit{Declarations}, we will only 
 formalise the rules where only a single declaration is present. The 
@@ -1607,8 +1606,8 @@ In order to define the operational semantics of a function we will need to
 specify the function body. We define a mapping 
 \textit{fns} $: f \mapsto ((x_1, x_2,\text{ }...\text{ },x_n), f_{body})$, 
 $f_{body}$ can either be $C;e$ or $\textbf{begin }D;C;e\textbf{ end}$, 
-using this mapping we can retrieve the body of a function. Since functions 
-definition cannot be changed at runtime, this does not need to be part of the 
+using this mapping we can retrieve the body of a function. Since function  
+definitions cannot be changed at runtime, this does not need to be part of the 
 configuration and can be consider as a static context.
 
 \par
@@ -1624,8 +1623,8 @@ in the section.
       {\langle f(v_1,\text{ }...\text{ },v_n), \sigma \rangle \Longrightarrow \langle v, \sigma \rangle} [(Func-$V$)]
       & \\
       \inference {\langle e_k, \sigma \rangle \Longrightarrow \langle e_k', \sigma' \rangle}
-      {\langle f(v_0,\text{ }...\text{ },v_{k - 1},e_k,\text{ }...\text{ },e_n), 
-      \sigma \rangle \Longrightarrow \langle f(v_0,\text{ }...\text{ },v_{k - 1}, e_{k}',
+      {\langle f(v_1,\text{ }...\text{ },v_{k - 1},e_k,\text{ }...\text{ },e_n), 
+      \sigma \rangle \Longrightarrow \langle f(v_1,\text{ }...\text{ },v_{k - 1}, e_{k}',
       \text{ }...\text{ },e_n), \sigma \rangle} [(Func-$E$)]
     \end{tabular}
   \end{center}
@@ -1638,8 +1637,7 @@ Figure \ref{fig:basic_functions} shows the basic evaluation rules for functions,
 the first rule (Func-$V$) creates a new state where only 
 the argument values are available. We then evaluates the function body until it 
 evaluates to a value which is then returned to the caller's context. Unlike 
-scopes, functions only update its local state which is dellalocated upon return. 
-It cannot change the caller's state. 
+scopes, functions only update its local state which is dellalocated upon return.
 
 \par
 The second rule (Func-$E$) evaluates the arguments passed into the 
@@ -1729,8 +1727,8 @@ perform a type check on refinement type using the rule defined below.
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      \inference{\Gamma \vdash e_1 : T_1 & \langle e[e_1/\upsilon], \sigma \rangle \Longrightarrow^{*} \langle \textit{true}, \sigma \rangle}
-      {\sigma, \Gamma \vdash_{R} e_1 : \{\upsilon : T_1\text{ }|\text{ }e\}} [(Runtime-Refine)]
+      \inference{\Gamma \vdash e_1 : T & \langle e[e_1/\upsilon], \sigma \rangle \Longrightarrow^{*} \langle \textit{true}, \sigma \rangle}
+      {\sigma, \Gamma \vdash_{R} e_1 : \{\upsilon : T\text{ }|\text{ }e\}} [(Runtime-Refine)]
     \end{tabular}
   \end{center}
   \caption{Type Checking Refinement Types}
@@ -1740,7 +1738,7 @@ perform a type check on refinement type using the rule defined below.
 \par
 During runtime, the typing judgement in figure \ref{fig:refine_typecheck} 
 asserts that an expression $e_1$ is a valid refinement type if it 
-evaluates to the base type $T_1$ and the refinement predicate $e[e_1/\upsilon]$ 
+evaluates to the base type $T$ and the refinement predicate $e[e_1/\upsilon]$ 
 evaluates to true under state $\sigma$.
 
 \par
@@ -1751,10 +1749,10 @@ design and discuss different choices one can make to address them.
 
 \section{Refinement Types and Variables}
 \subsection{Ambiguity of Refinement Types involving Mutation}
-Programming languages often have a wide range of features, often the team behind 
+Programming languages have a wide range of features, often the team behind 
 the language have to put extensive thought into the design decisions. As there 
 are often multiple ways to handle a certain feature, rarely is there a definite 
-answer to which is the most optimal, often they are a matter of human judgement 
+answer to which is the most optimal, they are usually a matter of human judgement 
 or aesthetics. 
 
 \par
@@ -1770,8 +1768,8 @@ in refinement types in figure \ref{fig:amb_refinement_vars}.
 \begin{figure} [H]
   \begin{tabs}{1cm,2cm}
     \textbf{begin var }$y\text{ }:\text{ } int = 10;$ \\
-    \tab\textbf{begin typedef }$BoundedIntY$ = $\{i : Int\text{ }|\text{ } i < y\}$; \\ 
-    \tab\tab\textbf{begin var }$x\text{ }:\text{ }BoundedIntY = 4;y := 5$\textbf { end} \\
+    \tab\textbf{begin typedef }$BoundedIntY$ = $\{\upsilon : Int\text{ }|\text{ } \upsilon  < y\}$; \\ 
+    \tab\tab\textbf{begin var }$x\text{ }:\text{ }BoundedIntY = 6;y := 5$\textbf { end} \\
     \tab\textbf {end} \\
     \textbf{end}
   \end{tabs}  
@@ -1789,8 +1787,8 @@ should $x$ still be well-typed, or is the behaviour invalid? This section
 discusses the problem in detail. 
 
 \subsection{Type Declaration}
-First we need to introduce a new declaration statement for type declaration, 
-in the example above we used a \textbf{typedef} statement to denote a 
+First we need to introduce a new declaration statement for types, 
+in our language we use a \textbf{typedef} statement to create a 
 new refinement type $\{\upsilon : T\text{ }|\text{ }e\}$ with the name $x$. It is 
 important to note that a \textbf{typedef} can only declare a new refinement type, one is 
 not able to use \textbf{typedef} to provide an alias for a base type, i.e. the type 
@@ -1991,7 +1989,8 @@ predicate $e$, we require $\textit{free\_vars}(e) \subseteq \textbf{dom}(\sigma)
 
 \par
 Using the new notation we can easily verify that all free variables in a 
-refinement predicate $is\_immutable$ using the evaluation defined below. The same 
+refinement predicate $is\_immutable$ using the rules defined in figure 
+\ref{fig:typedef-simple-ri}. The same 
 applies when one declares a variable of type $\{\upsilon : T\text{ }|\text{ }e\}$ 
 without using the \textbf{typedef} command.
 
@@ -2016,6 +2015,8 @@ without using the \textbf{typedef} command.
       \longrightarrow \langle \sigma' \setminus \{x\}, \tau \rangle} [(Refine-Immu)]
     \end{tabular}
   \end{center}
+  \caption{Operational Semantics for Typedef in Simple-$R_I$}
+  \label{fig:typedef-simple-ri}
 \end{figure}
 
 \par
@@ -2094,8 +2095,8 @@ definition of $\tau$ to hold this information.
 The Type Name Context now associate a refinement type with its 
 evaluation context. The said context is simply the $\sigma, \tau$ at the time of 
 the refinement type creation. 
-We define $\sigma_1$ and $\tau_1$ as a copy of the program state $\sigma$ and 
-$\tau$ and attach this to the type. 
+In figure \ref{fig:typedef_simple_rc}, we define $\sigma_1$ and $\tau_1$ 
+as a copy of the program state $\sigma$ and $\tau$ and attach this to the type. 
 
 \begin{figure}[H]
   \begin{center}
@@ -2107,7 +2108,8 @@ $\tau$ and attach this to the type.
       \sigma, \tau \rangle \longrightarrow \langle \sigma', \tau \rangle} [(Refine-Typedef-Closure)]
     \end{tabular}
   \end{center}
-  \caption{Operational Semantics for Refinement Type with Closures}
+  \caption{Operational Semantics for Typedef in Simple-$R_C$}
+  \label{fig:typedef_simple_rc}
 \end{figure}
 
 \par
@@ -2119,7 +2121,7 @@ $\textbf{var }x : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$, then the rul
 the predicate using the current environment will hold. 
 
 \par
-Our new typing judgement now retrieves the associated context 
+Our new typing rule now retrieves the associated context 
 and evaluates appropriate, the new rule is defined in figure \ref{fig:runtime_refine_closure}. 
 
 \begin{figure}[H]
@@ -2137,7 +2139,7 @@ and evaluates appropriate, the new rule is defined in figure \ref{fig:runtime_re
 \end{figure}
 
 \par
-The typing judgement behaves similarly to our initial judgement, the only 
+The typing rule behaves similarly to our previous rule, the only 
 difference here is the context being evaluated in. When type checking against a 
 refinement type, the evaluation context $\sigma_1, \tau_1$ is retrieved 
 from $\tau$, the predicate $e[e_1/\upsilon]$ is then evaluated under these context.
@@ -2183,7 +2185,7 @@ pointers and refinement types in order to identify a consistent behaviour.
 \subsection{Introducing Heap Allocated Memory}
 In programming languages, there are three different types of memory allocation, 
 static, stack and heaps \cite{heapVsStack}. While we have not explicitly 
-discussed our memory management model, it is rather obvious that Simple-$R$ 
+discussed our memory management model, it is obvious that Simple-$R$ 
 operates on a stack based model. It is apparent in the behaviour of local 
 variables which are inaccessible once out of scope as discussed in our scoping rules. 
 We introduce a new variant of Simple-$R$ called Simple-$R^{*}$ that supports 
