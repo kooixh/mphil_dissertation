@@ -224,7 +224,7 @@ an extension to \textit{WHILE language} \cite{whileLanguage}. The WHILE language
 created as a tool to aid the study of programming language theory, 
 thus we believe it strongly satisfies our requirement of accessibility with 
 its simple syntax and semantics. Using the 
-framework, we will study the interactions between mutation and refinement types, 
+framework, we study the interactions between mutation and refinement types, 
 furthermore we relate our findings to concepts in mainstream languages.
 
 
@@ -287,7 +287,7 @@ implemented in established languages such as C++ and Java.
 \par
 In chapter \ref{chapter:related_work} we discuss our work with regards to the 
 existing research in the area and how our project complements the literature.
-Finally, we will conclude by summarising our project and discuss future work in 
+Finally, we conclude by summarising our project and discuss future work in 
 chapter \ref{chapter:further_work}. 
 
 \chapter{Background Research} \label{chapter:background}
@@ -813,7 +813,7 @@ because of the lack of mutation. Previous research that attempts to bring the mo
 advanced type system to imperative languages remains mainly theoretical and 
 does not relate to real-world languages. Practical projects that address 
 these form of typing in real-world languages remains informal and are 
-mainly documented as online articles. Our project will address these gaps by 
+mainly documented as online articles. Our project addresses these gaps by 
 providing formal semantics for refinement types and relating them to 
 real-world imperative languages. 
 
@@ -821,8 +821,8 @@ real-world imperative languages.
 Throughout our research, we observed certain ideas that commonly appear across 
 different language constructs. In this chapter, we introduce three concepts, 
 immutability, closures and hybrid type checking. We discuss these concepts 
-in depth and identify how they relate to refinement types which will 
-be critical in the development of our language.
+in depth and identify how they relate to refinement types which is 
+critical in the development of our language.
 
 \section{Immutable Objects in Programming}
 In this section we analyse the crucial differences between an immutable object   
@@ -976,7 +976,7 @@ incorporated together. Gordon Plotkin, et al discussed the
 idea of dynamically checking a static language in this paper 
 \cite{dynamicCheckStaticLanguage}. In practice, modern languages like 
 Java and C# now supports the combination of static and dynamic type checking, 
-e.g. Java's runtime checks for downcasting which will be 
+e.g. Java's runtime checks for downcasting which is 
 discussed in the next subsection.
 
 \subsubsection{Example of Hybrid Type Checking in Java} 
@@ -1355,7 +1355,7 @@ type checks against the base type for a chance of success.
 \par
 We adopted a type checking approach that validates as much as possible 
 statically and defers complicated type 
-checking until runtime. In this section we will focus on static refinement type 
+checking until runtime. In this section we focus on static refinement type 
 checking, we will discuss runtime type checking later in section 
 \ref{section:runtime_refine}.
 
@@ -1746,7 +1746,7 @@ This problem is known as \textit{feature interactions}
 features would modify the behaviours of each others. The same applies to 
 refinement types, which can be seen as a feature. For instance, the inclusion 
 of refinement types would modify the behaviour of assignments and vice versa. 
-This section will cover the different ways of handling refinement types and how 
+This section covers the different ways of handling refinement types and how 
 they interact with other features. Consider the ambiguity of using variables 
 in refinement types in figure \ref{fig:amb_refinement_vars}.
 
@@ -1884,7 +1884,7 @@ Using this approach does definitely resolves the uncertainty but the usability o
 the language is poor. Imperative programming relies on state changes, forbidding 
 that goes against the paradigm. However, if we strategically enforce immutability 
 we can resolve the ambiguity while preserving a flexible imperative style 
-language. In the next few sections we will discuss two approaches that 
+language. In the next few sections we discuss two approaches that 
 improve the specification of our type checker through restricting changes to 
 variables. 
 
@@ -2160,8 +2160,8 @@ relies on pointers in the refinement predicate then the simple act of declaring
 the pointers immutable is not enough as pointer values can be altered through aliasing. 
 
 \par
-In this section we will first extend our syntax with the notion of dynamically 
-allocated memory. Later we will study the feature interaction between 
+In this section we first extend our syntax with the notion of dynamically 
+allocated memory. Later we study the feature interaction between 
 pointers and refinement types in order to identify a consistent behaviour. 
 
 \subsection{Introducing Heap Allocated Memory}
@@ -2440,7 +2440,7 @@ The introduction of immutable heap address allows us to specify a concrete
 behaviour for refinement types in the presence of pointers. Adopting a similar 
 strategy to our previous restriction, we require all pointers present in a 
 refinement predicate to not only be a constant itself but it must also be 
-referencing a constant value. In the following text, we will be incorporating 
+referencing a constant value. In the following text, we incorporate 
 the same idea used in Simple-$R_{I}$ where we 
 restrict mutation on free variables in a refinement predicate. 
 
