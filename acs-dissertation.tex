@@ -20,7 +20,7 @@
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
 \def\dissertationtitle{Refinement Types in Real-World Programming}
-\def\wordcount{14,818}
+\def\wordcount{14,807}
 
 
 %\usepackage[dvips]{epsfig,graphics} 
@@ -743,8 +743,8 @@ the \textit{constant expression} requirements \cite{cppConstExpr}.
 \end{figure}
 
 \par
-Figure \ref{code:compileLTN} shows a struct that represents a refined integer 
-type whose values is can only be less than \verb|N|, defined as 
+Figure \ref{code:compileLTN} shows a struct that simulate a refined integer 
+type whose values can only be less than \verb|N|. It is defined as 
 \verb|LessThanN<10, 5> x = LessThanN<10, 5>;|. Type checking is done at compile 
 time using the \verb|static_assert| in the constructor. If one provides an 
 invalid definition then a compile time error is thrown. 
@@ -2440,7 +2440,7 @@ The introduction of immutable heap address allows us to specify a concrete
 behaviour for refinement types in the presence of pointers. Adopting a similar 
 strategy to our previous restriction, we require all pointers present in a 
 refinement predicate to not only be a constant itself but it must also be 
-referencing a constant value. In the following text, we incorporate 
+referencing a constant value. In the following text, we incorporate  
 the same idea used in Simple-$R_{I}$ where we 
 restrict mutation on free variables in a refinement predicate. 
 
