@@ -20,7 +20,7 @@
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
 \def\dissertationtitle{Refinement Types in Real-World Programming}
-\def\wordcount{14,710}
+\def\wordcount{14,630}
 
 
 %\usepackage[dvips]{epsfig,graphics} 
@@ -683,7 +683,7 @@ named \textit{refined} \cite{refinedScala} has brought refinement types into Sca
   \begin{center}
     \includegraphics[scale=0.7]{assets/refined_scala.PNG}
   \end{center}
-  \caption{Refinement Types in Scala using refined}
+  \caption{Refinement Types in Scala}
   \label{code:refined-scala}
 \end{figure}
 
@@ -753,7 +753,7 @@ the \textit{constant expression} requirements \cite{cppConstExpr}.
       }
     };
   \end{lstlisting}
-  \caption{Compile Time Type Checking in C++}
+  \caption{Compile Time Checking in C++}
   \label{code:compileLTN}
 \end{figure}
 
@@ -790,7 +790,7 @@ figure \ref{code:compileLTN}:
     LessThanN<n, 3> ltf = LessThanN<n, 3>();
     n = 2;
   \end{lstlisting}
-  \caption{Mutating the Refinement Variable in C++}
+  \caption{Modifying Template Variable in C++}
 \end{figure}
 
 \par
@@ -1478,7 +1478,7 @@ calls will be covered in section \ref{section:functions_sos}.
       \inference {x \in \textbf{dom}(\sigma)}{\langle x, \sigma \rangle \Longrightarrow \langle \sigma(x), \sigma \rangle}[(Vars)] 
     \end{tabular}
   \end{center}
-  \caption{Operational Semantics for Simple-$R$ Expression}
+  \caption{Operational Semantics for Expression}
   \label{fig:sos_expr}
 \end{figure}
 
@@ -1517,7 +1517,7 @@ details in section \ref{section:scope_sos}.
       {\langle x := e, \sigma \rangle \longrightarrow \langle x := e', \sigma \rangle} [(Assign-$E$)]
      \end{tabular}
   \end{center}
-  \caption{Operational Semantics for Simple-$R$ Commands}
+  \caption{Operational Semantics for Commands}
   \label{fig:sos_commands}
 \end{figure}
 
@@ -1573,7 +1573,7 @@ in the set $\{x\}$ from the domain of $\sigma$.
       \normalsize
     \end{tabular}
   \end{center}
-  \caption{Scoping Rules for Simple-$R$}
+  \caption{Scoping Rules in Simple-$R$}
   \label{fig:scoping_rules}
 \end{figure}
 
@@ -1628,7 +1628,7 @@ in the section.
       \text{ }...\text{ },e_n), \sigma \rangle} [(Func-$E$)]
     \end{tabular}
   \end{center}
-  \caption{Functions Semantics for Simple-$R$}
+  \caption{Operational Semantics for Functions}
   \label{fig:basic_functions}
 \end{figure}
 
@@ -1773,7 +1773,7 @@ in refinement types in figure \ref{fig:amb_refinement_vars}.
     \tab\textbf {end} \\
     \textbf{end}
   \end{tabs}  
-  \caption{Mutation to Free Variables in Refinement Predicate}
+  \caption{Refinement Type Ambiguity involving Mutation}
   \label{fig:amb_refinement_vars}
 \end{figure}
 
@@ -1923,7 +1923,7 @@ $is\_immutable(x)$ holds if and only if $x$ is immutable.
       \textit{Declaration} & $D$ & $:$ $...\text{ }|\text{ }\textbf{const }x : T = e_1$
     \end{tabular}
   \end{center}
-  \caption{Immutable Variable Context for Simple-$R_{I}$}
+  \caption{Immutable Variables Declaration for Simple-$R_{I}$}
 \end{figure}
  
 One can declare an immutable variable similar to defining a mutable 
@@ -2134,7 +2134,7 @@ and evaluates appropriate, the new rule is defined in figure \ref{fig:runtime_re
       {\Gamma,\sigma,\tau \vdash_{R} e_1 : x } [(Refine-Runtime-Closure)]
     \end{tabular}
   \end{center}
-  \caption{Type Checking in Simple-$R_{C}$}
+  \caption{Refinement Type Checking in Simple-$R_{C}$}
   \label{fig:runtime_refine_closure}
 \end{figure}
 
@@ -2208,7 +2208,7 @@ the language.
       \textit{Heap} & $\Delta$& $:$ $h \mapsto vals$\\
     \end{tabular}
   \end{center}
-  \caption{Heap Memory Allocation in Simple-$R^{*}$}
+  \caption{Heap Memory in Simple-$R^{*}$}
   \label{fig:ptr_syntax}
 \end{figure}
 
@@ -2341,7 +2341,7 @@ the definition of the type $BoundedIntY$, making $z$ ill-typed.
     \tab\textbf {end} \\
     \textbf{end}
   \end{tabs}  
-  \caption{Ambiguity of Pointers in Refinement Predicate}
+  \caption{Refinement Type Ambiguity involving Pointers}
   \label{fig:amb_refinement_pointers}
 \end{figure}
 
@@ -2400,7 +2400,7 @@ returns a pointer to it.
       \textit{Expressions} & $e$& $:$ $...\text{ }|\text{ \textbf{newconst}}(T, e_1)$ \\
     \end{tabular}
   \end{center}
-  \caption{Heap Memory Allocation in Simple-$R^{*}_{C}$}
+  \caption{Heap Memory in Simple-$R^{*}_{C}$}
 \end{figure}
 
 \par
@@ -2512,7 +2512,7 @@ and rewrite it as in figure \ref{fig:valid_ptr_program}.
     \tab\textbf {end} \\
     \textbf{end}
   \end{tabs}  
-  \caption{Pointers in Refinement Types}
+  \caption{Valid Pointers in Refinement Types}
   \label{fig:valid_ptr_program}
 \end{figure}
 
@@ -2540,7 +2540,7 @@ named Simple-$R^{*}_{C}$
       \sigma, \tau \rangle \longrightarrow \langle \sigma', \tau \rangle} [(Refine-Typedef-Closure-P)]
     \end{tabular}
   \end{center}
-  \caption{Operational Semantics of Refinement Type in Simple-$R^{*}_{C}$}
+  \caption{Operational Semantics for Refinement Type in Simple-$R^{*}_{C}$}
 \end{figure}
 
 \subsubsection{Deep Copy Pointers}
