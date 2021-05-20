@@ -1,4 +1,6 @@
-1.) Download the TexCount script at https://app.uio.no/ifi/texcount/download.html
-2.) Extract the TexCount zip file
-3.) Run the script (texcount.pl) on the relevant .tex file (e.g. $PATH_TO_SCRIPT/texcount.pl acs-dissertation.tex).
+Word count is generated using the TeXcount script, the steps below describe the process. 
+
+1.) Download the TeXCount script at https://app.uio.no/ifi/texcount/download.html
+2.) Extract the TeXCount zip file
+3.) Run the script (texcount.pl) on the relevant .tex file (dissertation and abstract), e.g. $PATH_TO_SCRIPT/texcount.pl acs-dissertation.tex.
 4.) Sum up the text count for words in text, words in headers and words outside text (captions, etc).
