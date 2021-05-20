@@ -20,7 +20,7 @@
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
 \def\dissertationtitle{Refinement Types in Real-World Programming}
-\def\wordcount{14,626}
+\def\wordcount{14,817}
 
 
 %\usepackage[dvips]{epsfig,graphics} 
@@ -93,15 +93,12 @@
 researched field in programming languages theory. They act as a way of 
 improving the reliability of a 
 language by enforcing rules, preventing operations being applied on 
-incompatible data. Type systems can be broken down into various categories, 
-two of the most well known are \textit{Static} \cite{staticTyping} and 
-\textit{Dynamic} \cite{dynamicTyping} typing. Mainstream programming 
-languages such as \textit{Java} \cite{java}, \textit{C} \cite{c} and \textit{C++} \cite{cpp} 
-use the former while languages like \textit{Python} \cite{python} and 
-\textit{JavaScript} \cite{js} use the latter. 
-Over the years, programming languages have included more powerful and flexible 
-type systems, languages like \textit{C\#} \cite{cSharp} and \textit{Go} 
-\cite{goInferenceType} for example allow \textit{Type Inference} \cite{inferenceType}.
+incompatible data. Type systems can be broken down into various categories.  
+In addition to the well known \textit{Static} \cite{staticTyping} and 
+\textit{Dynamic} \cite{dynamicTyping} typing, programming languages have 
+included more powerful and flexible type systems over the years. 
+Languages like \textit{C\#} \cite{cSharp} and \textit{Go} \cite{goInferenceType} 
+for example allow \textit{Type Inference} \cite{inferenceType}.
 
 \par
 Types are a fundamental way of showing a program's correctness, the use of types 
@@ -182,7 +179,7 @@ programmer more time to focus on writing the logical part of the code, indirectl
 leading to more robust codebases \cite{elimArrayCheck}.
 
 \section{Motivation}
-Type systems have been studied extensively, however dependent and refinement types 
+Desipte their usefulness, dependent and refinement types 
 remain uncommon in real-world programming. While their theory has been 
 established several decades ago, only a small number of programming languages 
 support these advanced type systems. Furthermore, the languages that do support 
@@ -190,19 +187,20 @@ them are limited to functional languages and theorem provers that are rarely
 used in real-world programming.
 
 \par
-One of the challenges of adopting dependent and refinement types 
+Mainstream programming languages often follow the imperative programming 
+paradigm and one of the challenges of introducing these type systems 
 in imperative programming languages is the presence of mutation. Imperative 
 languages rely on statements that change the state of the program, these 
-changes has the potential making the semantics of refinement types unclear. 
+changes has the potential making their semantics unclear. 
 For instance, if one defined a refinement type as 
 $\{\upsilon : int\text{ }|\text{ }\upsilon < N\}$ where their values have to be 
 less than $N$, what is the behaviour if the value of $N$ changes?
 
 \par
-Past research has studied and shown the feasibility of a dependently typed 
-imperative language, however these studies that are focused on expressing 
-the semantics of dependent types in an imperative language are often highly 
-technical and complex, requiring prerequisite knowledge in the literature. While 
+Past research has shown the feasibility of using dependent and refinement types  
+in imperative languages, however these studies are only focused on 
+the theoretical aspects and are highly technical and complex, 
+requiring prerequisite knowledge in the literature. While 
 we find these works novel and made important advancements in the field, 
 they fail to capture how these types systems could relate to 
 mainstream programming languages.
@@ -218,7 +216,7 @@ imperative programming by extending the calculus, we begin to lose the simple
 nature. 
 
 \par
-Our project is motivated by this apparent lack of accessible literature on the 
+Our project is motivated by this lack of accessible literature on the 
 theory of refinement types especially involving mainstream languages 
 with features such as mutation. We aim to present a simple, restricted framework that 
 captures the essence of refinement types. The said framework will be presented as 
@@ -226,10 +224,8 @@ an extension to \textit{WHILE language} \cite{whileLanguage}. The WHILE language
 created as a tool to aid the study of programming language theory, 
 thus we believe it strongly satisfies our requirement of accessibility with 
 its simple syntax and semantics. Using the 
-framework, we will study the interactions between mutation and refinement types 
-and relate our findings to concepts in mainstream languages. We believe that 
-imperative programming proves to be the more popular paradigm in modern 
-programming and is therefore more accessible. 
+framework, we will study the interactions between mutation and refinement types, 
+furthermore we relate our findings to concepts in mainstream languages.
 
 
 \section{Key Contributions}
@@ -368,9 +364,6 @@ universal quantifier, in this case, the \textit{existential quantifier}. As
 per the Curry–Howard correspondence, $F(x)$ corresponds to predicate $P(x)$ 
 thus $\Sigma x:A.F(x)$ corresponds to $\exists x: A. P(x)$.
 
-\par
-While both dependent product types and dependent sum types are important to the 
-literature, the project itself will mainly focus on the former.
 
 \section{Refinement Types}
 \textit{Refinement Types}, sometimes referred to as \textit{Subset Types} 
@@ -393,7 +386,7 @@ the former only restrict using a decideable predicate.
 In many cases refinement types and dependent types can achieve the same thing, 
 $\{\upsilon : int \text{ }|\text{ }\upsilon < x\}$ and 
 $\Pi x:int.\text{ }\{ i:int\text{ }|\text{ }i < x\}$ effectively define the 
-same types, a bounded integer whose value cannot be greater than $x$. They differ 
+same type, a bounded integer whose value cannot be greater than $x$. They differ 
 only in the way $x$ is provided, in a refinement type $x$ is a free variable 
 whereas in a dependent type $x$ is a parameter. 
 
@@ -413,21 +406,21 @@ base our project on refinement types.
 \par
 The decidability of refinement types allows one to have a high level of automation and 
 provides a simpler understanding. In various refinement type systems, the authors  
-restrict the refinement predicate to be a SMT decidable, this allows many 
+restrict the refinement predicate to be SMT decidable, this allows many 
 properties to be checkable at compile time through the use of theorem provers. 
 However, this is only possible in cases where values are known at compile time 
 which limits it to functional languages where mutation is not possible. 
 
 \section{Functional Languages}
-In this section we examine three functional languages with 
-dependent typing. Functional languages 
-use the \textit{functional programming} \cite{overviewFP} paradigm which 
+In this section we analyse functional languages that suports dependent types and 
+refinement types. Functional languages use the 
+\textit{functional programming} \cite{overviewFP} paradigm which 
 is a programming paradigm whose evaluation consists of using a series of function 
-applications. Many functional languages has the notion of purity which states that i) 
+applications. Functional languages has the notion of purity which states that i) 
 a function will always return the same value when given the same arguments,  
 ii) the evaluation of a function has no side effects (changes to the state of the program).
  In this paradigm, functions return values as opposed to 
-altering the state of the program. The functional programming paradigm is 
+altering the state of the program. This programming paradigm is 
 \emph{declarative} in that it focuses on describing \textit{what} the program 
 will accomplish rather than \textit{how} it accomplish it. 
 
@@ -580,14 +573,6 @@ languages. Imperative languages use the \textit{imperative programming}
 \cite{imperativeOverview} paradigm, in contrast to the functional 
 paradigm, this paradigm emphasises \textit{how} a program will operate 
 by using a series of statements to change the program state.
-
-\par
-Imperative languages can be further broken down into different categories, 
-mainly Procedural and Object-Oriented. Many of the world's most popular languages 
-fall into this two categories, C, FORTRAN, COBOL are examples of procedural 
-languages while Java, C\#, Kotlin are object-oriented Languages. Some languages such 
-as C++, Python are multi-paradigm and allows the programmer to write code both 
-in a procedural manner or object-oriented manner. 
 
 \subsection{Research Languages}
 Currently there are no production imperative programming language with 
@@ -2030,13 +2015,10 @@ that the expression stays the same throughout its existence, avoiding any
 complications regarding mutation.
 
 \par
-The approach laid out here is a simple approach to dealing with the ambiguity of 
-having mutability and refinement types. Note that C++ utilises the same 
-strategy for templates arguments, where a value passed into a template must be a 
-constant expression. 
-
-\par
-We could potentially adapt a clever approach used by the Java programming 
+This is a simple approach that deals with the ambiguity of 
+having mutation and refinement types, note that C++ utilises the same 
+strategy for templates arguments. We could potentially 
+adapt a clever approach used by the Java programming 
 language to overcome variable mutation in Anonymous classes. Java requires that 
 any variables accessed by an anonymous class that is part of 
 its enclosing scope to be final or \textit{effectively final} 
@@ -2048,8 +2030,8 @@ For this reason we consider this approach as unimportant and considered a more
 general solution. 
 
 \par
-The limitation of this approach is of course the fact that one has to strategically 
-declare the variables needed, in some cases one might not be able to declare 
+The limitation of this approach is that one has to strategically 
+declare variables, in some cases one might not be able to declare 
 immutable variable but still want the ability to define a refinement type.
 
 \subsection{Type Closure}
@@ -2155,19 +2137,19 @@ in type definition. This is achieved by using the idea of closures and
 snapshotting the value of variables at the time of type definition. 
  
 \subsection{Summary}
-In this section, we gave a scenario where our refinement type system is 
+In this section we gave a scenario where our refinement type system is 
 underspecified in the presence of mutation. We proposed two different approaches 
-to complete our specification, approach one utilises constants and immutable 
-variables to disallow modification of free variables used in a refinement 
+to complete our specification, the first utilises constants and immutable 
+variables to disallow modification of free variables in a refinement 
 predicate. The second utilises closures and value bindings to ensure 
 consistency. 
 
 \par
 While the proposed solutions are effective in dealing with mutation on local 
 variables. As Simple-$R$ starts incorporating more features, our design becomes 
-underspecified yet again. In the next section, we will analyse 
+underspecified yet again. In the next section, we analyse 
 the behaviour of our system in the presence of dynamic memory allocation 
-and hence aliasing.
+and aliasing.
 
 \section{Refinement Types and Pointers}
 We previously proposed a set of rules that specify behaviour of refinement 
@@ -2733,13 +2715,11 @@ immutable in C/C++, highlighting the key differences between constant and immuta
 
 \section{Future Work}
 Simple-$R$ serves as a simple foundation for introducing refinement types 
-into an imperative programming language and it can be extended with 
+into imperative programming and it can be extended with 
 different ideas. In this section we outline some possible areas for future work. 
 
-\paragraph{Advanced Language Features} We observed how introducing new form of 
-variables such as pointers can complicate refinement types, an interesting 
-outlet would be to study how static and global variables will change the 
-behaviour of the language. In a paper \cite{objOritentedDependentType} published 
+\paragraph{Advanced Language Features} 
+In a paper \cite{objOritentedDependentType} published 
 in 2012, Joana Campos and Vasco Vasconcelos presented an 
 object-oriented language with dependent types. An interesting 
 extension would be to extend Simple-$R$ with classes and study how refinement 
