@@ -20,7 +20,7 @@
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
 \def\dissertationtitle{Refinement Types in Real-World Programming}
-\def\wordcount{14,807}
+\def\wordcount{14,756}
 
 
 %\usepackage[dvips]{epsfig,graphics} 
@@ -89,10 +89,9 @@
 \pagenumbering{arabic} 
 \setcounter{page}{1} 
 
-\textit{Type systems} \cite{typesystem} have been one of the most extensively 
-researched field in programming languages theory. They act as a way of 
-improving the reliability of a 
-language by enforcing rules, preventing operations being applied on 
+\textit{Type systems} \cite{typesystem} have been one of the most 
+researched field in programming languages theory. They improve the reliability 
+of a language by enforcing rules, preventing operations being applied on 
 incompatible data. Type systems can be broken down into various categories.  
 In addition to the well known \textit{Static} \cite{staticTyping} and 
 \textit{Dynamic} \cite{dynamicTyping} typing, programming languages have 
@@ -101,13 +100,13 @@ Languages like \textit{C\#} \cite{cSharp} and \textit{Go} \cite{goInferenceType}
 for example allow \textit{Type Inference} \cite{inferenceType}.
 
 \par
-Types are a fundamental way of showing a program's correctness, the use of types 
+Types are fundamental in order to show a program's correctness, the use of types 
 restricts and therefore eliminates illegal programs at compile time. However, 
 even a well-typed program still leaves room for various errors such as 
 \begin{enumerate}
   \item {\textbf{Out of bounds access}} In the case of arrays or buffers, the type checker 
-  can guarantee that the programmer is using an integer to index elements. 
-  However it makes no guarantee that the index is indeed within the valid range. 
+  can guarantee that the programmer is using an integer to index elements 
+  but it makes no guarantee that the index is indeed within the valid range. 
   \item {\textbf{Arithmetic errors}} An arithmetic operation can type check that it is 
   indeed operating on numerical values however it is unable to verify the 
   legality. Forbidden arithmetic operations such as as zero divisors or square 
@@ -132,9 +131,9 @@ Types} \cite{refinementTypes} where one is allowed to define specify subtypes
 of existing types, e.g. a type of non-zero integers. Refinement Types can be 
 seen as a generalisation of \emph{Floyd-Hoare Logic} assertions \cite{localRefTyping},  
 they are constrained by a decidable predicate which brings a 
-better ease of programming. While dependent types are significantly 
-more powerful than refinement types, the latter provides a good balance between 
-expressiveness and ease of use.
+better ease of programming compared to dependent types. While dependent 
+types are significantly more powerful than refinement types, the latter 
+provides a good balance between expressiveness and ease of use.
 
 \section{Overview of Refinement Types}
 In this section we discuss at a very high level the behaviour one would 
@@ -150,7 +149,7 @@ expect from refinement types and the benefits of using refinement types.
     ...
   }
   
-  function refined_f(EvenInt i) {
+  function refined_f(EvenInt x) {
     ...
   }
   \end{lstlisting}
@@ -187,19 +186,19 @@ them are limited to functional languages and theorem provers that are rarely
 used in real-world programming.
 
 \par
-Mainstream programming languages often follow the imperative programming 
+Mainstream languages often follow the imperative programming 
 paradigm and one of the challenges of introducing these type systems 
-in imperative programming languages is the presence of mutation. Imperative 
+in imperative languages is the presence of mutation. Imperative 
 languages rely on statements that change the state of the program, these 
-changes has the potential making their semantics unclear. 
+changes have the potential making the semantics of refinement types unclear. 
 For instance, if one defined a refinement type as 
-$\{\upsilon : int\text{ }|\text{ }\upsilon < N\}$ where their values have to be 
+$\{\upsilon : int\text{ }|\text{ }\upsilon < N\}$ where its values have to be 
 less than $N$, what is the behaviour if the value of $N$ changes?
 
 \par
 Past research has shown the feasibility of using dependent and refinement types  
 in imperative languages, however these studies are only focused on 
-the theoretical aspects and are highly technical and complex, 
+the theoretical aspects which are highly technical and complex, 
 requiring prerequisite knowledge in the literature. While 
 we find these works novel and made important advancements in the field, 
 they fail to capture how these types systems could relate to 
@@ -272,7 +271,7 @@ types in an imperative language.
 In chapter \ref{chapter:simple_r} we introduce an imperative 
 language with refinement type support. 
 Our language, named Simple-$R$, is a First-Order Programming Language which 
-highly resembles the C programming language. Our aim with the language is to 
+resembles the C programming language. Our aim with the language is to 
 capture the core behaviour of refinement types, for the pursuit 
 of simplicity, the language is kept at a minimal with only the fundamental features. 
 In this chapter, we raise multiple scenarios where refinement types 
@@ -280,9 +279,7 @@ causes ambiguity when mutation is possible. We address this problem by starting
 with a simple approach where mutation is restricted on variables associated with 
 refinement types. We then propose a solution based on closures that allows 
 variables in types to be independent from program variables. Finally we tackle 
-the problem where mutation happens indirectly via pointers. Throughtout the chapter, 
-we draw parallels between our mechanisms and similar mechanisms 
-implemented in established languages such as C++ and Java. 
+the problem where mutation happens indirectly via pointers. 
 
 \par
 In chapter \ref{chapter:related_work} we discuss our work with regards to the 
@@ -297,15 +294,14 @@ advanced type system differ. As functional languages prove to be more
 commonly associated with these type systems, we review the Agda, Haskell and Idris 
 programming languages to understand the natural behaviour of dependent types 
 and refinement types. During our research, we noted several research projects  
-that bring these type systems to imperative programming languages, we review 
-the projects \textit{Xanadu} \cite{xanadu}, \textit{Ynot} \cite{ynot} and 
-\textit{RSC} \cite{rts}. Open-source programmers have also made strides in 
+that bring these type systems to imperative languages, we review 
+the \textit{Xanadu} \cite{xanadu}, \textit{Ynot} \cite{ynot} and 
+\textit{RSC} \cite{rts} projects. Open-source programmers have also made strides in 
 the area, we review a Scala library, \textit{refined} \cite{refinedScala}, 
 which brings refinement type to the Scala language. Finally, we study the C++ 
 templating mechanism and identify its similarity to refinement types. 
 
 \section{Dependent Types}
-\subsection{Definition of Dependent Types}
 At a very high level dependent types are types that depend on the value of 
 another type. For example, we can define a type that captures the  
 integers less than $x$ using the definition 
@@ -507,14 +503,14 @@ of work remains to be done \cite{dependentHaskell, aRoleForDependentHaskell}.
 is a static type-checker that allows programmers to specify and 
 check program correctness by applying refinement types theory. The programmer 
 annotates refinement types in the form of Haskell comments 
-\verb|{-@ annotation @-}|, the properties must be SMT decideable and is check 
+\verb|{-@ annotation @-}|, the properties must be SMT decideable and is checked 
 using a variety of theorem provers. 
 
 \par
-The verification of LiquidHaskell happens in three phases, phase one is the 
+Type checking in LiquidHaskell happens in three phases, phase one is the 
 normal compilation using the Haskell compiler. In phase two LiquidHaskell 
 generates the set of types constraints provided by the annotations, these are 
-checked using a SMT solver in phase three. At the end of the verification, 
+checked using a SMT solver in phase three. After these verifications, 
 LiquidHaskell outputs ``SAFE'' if the program is well-typed. Otherwise, 
 type errors are reported with along with the line it occurs. 
 
@@ -685,14 +681,14 @@ with refinement types. In the example provided in figure \ref{code:refined-scala
 we use the predicate \verb|Less[N]| to refine the integer type such that its value 
 is always less than \verb|N|. As Scala is an imperative language where mutation 
 is possible, the library insist that \verb|N| must be a 
-literal and not a form of variable.
+literal and not a variable.
 
 \par
 Furthermore, in order to have compile time refinement type checking, one must 
-initialise the variable of refinement type with a literal. Using the example 
+initialise variables that is of refinement type with a literal. Using the example 
 in figure \ref{code:refined-scala}, the statement 
-\verb|val l: Int Refined Less[10] = x| would be forbidden as one tries to assign a 
-refinement type a non-literal. 
+\verb|val l: Int Refined Less[10] = x| would be forbidden as one tries to initialise 
+a refinement typed variable with a non-literal. 
 
 \par
 If one wishes to initialise a refinement type using a variable or function, one 
@@ -704,7 +700,7 @@ An example of this use case in shown in figure \ref{code:refined-scala}.
 
 \par
 The refined Scala library provides a simple of using refinement types in a modern 
-language through a restrictive manner. However, there are many design decisions 
+language through a restrictive manner. There are many design decisions 
 one can take away from this project such as the combination of compile-time and 
 runtime type checking. 
 
@@ -882,8 +878,8 @@ modified in a different manner. The value pointed to by
   \label{code:cpp_const}
 \end{figure}
 
-\subsection{Importance of Immutability}
-The concept of immutability is fundamental and taught to new programmers early 
+\subsection{Immutability in Types}
+The concept of immutability is fundamental and is taught to new programmers early 
 in the curriculum. However, the use of constants are often introduced as 
 a good software engineering practice that reduces careless errors in code. 
 While it is a key use case of constants, they are often used to achieve a lot 
@@ -898,7 +894,7 @@ referenced in the expression must be a constant.
 \par
 Immutability is a key idea in our project as it is one of the biggest hurdle in 
 bringing dependent types and refinement types into imperative programming. A 
-good understanding the difference between constant and immutable proves to be a 
+good understanding of the difference between constant and immutable proves to be a 
 critical in the development of our language. Furthermore, we see how different 
 imperative languages enforce constancy and immutability in areas where changes 
 to variables are problematic. We identify that the same idea can be 
@@ -975,7 +971,7 @@ complexity of programming languages, the two distinct approachs are
 incorporated together. Gordon Plotkin, et al discussed the 
 idea of dynamically checking a static language in this paper 
 \cite{dynamicCheckStaticLanguage}. In practice, modern languages like 
-Java and C# now supports the combination of static and dynamic type checking, 
+Java now supports the combination of static and dynamic type checking, 
 e.g. Java's runtime checks for downcasting which is 
 discussed in the next subsection.
 
@@ -1023,9 +1019,9 @@ predicate, however we are able to verify some important properties. Consider the
 following example, $4 : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$, we 
 cannot check the validity statically as the value of $x$ is not available. 
 However, we can verify that there is a possibility for success. Similarly, we 
-can those that will not succeed at all such as 
-$\textit{false} : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$. This 
-property can be easily checked by type checking the value against the base type. 
+can identify cases that will not succeed at all such as 
+$\textit{false} : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$ 
+where the value is different from the base type. 
 Interestingly, in certain cases refinement types can be completely checked 
 statically. For example, $x : \{\upsilon : int\text{ }|\text{ }\upsilon < x\}$ 
 obviously does not type check, however in order to verify this statically one 
@@ -1118,7 +1114,7 @@ other functions, nor can it return a function as a result. One can compare
 functions in Simple-$R$ to methods in Java. The function body is either a 
 command or declarations followed by command and it must end in an 
 expression that is the return value. Note that the 
-return keyword is omitted. Functions return can be difficult to represent, in many 
+return keyword is omitted. Function returns can be difficult to represent, in many 
 languages functions can be terminated in certain branches using the 
 return keyword. In order to achieve a simple model for functions, we came to 
 the decision to disallow return in the middle of the function, values can 
@@ -1154,10 +1150,10 @@ action. Simple-$R$ supports the following commands,
   control flow operations one would expect.
   \item The \textbf{skip} statement is use to indicate an empty expression and 
   does not perform any meaningful action. 
-  \item The \textbf{begin ... end} command allows one to open a new scope. A 
-  begin statement is followed by a variable declaration $D$, the declared 
-  variable would then be accessible in the scope of command $C_1$. Upon reaching 
-  \textbf{end}, the variable is out of scope and deallocated. 
+  \item The \textbf{begin $D;C$ end} command allows one to open a new scope. A 
+  begin statement is followed by a declaration $D$, the declared 
+  variables would then be accessible in the scope of command $C$. Upon reaching 
+  \textbf{end}, the variables are out of scope and deallocated. 
 \end{itemize}
 
 \paragraph{Declarations} Declarations are the method one use to declare new construct 
@@ -1178,8 +1174,8 @@ to retrieve the value bound to variable $x$.
 
 \paragraph{Variable Types Context} Variables are also mapped to their types 
 in the type context $\Gamma$. Each variable is allowed to only appear once in 
-the context. This context will be used to type check the program using the 
-typing judgement in the next section.
+the context. This context will be used to type check programs in the next few 
+sections.
 
 \section{Metavariables}
 Throughout the text we will be extending the syntax and semantics 
@@ -1195,7 +1191,7 @@ definitions.
   \item The following notations to operate on states and contexts. 
     \begin{itemize}
       \item $\sigma + \{x \mapsto v\}$ adds $\{x \mapsto v\}$ to $\sigma$ provided initially $x \notin\textbf{dom}(\sigma)$. 
-      \item $\sigma[x \mapsto v]$ or $\sigma \uplus \{x \mapsto v\}$ updates $\sigma$ such that now $\sigma(x) = v$.
+      \item $\sigma[x \mapsto v]$ updates $\sigma$ such that now $\sigma(x) = v$.
       \item $\sigma \setminus \{x\}$ to remove $x$ from $\sigma$, provided that $x \in \textbf{dom}(\sigma)$.
     \end{itemize}
   \item $\langle e, \sigma \rangle \Longrightarrow \langle e', \sigma \rangle$ as the transition relation for expression.
@@ -1227,8 +1223,8 @@ Using these judgements we can easily define the first few typing rules for
 \begin{figure}[H]
   \begin{center}
     \begin{tabular} {c}
-      $\forall n \in \mathbb{Z}$, $\Gamma \vdash n : int$ & 
-      $\forall b \in \mathbb{B}$, $\Gamma \vdash b : bool$ & 
+      $\forall n \in \mathbb{Z}$. $\Gamma \vdash n : int$ & 
+      $\forall b \in \mathbb{B}$. $\Gamma \vdash b : bool$ & 
       $\Gamma \vdash_{C} \textbf{skip} : void$ & 
       $x : T, \Gamma \vdash x : T$ 
     \end{tabular}
@@ -1429,8 +1425,9 @@ We enable this behaviour using the (Subtype) rule.
 
 \par
 In this section we covered the typing rules for Simple-$R$ and how 
-refinement types are hard to verify statically because 
-of the dynamic behaviour when evaluating the refinement predicate. 
+refinement types are verified statically. In the next section we discuss the 
+dynamic behaviours.
+
 
 \section{Operational Semantics}
 In this section we define the \textit{Operational Semantics} 
@@ -1736,13 +1733,13 @@ design and discuss different choices one can make to address them.
 \subsection{Ambiguity of Refinement Types involving Mutation}
 Programming languages have a wide range of features, often the team behind 
 the language have to put extensive thought into the design decisions. As there 
-are often multiple ways to handle a certain feature, rarely is there a definite 
+are often multiple ways of handling a certain feature, rarely is there a definite 
 answer to which is the most optimal, they are usually a matter of human judgement 
 or aesthetics. 
 
 \par
 This problem is known as \textit{feature interactions} 
-\cite{featInteract}, it describes the problem in some situations multiple 
+\cite{featInteract}, it describes the problem where in some situations multiple 
 features would modify the behaviours of each others. The same applies to 
 refinement types, which can be seen as a feature. For instance, the inclusion 
 of refinement types would modify the behaviour of assignments and vice versa. 
@@ -1768,8 +1765,7 @@ bounded integer type $BoundedIntY$ whose value cannot be greater than another in
 a free variable in the program. A variable $x$ is declared to be of type 
 $BoundedIntY$ with the appropriate value. Later in the program, the value of $y$ 
 changes. resulting to $x$ now being ill-typed. The behaviour is now undefined, 
-should $x$ still be well-typed, or is the behaviour invalid? This section 
-discusses the problem in detail. 
+should $x$ still be well-typed, or is the behaviour invalid? 
 
 \subsection{Type Declaration}
 First we need to introduce a new declaration statement for types, 
@@ -1880,7 +1876,7 @@ work around this problem is to remove the ability to make changes to the state
 of the program, all variables declared are final.
 
 \par
-Using this approach does definitely resolves the uncertainty but the usability of 
+Using this approach does definitely resolves the ambiguity but the usability of 
 the language is poor. Imperative programming relies on state changes, forbidding 
 that goes against the paradigm. However, if we strategically enforce immutability 
 we can resolve the ambiguity while preserving a flexible imperative style 
@@ -1938,7 +1934,7 @@ statement to only accept the latter.
       \langle C_1, \sigma', \tau \rangle \longrightarrow^{*} \langle \sigma'', \tau' \rangle 
       \\ \sigma' = \sigma + \{x \mapsto v\} & x \notin \textbf{dom}(\sigma)} 
       {\langle \textbf{begin const }x : T = v;C_1\textbf{ end}, \sigma, \tau \rangle 
-      \longrightarrow \langle \sigma'' \setminus \{x\}, \tau' \rangle} [(Begin-$C$)] 
+      \longrightarrow \langle \sigma'' \setminus \{x\}, \tau' \rangle} [(Begin-Const)] 
       & \\
       \footnotesize
       \inference {\langle e_1, \sigma, \tau \rangle \Longrightarrow \langle e_1', \sigma, \tau \rangle} 
@@ -1949,7 +1945,7 @@ statement to only accept the latter.
       & \\
       \inference {x \in \textbf{dom}(\sigma) & \neg is\_immutable(x)} 
       {\langle x := v, \sigma, \tau \rangle \longrightarrow \langle \sigma[x \mapsto v], 
-      \tau \rangle} [(Assign-$C$)]
+      \tau \rangle} [(Assign-Const)]
     \end{tabular}
   \end{center}
   \caption{Immutable Variables Rules for Simple-$R_{I}$}
@@ -2031,8 +2027,8 @@ general solution.
 
 \par
 The limitation of this approach is that one has to strategically 
-declare variables, in some cases one might not be able to declare 
-immutable variable but still want the ability to define a refinement type.
+declare variables, in some cases one might not be able to declare an 
+immutable variable but still wants to use it in a refinement type. 
 
 \subsection{Type Closure}
 If we further analyse our design, we notice that our main concern is for the 
@@ -2104,7 +2100,8 @@ the predicate using the current environment will hold.
 
 \par
 Our new typing rule now retrieves the associated context 
-and evaluates appropriate, the new rule is defined in figure \ref{fig:runtime_refine_closure}. 
+and evaluates appropriately, the new rule is defined in 
+figure \ref{fig:runtime_refine_closure}. 
 
 \begin{figure}[H]
   \begin{center}
@@ -2157,7 +2154,7 @@ types with regards to local variables and we learn that we can keep behaviour
 consistent if we restrict changes to the variable. However, our solution does 
 not accommodate reference variables and pointers. If a refinement type 
 relies on pointers in the refinement predicate then the simple act of declaring 
-the pointers immutable is not enough as pointer values can be altered through aliasing. 
+the pointers immutable is not enough as pointer values can be altered indirectly. 
 
 \par
 In this section we first extend our syntax with the notion of dynamically 
@@ -2305,13 +2302,10 @@ The introduction of pointers provides the programmer with multiple new tools.
 Features such as pass-by-reference and aliasing are now at their disposal. 
 However with the introduction of new features, the feature interaction problem 
 arises once again and the relation between pointers and refinement types is 
-unclear. Throughout the text we showed that we can avoid ambiguous behaviour 
+unclear. Previously we showed that we can avoid ambiguous behaviour 
 between mutation and refinement types using immutability or closures. This appears 
-not to be the case with pointers, to show that consider the code snippet in figure
-\ref{fig:amb_refinement_pointers}. 
-
-\par
-In this scenario, we declare a constant $y$ as a pointer to an int, 
+not to be the case with pointers, consider the code snippet in figure
+\ref{fig:amb_refinement_pointers}. In this scenario, we declare a constant $y$ as a pointer to an int, 
 initialised with the value 10. The expression $!y := 5$ indirectly modifies 
 the definition of the type $BoundedIntY$, making $z$ ill-typed. 
 
@@ -2386,7 +2380,7 @@ returns a pointer to it.
 \end{figure}
 
 \par
-The typing judgement in figure \ref{fig:tj_const_ptr} above formalises the 
+The typing rule in figure \ref{fig:tj_const_ptr} above formalises the 
 typing rules for this new expression. 
 
 \begin{figure}[H]
@@ -2582,15 +2576,15 @@ types in a mutable environment. Our first approach is based on the
 idea of immutable variables and forbidding mutation on variables associated 
 with the refinement predicate. The second approach utilises the notion of closures, 
 a snapshot of the relevant parts of state is made at the time of type declaration and the copied 
-state is always used for type checking. The the base language is extended into two 
+state is always used for type checking. The base language is extended into two 
 new variants, Simple-$R_{I}$ and Simple-$R_{C}$ incorporates the first 
 and second approach respectively.
 
 \par
 Finally, we explored the idea of adding dynamically allocated memory into the 
-language and how it leads to further ambiguity. We discussed the 
-difference between immutable reference variable and an immutable object, we 
-showed how our variant avoid certain pitfalls in C/C++ by disallowing 
+language and how it leads to further ambiguity. We introduce the concept of 
+immutable heap locations that forbids modifications to pointers used in a refinement 
+predicate, we showed how our variant avoid certain pitfalls in C/C++ by disallowing 
 address taking. We conclude the chapter by extending Simple-$R_{I}$ 
 and Simple-$R_{C}$ with two new variants Simple-$R^{*}_{I}$ and Simple-$R^{*}_{C}$ 
 which provide the semantics for pointers in refinement types. 
