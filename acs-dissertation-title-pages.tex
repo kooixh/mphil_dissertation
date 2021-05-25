@@ -1,0 +1,77 @@
+%% 
+%% ACS project dissertation template. 
+%% 
+%% Currently designed for printing two-sided, but if you prefer to 
+%% print single-sided just remove ",twoside,openright" from the 
+%% \documentclass[] line below. 
+%%
+%%
+%%   SMH, May 2010. 
+
+\documentclass[a4paper,12pt]{report}
+%TC:group tabular 1 1
+
+
+%%
+%% EDIT THE BELOW TO CUSTOMIZE
+%%
+
+\def\authorname{Xiu Hong\ Kooi\xspace}
+\def\authorcollege{Wolfson College\xspace}
+\def\authoremail{xhk20@cam.ac.uk}
+\def\dissertationtitle{Refinement Types in Real-World Programming}
+\def\wordcount{14,754}
+
+
+%\usepackage[dvips]{epsfig,graphics} 
+\usepackage{epsfig,graphicx,verbatim,parskip,tabularx,setspace,xspace}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{semantic}
+\usepackage{float}
+\usepackage[margin=3cm]{geometry}
+
+
+\usepackage{tabto}
+
+\newenvironment{tabs}[1]
+ {\flushleft\TabPositions{#1}}
+ {\endflushleft}
+
+\usepackage[british]{babel}
+\usepackage[%
+  backend=bibtex      % biber or bibtex
+%,style=authoryear    % Alphabeticalsch
+ ,style=numeric-comp  % numerical-compressed
+ ,sorting=anyt        % no sorting
+ ,sortcites=true      % some other example options ...
+ ,maxbibnames=99
+ ,block=none
+ ,indexing=false
+ ,citereset=none
+ ,isbn=true
+ ,url=true
+ ,doi=true            % prints doi
+ ,natbib=true         % if you need natbib functions
+]{biblatex}
+\usepackage{biblatex}
+\addbibresource{./dissertation.bib}
+
+
+%% START OF DOCUMENT
+\begin{document}
+
+
+%% FRONTMATTER (TITLE PAGE, DECLARATION, ABSTRACT, ETC) 
+\pagestyle{empty}
+\singlespacing
+\input{titlepage}
+\onehalfspacing
+\input{declaration}
+\singlespacing
+\input{acknowledgement}
+\onehalfspacing
+
+\end{document}
