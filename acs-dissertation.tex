@@ -20,7 +20,7 @@
 \def\authorcollege{Wolfson College\xspace}
 \def\authoremail{xhk20@cam.ac.uk}
 \def\dissertationtitle{Refinement Types in Real-World Programming}
-\def\wordcount{14,762}
+\def\wordcount{14,706}
 
 
 %\usepackage[dvips]{epsfig,graphics} 
@@ -291,7 +291,7 @@ chapter \ref{chapter:further_work}.
 In this chapter we provide a formal introduction to the theory of dependent 
 types and refinement types. Building on the definition, we identify how these two 
 advanced type system differ. As functional languages prove to be more 
-commonly associated with these type systems, we review the Agda, Haskell and Idris 
+commonly associated with these type systems, we review the Agda, Idris and Haskell 
 programming languages to understand the natural behaviour of dependent types 
 and refinement types. During our research, we noted several research projects  
 that bring these type systems to imperative languages, we review 
@@ -452,13 +452,25 @@ dependent type.
 
 \par
 While Agda provides dependent type support, it remains a niche language. One of 
-the reason being its paradigm, Agda is \textit{purely functional} \cite{purelyFP}, meaning that 
-all functions are pure (i.e. not relying on the program state or other mutable 
+the reason being its paradigm, Agda is \textit{purely functional} \cite{purelyFP}, 
+meaning that all functions are pure (i.e. not relying on the program state or other mutable 
 data). Functional languages are generally considered harder to learn and grasp 
 compared to other paradigms \cite{fpHarder}. Furthermore, the general lack of 
 awareness and experienced users who can program with dependent types 
 contribute to Agda's niche in the programming world and is 
 predominantly used for theorem proving.
+
+\subsubsection{Idris}
+\textit{Idris} \cite{idris} is a dependently typed functional language which first 
+appeared in 2007 and bears similarity with Agda, both in terms of paradigm 
+and type system. However they differ in one crucial way, Idris was designed to 
+emphasise general purpose programming rather than theorem proving. It provides 
+interoperability with systems libraries and C programs, 
+as well as language constructs for domain specific language 
+implementation \cite{gpIdris}. However, Idris remain predominantly a research tool. 
+Idris is not production ready \cite{gpIdris} as it is missing certain libraries 
+and more importantly nobody is working on Idris full time. Furthermore Idris is 
+still a functional language, hence suffering from the limitations stated earlier.
 
 \subsection{Haskell and LiquidHaskell}
 \textit{Haskell} \cite{haskell} is a purely functional programming language first appeared in 1990. In 
@@ -528,40 +540,6 @@ of assignment statements. Once a variable $x$ is declared in a scope, its value
 cannot be changed. This allows SMT solvers to know precisely the value of $x$ 
 and prove the refinement predicate statically. In the case of I/O 
 their properties cannot be verified using LiquidHaskell.
-
-\subsection{Idris}
-\textit{Idris} \cite{idris} is a dependently typed functional language which first 
-appeared in 2007. Idris bears similarity with Agda, both in terms of paradigm 
-and type system. However they differ in one crucial way, Idris was designed to 
-emphasise general purpose programming rather than theorem proving. In section 
-\ref{section:agda} we stated that one of the less desirable property of 
-Agda was its niche because of the emphasis on theorem proving. Idris provides 
-interoperability with systems libraries and C programs, 
-as well as language constructs for domain specific language 
-implementation \cite{gpIdris}. 
-
-\par
-Syntactically Idris is very similar to Agda, dependent types are defined as so 
- 
-\begin{figure}[H]
-  \begin{lstlisting}      
-    data EvenNat :  Nat -> Type where
-      EvenZero  :: EvenNat 0
-      EvenPlusTwo :: EvenNat n -> EvenNat (n + 2)
-      
-    data Vect : Nat -> Type -> Type where
-      Nil  : Vect 0 a
-      (::) : (x : a) -> (xs : Vect n a) -> Vect (n + 1) a
-  \end{lstlisting}
-  \caption{Dependent Types in Idris}
-\end{figure}
-
-\par
-While Idris offers interoperability with multiple mainstream programming 
-languages such as C and JavaScript, Idris remain predominantly a research tool. 
-Idris is not production ready \cite{gpIdris} as it is missing certain libraries 
-and more importantly nobody is working on Idris full time. Furthermore Idris is 
-still a functional language, hence suffering from the limitations stated earlier. 
 
 \section{Imperative Languages}
 In this section we discuss dependent and refinement typing with regards to imperative 
@@ -2198,7 +2176,7 @@ is a heap address.
 
 \paragraph{Expressions}
 The following expressions are introduced into the language, unlike C/C++ 
-where one is allowed to retrieve the address of a local variable, in our 
+where one is allowed to take the address of a local variable, in our 
 system one may only create a pointer through the use of \textbf{new} as 
 one would in a language like Java.
 \begin{itemize}
@@ -2209,27 +2187,20 @@ one would in a language like Java.
 
 \paragraph{Commands}
 We add a new command that dereference a heap address and modifies its underlying 
-value. The command $!e_1 := e_2$ changes the value at heap address $h_1$ to the 
-value after evaluating $e$.
+value. The command $!e_1 := e_2$ changes the value at heap address after evaluating 
+$e_1$ to the value after evaluating $e_2$.
 
 \paragraph{Values}
 We add new values into the language, $h$ is an element in the set 
 $\{h_0, h_1, h_2...\}$ and repesents a heap address.
 
 \paragraph{Heap}
-Finally, we define a heap context $\Delta$ as a mapping from heap address to values.  
+Finally, we define a heap context $\Delta$ as a mapping from heap addresses to values.  
 It represents the set of heap addresses that are currently in use and we use 
 the notation, $\Delta(h)$ to get the value held at a particular heap address. 
 
 \subsubsection{Typing Rules}
-We first define the typing judgement for the base types for references. 
-
-\begin{center}
-   $\Gamma \vdash h : T\textit{ ref}$ (Heap-Addr)
-\end{center}
-
-\par
-We define the rules for this typing judgement as shown below. 
+We define the rules for pointers in figure \ref{fig:ref_type_rules}. 
 The typing rules are straightforward, 
 dereferencing a heap address of type $T \textit{ref}$ yields a value of type $T$ and 
 allocating a new heap address with type $T$ gets a reference of the same type.
@@ -2246,30 +2217,36 @@ allocating a new heap address with type $T$ gets a reference of the same type.
     \end{tabular}
   \end{center}
   \caption{Typing Rules for Ref Type}
+  \label{fig:ref_type_rules}
 \end{figure}
 
 
 \subsubsection{Operational Semantics}
 Lastly, we define the operational semantics for the new expression forms in figure 
-\ref{fig:sos_pointers}.
+\ref{fig:sos_pointers}. Pointers are allocated using the \textbf{new} expression which takes a type $T$ 
+and a value $v$, the evaluation rules allocate a new heap address $h$ that is 
+not currently present, assigns it the value $v$ and returns the address. The 
+value can be retrieved and modified through dereferencing, shown in the first two 
+rules. 
+
 
 \begin{figure}[h]
   \begin{center}
     \begin{tabular} {c}
       \inference {
-      \langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
+      \langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta' \rangle}
       {\langle !e_1, \sigma, \tau, \Delta \rangle \Longrightarrow 
-      \langle !e_1', \sigma, \tau, \Delta \rangle} [(Deref-E)]
+      \langle !e_1', \sigma, \tau, \Delta' \rangle} [(Deref-E)]
       \text{ }
       \inference {h_1 \in \textbf{dom}(\Delta) & v = \Delta(h_1)}
       {\langle !h_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle v, 
       \sigma, \tau, \Delta \rangle} [(Deref-V)]
       & \\
-      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
+      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta' \rangle}
         {\langle !e_1 := e_2, \sigma, \tau, \Delta \rangle \longrightarrow \langle !e_1' := e_2, 
         \sigma, \tau, \Delta' \rangle} [(P-Assign-$E$ 1)]
       & \\
-      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
+      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta' \rangle}
         {\langle !h_1 := e_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle !h_1 := e_1', 
         \sigma, \tau, \Delta' \rangle} [(P-Assign-$E$ 2)]
       & \\
@@ -2277,7 +2254,7 @@ Lastly, we define the operational semantics for the new expression forms in figu
         {\langle !h_1 := v_1, \sigma, \tau, \Delta \rangle \longrightarrow \langle 
         \sigma, \tau, \Delta' \rangle} [(P-Assign)]
       & \\
-      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
+      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta' \rangle}
         {\langle \textbf{new}(T, e_1), \sigma, \tau, \Delta \rangle \Longrightarrow \langle \textbf{new}(T, e_1'), 
         \sigma, \tau, \Delta' \rangle} [(P-Alloc-$E$)]
       & \\
@@ -2290,12 +2267,6 @@ Lastly, we define the operational semantics for the new expression forms in figu
   \label{fig:sos_pointers}
 \end{figure}
 
-\par
-Pointers are allocated using the \textbf{new} expression which takes a type $T$ 
-and a value $v$, the evaluation rules allocated a new heap address $h$ that is 
-not currently present, assigns it the value $v$ and returns the address. The 
-value can be retrieved and modified through dereferencing, shown in the first two 
-rules. 
 
 \subsection{Ambiguity of Refinement Types involving Pointers}
 The introduction of pointers provides the programmer with multiple new tools. 
@@ -2337,8 +2308,8 @@ cannot change, the underlying value can.
 \par
 In order to address this case, our previously proposed semantics has to be 
 extended to address two different features. One is to prevent the pointer from 
-modifying the underlying heap address and no aliases should be able to modify 
-the address indirectly.
+modifying the underlying heap address and the other is that no aliases 
+should be able to modify the address indirectly.
 
 \subsection{Immutable Heap Locations}
 In C/C++, one is able to declare a pointer to a constant, we would require 
@@ -2396,14 +2367,14 @@ typing rules for this new expression.
 
 \par
 Notice that unlike C/C++, Simple-$R^{*}$ does not have the notion of 
-\textit{address taking}, the only way to obtain a pointer is through the use of 
+\textit{address-taking}, the only way to obtain a pointer is through the use of 
 \textbf{new} or \textbf{newconst}. Recall from section \ref{section:const_immutable}, 
 this form avoids pitfalls in C/C++ where one gives a pointer to a 
 constant the address of a mutable variable which still allows the value to be 
 modified in a different manner.
 
 \par
-The lack of address taking allows us to define semantics that completely forbid 
+The lack of address-taking allows us to define semantics that completely forbid 
 modification on a heap location. We define the operational semantics for the 
 new expression in figure \ref{fig:sos_const_ptr}, the rules simply restrict the 
 ability to modify the value of a constant heap address.
@@ -2411,7 +2382,7 @@ ability to modify the value of a constant heap address.
 \begin{figure}[h]
   \begin{center}
     \begin{tabular} {c}
-      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta \rangle}
+      \inference {\langle e_1, \sigma, \tau, \Delta \rangle \Longrightarrow \langle e_1', \sigma, \tau, \Delta' \rangle}
         {\langle \textbf{newconst}(T, e_1), \sigma, \tau, \Delta \rangle 
         \Longrightarrow \langle \textbf{newconst}(T, e_1), 
         \sigma, \tau, \Delta' \rangle} [(PConst-Alloc-$E$)]
@@ -2466,7 +2437,7 @@ is proposed in figure \ref{fig:immu_pointer_typedef}.
 
 \par
 The new specification retains all constraints present and make a crucial 
-new addition. In addition to all variables being immutable, a new rule states 
+new addition. In addition to all free variables being immutable, a new rule states 
 that all pointer variables in the expression must to be pointing to a constant.  
 This ensures that the value pointed 
 to by the pointer would not change throughout the type's existence, 
@@ -2476,8 +2447,8 @@ address will not be able to modify the memory address because of the rules
 specified in figure \ref{fig:sos_const_ptr}.
 
 \par
-The example program showed previously in figure \ref{fig:amb_refinement_pointers} 
-is now an invalid program. To make it valid we adapted the newly defined rules 
+The example program shown previously in figure \ref{fig:amb_refinement_pointers} 
+is now an invalid program. To make it valid we adapt the newly defined rules 
 and rewrite it as in figure \ref{fig:valid_ptr_program}.
 
 \begin{figure} [H]
@@ -2510,7 +2481,7 @@ named Simple-$R^{*}_{C}$
     \begin{tabular} {c}      
       \inference {\sigma_1 = \sigma & \tau_1 = \tau
       \\ \forall \alpha \in \textit{free\_vars}(e).\text{ }is\_ref(\alpha) \Rightarrow is\_immutable\_heap(\sigma(\alpha))    
-      \\ \langle C_1, \sigma, \tau + \{y \mapsto (\{\upsilon : T\text{ }|\text{ }e\}\}, \sigma_1, \tau_1)
+      \\ \langle C_1, \sigma, \tau + \{y \mapsto (\{\upsilon : T\text{ }|\text{ }e\}, \sigma_1, \tau_1)\}
       \rangle \longrightarrow^{*} \langle \sigma', \tau\rangle}
       {\langle\textbf{begin typedef } y = \{\upsilon : T\text{ }|\text{ }e\};C_1;e_1\textbf{ end}, 
       \sigma, \tau \rangle \longrightarrow \langle \sigma', \tau \rangle} [(Refine-Typedef-Closure-P)]
@@ -2521,7 +2492,8 @@ named Simple-$R^{*}_{C}$
 
 \subsubsection{Deep Copy Pointers}
 An alternative solution which enhances the flexibility of the language is 
-snapshotting pointers using a \emph{deep copy} method. We observe that pointers in 
+snapshotting pointers using a \emph{deep copy} method and storing these in closures. 
+We observe that pointers in 
 refinement types simply behaves like local constant variables as 
 their values cannot be modified. One can easily snapshot the values held by pointers 
 and store them in a new local variables, for example, if a 
@@ -2532,9 +2504,9 @@ where $p_{val}$ is a local variable in the Type Closure that has the
 value of dereferecing the multi-level pointer $p$.
 
 \par
-Using a deep copy appraoch improves flexibility as one does not need to declare 
+Using a deep copy approach improves flexibility as one does not need to declare 
 pointers to immutable in order to use them in refinement types. Due to the 
-limits of time, we propose this as an interesting idea and left the formal 
+limits of time, we propose this as an interesting idea and leave the formal 
 semantics as future work. 
 
 \subsection{Summary}
@@ -2550,7 +2522,7 @@ Finally, we incorporate these new requirements
 into our language by creating two new variants, Simple-$R^{*}_{I}$ 
 and Simple-$R^{*}_{C}$, extending our previously defined semantics. 
 
-\section{Summary}
+\section{Overall Summary}
 In this chapter we constructed Simple-$R$, an imperative programming language with native 
 support for refinement types. We distinguished our 
 system apart from existing work by basing the underlying calculus 
@@ -2559,7 +2531,7 @@ rather than the $\lambda$-calculus, to the best of our knowledge this form of
 specification for refinement type with mutation has not been done 
 previously. The syntax and semantics of our 
 language resembles C/C++, enhancing the accessibility of our work especially 
-compared to those using Monads.
+compared to those using Monads such as Ynot.
 
 \par
 Throughout the chapter we demonstrated how type-checking refinement types 
